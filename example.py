@@ -49,8 +49,10 @@ else:
 # Set some dummy observations within the region of interest
 LPF.Set(filename,"observations",data=[((6470000,550000,0),0,0,"fault","Cleave"),\
     ((6470500,550500,1),0,0,"fold","Wavey")])
+LPF.Set(filename,"observationsAmend",data=[((6470000,551000,0),0,0,"fault","Cleave"),\
+    ((6470500,551500,1),0,0,"fold","Wavey")])
 
 # Get the observation data back out to confirm it was saved
-resp = LPF.Get(filename,"observations")
+resp = LPF.Get(filename,"observations",indexRange=(0,7), keyword="Cleave")
 if resp["errorFlag"]: print(resp["errorString"])
 else: print(resp["value"])

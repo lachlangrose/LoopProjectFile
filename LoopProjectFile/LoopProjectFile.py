@@ -501,12 +501,12 @@ def GetObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=Fa
     if resp["errorFlag"]: response = resp
     else:
         dcGroup = resp["value"]
+        data = []
         # Select all option
-        if indexList==[] and indexRange[0] == 0 \
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
           and indexRange[1] == 0 and keyword == "":
             # Create list of observations as:
             # ((northing,easting,altitude),strike,dip,type,layer)
-            data = []
             for i in range(0,dcGroup.dimensions['index'].size):
                 data.append(((dcGroup.variables.get('northing')[i].data.item(), \
                           dcGroup.variables.get('easting')[i].data.item(), \
@@ -515,6 +515,51 @@ def GetObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=Fa
                           dcGroup.variables.get('dip')[i].data.item(), \
                           dcGroup.variables.get('type')[i], \
                           dcGroup.variables.get('layer')[i]))
+            response["value"] = data
+        elif keyword != "" and indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < dcGroup.dimensions['index'].size \
+                    and dcGroup.variables.get('layer')[i] == keyword:
+                    data.append(((dcGroup.variables.get('northing')[i].data.item(), \
+                              dcGroup.variables.get('easting')[i].data.item(), \
+                              dcGroup.variables.get('altitude')[i].data.item()), \
+                              dcGroup.variables.get('strike')[i].data.item(), \
+                              dcGroup.variables.get('dip')[i].data.item(), \
+                              dcGroup.variables.get('type')[i], \
+                              dcGroup.variables.get('layer')[i]))
+            response["value"] = data            
+        elif keyword != "":
+            for i in range(0,dcGroup.dimensions['index'].size):
+                if dcGroup.variables.get('layer')[i] == keyword:
+                    data.append(((dcGroup.variables.get('northing')[i].data.item(), \
+                              dcGroup.variables.get('easting')[i].data.item(), \
+                              dcGroup.variables.get('altitude')[i].data.item()), \
+                              dcGroup.variables.get('strike')[i].data.item(), \
+                              dcGroup.variables.get('dip')[i].data.item(), \
+                              dcGroup.variables.get('type')[i], \
+                              dcGroup.variables.get('layer')[i]))
+            response["value"] = data
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < dcGroup.dimensions['index'].size:
+                    data.append(((dcGroup.variables.get('northing')[i].data.item(), \
+                              dcGroup.variables.get('easting')[i].data.item(), \
+                              dcGroup.variables.get('altitude')[i].data.item()), \
+                              dcGroup.variables.get('strike')[i].data.item(), \
+                              dcGroup.variables.get('dip')[i].data.item(), \
+                              dcGroup.variables.get('type')[i], \
+                              dcGroup.variables.get('layer')[i]))
+            response["value"] = data
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < dcGroup.dimensions['index'].size:
+                    data.append(((dcGroup.variables.get('northing')[i].data.item(), \
+                              dcGroup.variables.get('easting')[i].data.item(), \
+                              dcGroup.variables.get('altitude')[i].data.item()), \
+                              dcGroup.variables.get('strike')[i].data.item(), \
+                              dcGroup.variables.get('dip')[i].data.item(), \
+                              dcGroup.variables.get('type')[i], \
+                              dcGroup.variables.get('layer')[i]))
             response["value"] = data
         else:
             errStr = "Non-implemented filter option"
@@ -675,7 +720,7 @@ def SetStructuralModel(root, data, index=0, verbose=False):
     return response
 
 # Set observation
-def SetObservations(root, data, verbose=False):
+def SetObservations(root, data, amend=False, verbose=False):
     """
     **SetObservations** - Saves a list of observation in ((northing,easting,
     altitude),strike,dip,layer) format into the netCDF Loop Project File
@@ -722,7 +767,8 @@ def SetObservations(root, data, verbose=False):
         dipLocation = dcGroup.variables['dip']
         typeLocation = dcGroup.variables['type']
         layerLocation = dcGroup.variables['layer']
-        index = 0
+        if amend: index = dcGroup.dimensions['index'].size
+        else: index = 0
         for i in data:
             ((northing,easting,altitude),strike,dip,dType,layer) = i
             northingLocation[index] = northing
@@ -866,6 +912,7 @@ def Set(filename, element, **kwargs):
         elif element == "extents": response = SetExtents(root, **kwargs)
         elif element == "strModel": response = SetStructuralModel(root, **kwargs)
         elif element == "observations": response = SetObservations(root, **kwargs)
+        elif element == "observationsAmend": response = SetObservations(root, amend=True, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
             print(errStr)
