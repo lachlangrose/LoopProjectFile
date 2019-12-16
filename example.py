@@ -45,3 +45,12 @@ else:
     resp3 = LPF.Get(filename,"strModel",index=0)
     if resp3["errorFlag"]: print(resp3["errorString"])
     else: print("Data received again")
+
+# Set some dummy observations within the region of interest
+LPF.Set(filename,"observations",data=[((6470000,550000,0),0,0,"fault","Cleave"),\
+    ((6470500,550500,1),0,0,"fold","Wavey")])
+
+# Get the observation data back out to confirm it was saved
+resp = LPF.Get(filename,"observations")
+if resp["errorFlag"]: print(resp["errorString"])
+else: print(resp["value"])

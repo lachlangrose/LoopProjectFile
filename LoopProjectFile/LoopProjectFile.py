@@ -32,7 +32,6 @@ a failure or "value" in the case of a successful get call.
 import netCDF4
 import sys
 import os
-from numpy import dtype
 
 #Current Loop Project File Version
 def LoopVersion():
@@ -414,7 +413,7 @@ def GetExtents(rootGroup):
     return response
 
 # Get Structural Models group if present
-def GetStructuralModels(rootGroup):
+def GetStructuralModels(rootGroup, verbose=False):
     """
     **GetStructuralModels** - Gets the stuctural models group node within the
     netCDF Loop Project File
@@ -435,7 +434,33 @@ def GetStructuralModels(rootGroup):
         return {"errorFlag":False,"value":smGroup}
     else:
         errString = "No Structural Models Group Present on access request"
-        print(errString)
+        if verbose: print(errString)
+        return {"errorFlag":True,"errorString":errString}
+
+# Get Data Collection group if present
+def GetDataCollectionGroup(rootGroup, verbose=False):
+    """
+    **GetDataCollectionGroup** - Gets the data collection group node within the
+    netCDF Loop Project File
+    
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    
+    Returns
+    -------
+    dict {"errorFlag","errorString"/"value"}
+        value is a netCDF4 Group containing all the third-party data for this
+        project
+        
+    """
+    if "DataCollection" in rootGroup.groups:
+        dcGroup = rootGroup.groups.get("DataCollection")
+        return {"errorFlag":False,"value":dcGroup}
+    else:
+        errString = "No Data Collection Group Present on access request"
+        if verbose: print(errString)
         return {"errorFlag":True,"errorString":errString}
 
 # Extract structural model indexed by parameter
@@ -461,15 +486,41 @@ def GetStructuralModel(root, verbose=False, index=0):
     if resp["errorFlag"]: response = resp
     else:
         smGroup = resp["value"]
-        # Check data exists at the specified index value
+        # Check data exists at the specified index value 
+        # TODO Better checking to remove back indexing or out-of-bounds access
 #        if smGroup.variables.
         data = smGroup.variables.get('data')[:,:,:,index].data
         if verbose: print("The shape of the structuralModel is", data.shape)
         response["value"] = data
     return response
 
-
-
+#Extract observations
+def GetObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        dcGroup = resp["value"]
+        # Select all option
+        if indexList==[] and indexRange[0] == 0 \
+          and indexRange[1] == 0 and keyword == "":
+            # Create list of observations as:
+            # ((northing,easting,altitude),strike,dip,type,layer)
+            data = []
+            for i in range(0,dcGroup.dimensions['index'].size):
+                data.append(((dcGroup.variables.get('northing')[i].data.item(), \
+                          dcGroup.variables.get('easting')[i].data.item(), \
+                          dcGroup.variables.get('altitude')[i].data.item()), \
+                          dcGroup.variables.get('strike')[i].data.item(), \
+                          dcGroup.variables.get('dip')[i].data.item(), \
+                          dcGroup.variables.get('type')[i], \
+                          dcGroup.variables.get('layer')[i]))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errString":errStr}
+    return response
 
 # Set version on root group
 def SetVersion(rootGroup, version):
@@ -606,7 +657,7 @@ def SetStructuralModel(root, data, index=0, verbose=False):
         structuralModelsGroup.createDimension("northing",xyzGridSize[1])
         structuralModelsGroup.createDimension("depth",xyzGridSize[2])
         structuralModelsGroup.createDimension("index",None)
-        structuralModelsGroup.createVariable('data',dtype('float64').char,('northing','easting','depth','index'),zlib=True,complevel=9,fill_value=0)
+        structuralModelsGroup.createVariable('data','f8',('northing','easting','depth','index'),zlib=True,complevel=9,fill_value=0)
         # Check creation worked??
     else:
         structuralModelsGroup = resp["value"]
@@ -621,6 +672,71 @@ def SetStructuralModel(root, data, index=0, verbose=False):
 #            structuralModelsGroup.variables('data')[:,:,:,index] = data
             dataLocation = structuralModelsGroup.variables['data']
             dataLocation[:,:,:,index] = data
+    return response
+
+# Set observation
+def SetObservations(root, data, verbose=False):
+    """
+    **SetObservations** - Saves a list of observation in ((northing,easting,
+    altitude),strike,dip,layer) format into the netCDF Loop Project File
+    
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    data: double[int,int,int]
+        The scalar data to save
+    index: int
+        The index of this data
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+    
+    Returns
+    -------
+       dict {"errorFlag","errorString"}
+        errorString exist and contains error message only when errorFlag is
+        True
+   
+    """
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        dcGroup = root.createGroup("DataCollection")
+        dcGroup.createDimension("index",None)
+        dcGroup.createVariable('northing','f8',('index'),zlib=True,complevel=9,fill_value=0)
+        dcGroup.createVariable('easting' ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
+        dcGroup.createVariable('altitude','f8',('index'),zlib=True,complevel=9,fill_value=0)
+        dcGroup.createVariable('strike'  ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
+        dcGroup.createVariable('dip'     ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
+        dcGroup.createVariable('type'    ,'S20',('index'),zlib=True,complevel=9,fill_value=0)
+        dcGroup.createVariable('layer'   ,'S20',('index'),zlib=True,complevel=9,fill_value=0)
+        # Check creation worked??
+    else:
+        dcGroup = resp["value"]
+    if dcGroup:
+        northingLocation = dcGroup.variables['northing']
+        eastingLocation = dcGroup.variables['easting']
+        altitudeLocation = dcGroup.variables['altitude']
+        strikeLocation = dcGroup.variables['strike']
+        dipLocation = dcGroup.variables['dip']
+        typeLocation = dcGroup.variables['type']
+        layerLocation = dcGroup.variables['layer']
+        index = 0
+        for i in data:
+            ((northing,easting,altitude),strike,dip,dType,layer) = i
+            northingLocation[index] = northing
+            eastingLocation[index] = easting
+            altitudeLocation[index] = altitude
+            strikeLocation[index] = strike
+            dipLocation[index] = dip
+            typeLocation[index] = dType
+            layerLocation[index] = layer
+            index += 1
+    else:
+        errStr = "(ERROR) Creating data collection group for observation setting"
+        if verbose: print(errStr)
+        response = {"errorFlag":True,"errString":errStr}
     return response
 
 
@@ -749,6 +865,7 @@ def Set(filename, element, **kwargs):
         if element == "version": response = SetVersion(root, **kwargs)
         elif element == "extents": response = SetExtents(root, **kwargs)
         elif element == "strModel": response = SetStructuralModel(root, **kwargs)
+        elif element == "observations": response = SetObservations(root, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
             print(errStr)
@@ -817,6 +934,7 @@ def Get(filename, element, **kwargs):
         if element == "version": response = GetVersion(root)
         elif element == "extents": response = GetExtents(root)
         elif element == "strModel": response = GetStructuralModel(root,**kwargs)
+        elif element == "observations": response = GetObservations(root,**kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
             print(errStr)
