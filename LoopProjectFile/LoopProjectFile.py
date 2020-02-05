@@ -122,25 +122,39 @@ def Set(filename, element, **kwargs):
         strModel    : "data" = the 3D scalar field of structural data
                       "index" = the index of the dataset to save
                       "verbose" = optional extra console logging
+        orientations: "data" = the orientations data in the following structure
+                        a list of orientations containing
+                        ((northing,easting,altitude),   = the location (truple of doubles)
+                        dipdir,                         = the dip direction (double)
+                        dip,                            = the dip (double)
+                        polarity,                       = the polarity (int)
+                        formation,                      = the formation (string) (Hammerley,...)
+                        layer)                          = the layer to associate with (string)("S0","F1",...)
+                      "verbose" = optional extra console logging
     
     Examples
     --------
     For setting version number:
     >>> LoopProjectFile.Set("test.loop3d","version",version=[1,0,0])
       or
-    >>> resp = LoopProjectFile.Set("test.loop3d",version=[1,0,0])
+    >>> resp = LoopProjectFile.Set("test.loop3d","version",version=[1,0,0])
     >>> if resp["errorFlag"]: print(resp["errorString"])
     
     For saving data:
     >>> LoopProjectFile.Set("test.loop3d","strModel",data=dataset,index=0,verbose=True)
       or
-    >>> resp = LoopProjectFile.Set("test.loop3d",data=dataset,index=0,verbose=True)
+    >>> resp = LoopProjectFile.Set("test.loop3d","strModel",data=dataset,index=0,verbose=True)
     >>> if resp["errorFlag"]: print(resp["errorString"])
     
     For saving extents (in the middle of the pacific ocean):
     >>> LoopProjectFile.Set("test.loop3d","extents",geodesic=[0,1,-180,-179], \
         utm=[1,1,10000000,9889363.77,833966.132,722587.169], depth=[1000,2000] \
         spacing=[1000,1000,10],preference="utm")
+
+    For saving field orientations:
+    >>> data = ((northing,easting,altitude),dipdir,dip,polarity,formation,layer) * X rows
+    >>> resp = LoopProjectFile.Set("test.loop3d","orientations",data=data,amend=False,verbose=True)
+    >>> if resp["errorFlag"]: print resp["errorString"])
     
     
     Parameters
@@ -166,8 +180,12 @@ def Set(filename, element, **kwargs):
         if element == "version": response = Version.SetVersion(root, **kwargs)
         elif element == "extents": response = Extents.SetExtents(root, **kwargs)
         elif element == "strModel": response = StructuralModels.SetStructuralModel(root, **kwargs)
-        elif element == "observations": response = DataCollection.SetObservations(root, **kwargs)
-        elif element == "observationsAmend": response = DataCollection.SetObservations(root, amend=True, **kwargs)
+        elif element == "orientations": response = DataCollection.SetOrientations(root, **kwargs)
+        elif element == "orientationsAmend": response = DataCollection.SetOrientations(root, amend=True, **kwargs)
+        elif element == "contacts": response = DataCollection.SetContacts(root, **kwargs)
+        elif element == "contactsAmend": response = DataCollection.SetContacts(root, amend=True, **kwargs)
+        elif element == "stratigraphicLog": response = ExtractedInformation.SetStratigraphicLog(root, **kwargs)
+        elif element == "stratigraphicLogAmend": response = ExtractedInformation.SetStratigraphicLog(root, amend=True, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
             print(errStr)
@@ -196,7 +214,7 @@ def Get(filename, element, **kwargs):
     >>> if resp["errorFlag"]: print(resp["errorString"])
     >>> else: version = resp["value"]
     
-    For extracting data:
+    For extracting structural model data:
     >>> resp = LoopProjectFile.Set("test.loop3d","strModel",data=dataset,index=0)
     >>> if resp["errorFlag"]: print(resp["errorString"])
     >>> else: data = resp["value"]
@@ -236,7 +254,8 @@ def Get(filename, element, **kwargs):
         if element == "version": response = Version.GetVersion(root)
         elif element == "extents": response = Extents.GetExtents(root)
         elif element == "strModel": response = StructuralModels.GetStructuralModel(root,**kwargs)
-        elif element == "observations": response = DataCollection.GetObservations(root,**kwargs)
+        elif element == "orientations": response = DataCollection.GetOrientations(root,**kwargs)
+        elif element == "contacts": response = DataCollection.GetContacts(root,**kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
             print(errStr)
