@@ -19,7 +19,7 @@ def GetGroup(node,groupName,verbose=False):
     if groupName in node.groups:
         return {"errorFlag":False,"value":node.groups.get(groupName)}
     else:
-        errString = "No ",groupName," present on access request"
-        if verbose: print(errString)
-        return {"errorFlag":True,"errorString":errString}
+        errStr = "No "+groupName+" present on access request"
+        if verbose: print(errStr)
+        return {"errorFlag":True,"errorString":errStr}
 

@@ -62,9 +62,9 @@ def GetStructuralModels(rootGroup, verbose=False):
         smGroup = rootGroup.groups.get("StructuralModels")
         return {"errorFlag":False,"value":smGroup}
     else:
-        errString = "No Structural Models Group Present on access request"
-        if verbose: print(errString)
-        return {"errorFlag":True,"errorString":errString}
+        errStr = "No Structural Models Group Present on access request"
+        if verbose: print(errStr)
+        return {"errorFlag":True,"errorString":errStr}
 
 
 # Extract structural model indexed by parameter

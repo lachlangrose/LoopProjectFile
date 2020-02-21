@@ -38,12 +38,12 @@ def CheckVersionValid(rootGroup, verbose=False):
         version = [rootGroup.loopMajorVersion, \
                    rootGroup.loopMinorVersion, \
                    rootGroup.loopSubVersion]
-        if verbose: print("  Loop Project File version" \
+        if verbose: print("  Loop Project File version = " \
           +str(version[0])+"."+str(version[1])+"."+str(version[2]))
         return True
     else:
-        errString = "(INVALID) No Version for this project file"
-        print(errString)
+        errStr = "(INVALID) No Version for this project file"
+        print(errStr)
         return False
 
 # Get the version of this loop project file in an array

@@ -256,6 +256,7 @@ def Get(filename, element, **kwargs):
         elif element == "strModel": response = StructuralModels.GetStructuralModel(root,**kwargs)
         elif element == "orientations": response = DataCollection.GetOrientations(root,**kwargs)
         elif element == "contacts": response = DataCollection.GetContacts(root,**kwargs)
+        elif element == "stratigraphicLog": response = ExtractedInformation.GetStratigraphicLog(root,**kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
             print(errStr)

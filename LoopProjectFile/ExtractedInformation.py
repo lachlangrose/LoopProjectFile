@@ -30,7 +30,7 @@ def CheckExtractedInformationValid(rootGroup, verbose=False):
     return valid
 
 def GetExtractedInformationGroup(rootGroup, verbose=False):
-    return LoopProjectFileUtils.GetGroup(rootGroup,verbose)
+    return LoopProjectFileUtils.GetGroup(rootGroup,"ExtractedInformation",verbose)
 
 def GetStratigraphicInformationGroup(rootGroup,verbose=False):
     response = {"errorFlag":False}
@@ -67,17 +67,24 @@ def SetStratigraphicLog(root, data, amend=False, verbose=False):
     response = {"errorFlag":False}
     resp = GetExtractedInformationGroup(root)
     if resp["errorFlag"]:
-        # Create Structural Models Group and add data shape based on project extents
+        # Create  Extracted Information Group as it doesn't exist
         eiGroup = root.createGroup("ExtractedInformation")
     else:
         eiGroup = resp["value"]
 
     resp = GetStratigraphicInformationGroup(root)
     if resp["errorFlag"]:
+        print(resp["errorString"])
         group = eiGroup.createGroup("StratigraphicInformation")
         group.createDimension("index",None)
         group.createVariable('formation','S20',('index'),zlib=True,complevel=9,fill_value=0)
         group.createVariable('thickness' ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
+        group.createVariable('colour1Red','u1',('index'),zlib=True,complevel=9,fill_value=0)
+        group.createVariable('colour1Green','u1',('index'),zlib=True,complevel=9,fill_value=0)
+        group.createVariable('colour1Blue','u1',('index'),zlib=True,complevel=9,fill_value=0)
+        group.createVariable('colour2Red','u1',('index'),zlib=True,complevel=9,fill_value=0)
+        group.createVariable('colour2Green','u1',('index'),zlib=True,complevel=9,fill_value=0)
+        group.createVariable('colour2Blue','u1',('index'),zlib=True,complevel=9,fill_value=0)
     else:
         group = resp["value"]
 
@@ -94,5 +101,40 @@ def SetStratigraphicLog(root, data, amend=False, verbose=False):
     else:
         errStr = "(ERROR) Failed to create stratigraphic log group for strata setting"
         if verbose: print(errStr)
-        response = {"errorFlag":True,"errString":errStr}
+        response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+def GetStratigraphicLog(root, indexList=[], indexRange=(0,0), verbose=False):
+    response = {"errorFlag":False}
+    resp = GetStratigraphicInformationGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        group = resp["value"]
+        data = []
+        # Select all option
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
+          and indexRange[1] == 0:
+            # Select all
+            for i in range(0,group.dimensions['index'].size):
+                data.append((group.variables.get('formation')[i], \
+                          group.variables.get('thickness')[i].data.item()))
+            response["value"] = data
+        # Select based on list of indices option
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('formation')[i], \
+                              group.variables.get('thickness')[i].data.item()))
+            response["value"] = data
+        # Select based on indices range option
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('formation')[i], \
+                              group.variables.get('thickness')[i].data.item()))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errorString":errStr}
     return response

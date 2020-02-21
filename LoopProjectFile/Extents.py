@@ -120,7 +120,10 @@ def GetExtents(rootGroup):
       and "maxLatitude" in rootGroup.ncattrs() \
       and "minLongitude" in rootGroup.ncattrs() \
       and "maxLongitude" in rootGroup.ncattrs():
-        geodesic = [rootGroup.minLatitude,rootGroup.maxLatitude,rootGroup.minLongitude,rootGroup.maxLongitude]
+        geodesic = [
+            rootGroup.minLongitude,rootGroup.maxLongitude,
+            rootGroup.minLatitude,rootGroup.maxLatitude,
+            ]
     else:
         errStr = "(ERROR) No or incomplete geodesic boundary in loop project file"
         print(errStr)
@@ -131,7 +134,11 @@ def GetExtents(rootGroup):
       and "maxNorthing" in rootGroup.ncattrs() \
       and "minEasting" in rootGroup.ncattrs() \
       and "maxEasting" in rootGroup.ncattrs():
-        utm = [rootGroup.utmZone,rootGroup.utmNorthSouth,rootGroup.minNorthing,rootGroup.maxNorthing,rootGroup.minEasting,rootGroup.maxEasting]
+        utm = [
+          rootGroup.utmZone,rootGroup.utmNorthSouth,
+          rootGroup.minEasting,rootGroup.maxEasting,
+          rootGroup.minNorthing,rootGroup.maxNorthing
+        ]
     else:
         errStr = "(ERROR) No or incomplete UTM boundary in loop project file"
         print(errStr)
@@ -168,10 +175,10 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
         The root group node of a Loop Project File
     geodesic: [double,double,double,double]
         The latitude and longitude limits of the region in format:
-        [minLat,maxLat,minLong,maxLong]
+        [minLong,maxLong,minLat,maxLat]
     utm: [int,int,double,double,double,double]
         The utmZone, utmNorth/South, northing and easting extents in format:
-        [utmZone,utmNorthSouth,minNorthing,maxNorthing,minEasting,maxEasting]
+        [utmZone,utmNorthSouth,minEasting,maxEasting,minNorthing,maxNorthing]
     depth: [double,double]
         The depth minimum and maximums in format: [minDepth,maxDepth]
     spacing: [double, double, double]
@@ -205,10 +212,10 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
     else:
         rootGroup.utmZone = utm[0]
         rootGroup.utmNorthSouth = 0 if utm[1] == "S" or utm[1] == "s" or utm[1] == 0 else 1
-        rootGroup.minNorthing = utm[2]
-        rootGroup.maxNorthing = utm[3]
-        rootGroup.minEasting = utm[4]
-        rootGroup.maxEasting = utm[5]
+        rootGroup.minEasting = utm[2]
+        rootGroup.maxEasting = utm[3]
+        rootGroup.minNorthing = utm[4]
+        rootGroup.maxNorthing = utm[5]
     if len(depth) != 2:
         errStr = "(ERROR) Invalid number of depth boundary values (" + str(len(depth)) + ")"
         print(errStr)

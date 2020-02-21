@@ -131,7 +131,7 @@ def GetOrientations(root, indexList=[], indexRange=(0,0), keyword="", verbose=Fa
         else:
             errStr = "Non-implemented filter option"
             if verbose: print(errStr)
-            response = {"errorFlag":True,"errString":errStr}
+            response = {"errorFlag":True,"errorString":errStr}
     return response
 
 
@@ -207,7 +207,7 @@ def SetOrientations(root, data, amend=False, verbose=False):
     else:
         errStr = "(ERROR) Failed to Create orientation group for orientations setting"
         if verbose: print(errStr)
-        response = {"errorFlag":True,"errString":errStr}
+        response = {"errorFlag":True,"errorString":errStr}
     return response
 
 # Set contacts
@@ -270,5 +270,67 @@ def SetContacts(root, data, amend=False, verbose=False):
     else:
         errStr = "(ERROR) Failed to Create contacts group for contact setting"
         if verbose: print(errStr)
-        response = {"errorFlag":True,"errString":errStr}
+        response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+#Extract contacts 
+def GetContacts(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    response = {"errorFlag":False}
+    resp = GetContactsGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        group = resp["value"]
+        data = []
+        # Select all option
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
+          and indexRange[1] == 0 and keyword == "":
+            # Create list of orientations as:
+            # ((northing,easting,altitude),dipdir,dip,formation,layer)
+            for i in range(0,group.dimensions['index'].size):
+                data.append(((group.variables.get('northing')[i].data.item(), \
+                          group.variables.get('easting')[i].data.item(), \
+                          group.variables.get('altitude')[i].data.item()), \
+                          group.variables.get('formation')[i]))
+            response["value"] = data
+        # Select based on keyword and list of indices option
+        elif keyword != "" and indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size \
+                    and group.variables.get('layer')[i] == keyword:
+                    data.append(((group.variables.get('northing')[i].data.item(), \
+                              group.variables.get('easting')[i].data.item(), \
+                              group.variables.get('altitude')[i].data.item()), \
+                              group.variables.get('formation')[i]))
+            response["value"] = data
+        # Select based on keyword option
+        elif keyword != "":
+            for i in range(0,group.dimensions['index'].size):
+                if group.variables.get('layer')[i] == keyword:
+                    data.append(((group.variables.get('northing')[i].data.item(), \
+                              group.variables.get('easting')[i].data.item(), \
+                              group.variables.get('altitude')[i].data.item()), \
+                              group.variables.get('formation')[i]))
+            response["value"] = data
+        # Select based on list of indices option
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append(((group.variables.get('northing')[i].data.item(), \
+                              group.variables.get('easting')[i].data.item(), \
+                              group.variables.get('altitude')[i].data.item()), \
+                              group.variables.get('formation')[i]))
+            response["value"] = data
+        # Select based on indices range option
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append(((group.variables.get('northing')[i].data.item(), \
+                              group.variables.get('easting')[i].data.item(), \
+                              group.variables.get('altitude')[i].data.item()), \
+                              group.variables.get('formation')[i]))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errorString":errStr}
     return response
