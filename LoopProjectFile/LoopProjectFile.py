@@ -29,6 +29,10 @@ indicates a failure (on True) to get/set and then "errorString" in the case of
 a failure or "value" in the case of a successful get call.
 
 """
+import numpy
+import sys
+import os
+
 import netCDF4
 import LoopProjectFile.Version as Version
 import LoopProjectFile.Extents as Extents
@@ -37,9 +41,6 @@ import LoopProjectFile.DataCollection as DataCollection
 import LoopProjectFile.ExtractedInformation as ExtractedInformation
 import LoopProjectFile.GeophysicalModels as GeophysicalModels
 import LoopProjectFile.ProbabilityModels as ProbabilityModels
-
-import sys
-import os
 
 ####  External Accessors ####
 
@@ -186,6 +187,8 @@ def Set(filename, element, **kwargs):
         elif element == "contactsAmend": response = DataCollection.SetContacts(root, amend=True, **kwargs)
         elif element == "stratigraphicLog": response = ExtractedInformation.SetStratigraphicLog(root, **kwargs)
         elif element == "stratigraphicLogAmend": response = ExtractedInformation.SetStratigraphicLog(root, amend=True, **kwargs)
+        elif element == "faultLog": response = ExtractedInformation.SetFaultLog(root, **kwargs)
+        elif element == "faultLogAmend": response = ExtractedInformation.SetFaultLog(root, amend=True, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
             print(errStr)
@@ -257,6 +260,7 @@ def Get(filename, element, **kwargs):
         elif element == "orientations": response = DataCollection.GetOrientations(root,**kwargs)
         elif element == "contacts": response = DataCollection.GetContacts(root,**kwargs)
         elif element == "stratigraphicLog": response = ExtractedInformation.GetStratigraphicLog(root,**kwargs)
+        elif element == "faultLog": response = ExtractedInformation.GetFaultLog(root,**kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
             print(errStr)
@@ -310,5 +314,44 @@ def CheckFileValid(filename, verbose=False):
         else:
             print("\nThis Loop Project File is NOT valid")
     return valid
+
+# Explicitly setup Compound Types used in the LoopProjectFile module
+faultObservationType = numpy.dtype([('eventId','<u4'),
+                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('dipDir','<f8'),('dip','<f8'),('dipPolarity','<f8'),
+                        ('val','<f8'),('displacement','<f8')])
+
+foldObservationType = numpy.dtype([('eventId','<u4'),
+                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('axisX','<f8'),('axisY','<f8'),('axisZ','<f8'),
+                        ('foliation','S30'),('whatIsFolded','S30')])
+
+foliationObservationType = numpy.dtype([('eventId','<u4'),
+                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('dipDir','<f8'),('dip','<f8')])
+
+discontinuityObservationType = numpy.dtype([('eventId','<u4'),
+                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('dipDir','<f8'),('dip','<f8')])
+
+faultEventType = numpy.dtype([('eventId','<u4'),
+                        ('minAge','<f8'),('maxAge','<f8'),
+                        ('enabled','u1'),('name','S30')])
+
+foldEventType = numpy.dtype([('eventId','<u4'),
+                        ('minAge','<f8'),('maxAge','<f8'),
+                        ('periodic','u1'),('wavelength','<f8'),('amplitude','<f8'),
+                        ('asymmetry','u1'),('asymmetryShift','<f8'),
+                        ('secondaryWavelength','<f8'),('secondaryAmplitude','<f8'),
+                        ('enabled','u1'),('name','S30')])
+
+foliationEventType = numpy.dtype([('eventId','<u4'),
+                        ('minAge','<f8'),('maxAge','<f8'),
+                        ('lowerScalarValue','<f8'),('upperScalarValue','<f8'),
+                        ('enabled','u1'),('name','S30')])
+
+discontinuityEventType = numpy.dtype([('eventId','<u4'),
+                        ('minAge','<f8'),('maxAge','<f8'),
+                        ('scalarValue','<f8'),('enabled','u1'),('name','S30')])
 
 

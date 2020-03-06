@@ -1,1 +1,1 @@
-from .LoopProjectFile import CreateBasic, Get, Set, OpenProjectFile, CheckFileValid 
+from .LoopProjectFile import CreateBasic, Get, Set, OpenProjectFile, CheckFileValid, faultEventType, foldEventType, discontinuityEventType, foliationEventType, faultObservationType, foldObservationType, foliationObservationType, discontinuityObservationType

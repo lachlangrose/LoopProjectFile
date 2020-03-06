@@ -1,5 +1,7 @@
 import netCDF4
+import LoopProjectFile
 import LoopProjectFile.LoopProjectFileUtils as LoopProjectFileUtils
+import numpy
 
 # Check Extracted Information valid if present
 def CheckExtractedInformationValid(rootGroup, verbose=False):
@@ -39,6 +41,55 @@ def GetStratigraphicInformationGroup(rootGroup,verbose=False):
         return resp
     else:
         return LoopProjectFileUtils.GetGroup(resp["value"],"StratigraphicInformation",verbose)
+
+def GetEventLogGroup(rootGroup,verbose=False):
+    response = {"errorFlag":False}
+    resp = GetExtractedInformationGroup(rootGroup,verbose)
+    if resp["errorFlag"]:
+        return resp
+    else:
+        return LoopProjectFileUtils.GetGroup(resp["value"],"EventLog",verbose)
+
+# Set fault log
+def SetFaultLog(root, data, amend=False, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetEventLogGroup(root)
+    if resp["errorFlag"]:
+        # Create  Extracted Information Group as it doesn't exist
+        elGroup = root.createGroup("ExtractedInformation")
+    else:
+        elGroup = resp["value"]
+
+    resp = GetEventLogGroup(root)
+    if resp["errorFlag"]:
+        print(resp["errorString"])
+        group = elGroup.createGroup("EventLog")
+        group.createDimension("index",None)
+        faultEventType_t = group.createCompoundType(LoopProjectFile.faultEventType,'faultEventType')
+        group.createVariable('faultEvents',faultEventType_t,('index'),zlib=True,complevel=9)
+        # group.createVariable('folds','<u4,<f8,<f8,<f8,<f8,<f8,<f8,<f8,<f8,i1',('index'),zlib=True,complevel=9)
+        # group.createVariable('foliations','<u4,<f8,<f8,<f8,<f8,i1',('index'),zlib=True,complevel=9)
+        # group.createVariable('discontinuities','<u4,<f8,<f8,<f8,i1',('index'),zlib=True,complevel=9)
+    else:
+        group = resp["value"]
+
+    if group:
+        faultLocation = group.variables['faultEvents']
+        # foldLocation = group.variables['folds']
+        # foliationLocation = group.variables['foliations']
+        # discontinuityLocation = group.variables['discontinuities']
+        if amend: index = group.dimensions['index'].size
+        else: index = 0
+        for i in data:
+            faultLocation[index] = i
+            index += 1
+    else:
+        errStr = "(ERROR) Failed to create event log group"
+        if verbose: print(errStr)
+        response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+
 
 # Set stratigraphic log
 def SetStratigraphicLog(root, data, amend=False, verbose=False):
@@ -138,3 +189,36 @@ def GetStratigraphicLog(root, indexList=[], indexRange=(0,0), verbose=False):
             if verbose: print(errStr)
             response = {"errorFlag":True,"errorString":errStr}
     return response
+
+def GetFaultLog(root, indexList=[], indexRange=(0,0), verbose=False):
+    response = {"errorFlag":False}
+    resp = GetEventLogGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        group = resp["value"]
+        data = []
+        # Select all option
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
+          and indexRange[1] == 0:
+            # Select all
+            for i in range(0,group.dimensions['index'].size):
+                data.append((group.variables.get('folds')[i]))
+            response["value"] = data
+        # Select based on list of indices option
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('folds')[i]))
+            response["value"] = data
+        # Select based on indices range option
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('folds')[i]))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errorString":errStr}
+    return response
+
