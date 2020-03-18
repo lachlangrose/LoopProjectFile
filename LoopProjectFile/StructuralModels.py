@@ -133,7 +133,9 @@ def SetStructuralModel(root, data, index=0, verbose=False):
         structuralModelsGroup.createDimension("northing",xyzGridSize[1])
         structuralModelsGroup.createDimension("depth",xyzGridSize[2])
         structuralModelsGroup.createDimension("index",None)
-        structuralModelsGroup.createVariable('data','f8',('northing','easting','depth','index'),zlib=True,complevel=9,fill_value=0)
+        structuralModelsGroup.createVariable('data','f4',('northing','easting','depth','index'),zlib=True,complevel=9,fill_value=0)
+        structuralModelsGroup.createVariable('minVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
+        structuralModelsGroup.createVariable('maxVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
         # Check creation worked??
     else:
         structuralModelsGroup = resp["value"]
@@ -148,4 +150,8 @@ def SetStructuralModel(root, data, index=0, verbose=False):
 #            structuralModelsGroup.variables('data')[:,:,:,index] = data
             dataLocation = structuralModelsGroup.variables['data']
             dataLocation[:,:,:,index] = data
+            minValLocation = structuralModelsGroup.variables['minVal']
+            minValLocation[index] = data.min()
+            maxValLocation = structuralModelsGroup.variables['maxVal']
+            maxValLocation[index] = data.max()
     return response

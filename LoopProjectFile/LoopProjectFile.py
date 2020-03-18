@@ -30,6 +30,7 @@ a failure or "value" in the case of a successful get call.
 
 """
 import numpy
+import pandas
 import sys
 import os
 
@@ -354,4 +355,8 @@ discontinuityEventType = numpy.dtype([('eventId','<u4'),
                         ('minAge','<f8'),('maxAge','<f8'),
                         ('scalarValue','<f8'),('enabled','u1'),('name','S30')])
 
-
+def ConvertDataFrame(df,dtype):
+    if isinstance(df,pandas.DataFrame):
+        return numpy.array(df.to_records(index=False).tolist(),dtype=dtype)
+    else:
+        raise NotADataFrame
