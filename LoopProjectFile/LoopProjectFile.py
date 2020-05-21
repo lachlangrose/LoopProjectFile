@@ -280,7 +280,7 @@ def CheckFileValid(filename, verbose=False):
     Parameters
     ----------
     filename: string
-        The name of the file to laod data from
+        The name of the file to load data from
     verbose: bool
         A flag to indicate a higher level of console logging (more if True)
 
