@@ -1,5 +1,6 @@
 import netCDF4
 import LoopProjectFile.LoopProjectFileUtils as LoopProjectFileUtils
+import LoopProjectFile
 
 # Check Data Collection valid if present
 def CheckDataCollectionValid(rootGroup, verbose=False):
@@ -34,14 +35,14 @@ def CheckDataCollectionValid(rootGroup, verbose=False):
 def GetDataCollectionGroup(rootGroup, verbose=False):
     return LoopProjectFileUtils.GetGroup(rootGroup,"DataCollection",verbose)
 
-# Get Orientations group if present
-def GetOrientationsGroup(rootGroup,verbose=False):
+# Get Observations group if present
+def GetObservationsGroup(rootGroup,verbose=False):
     response = {"errorFlag":False}
     resp = GetDataCollectionGroup(rootGroup,verbose)
     if resp["errorFlag"]:
         return resp
     else:
-        return LoopProjectFileUtils.GetGroup(resp["value"],"Orientations",verbose)
+        return LoopProjectFileUtils.GetGroup(resp["value"],"Observations",verbose)
 
 # Get Contacts group if present
 def GetContactsGroup(rootGroup,verbose=False):
@@ -52,81 +53,71 @@ def GetContactsGroup(rootGroup,verbose=False):
     else:
         return LoopProjectFileUtils.GetGroup(resp["value"],"Contacts",verbose)
 
-#Extract orientations
-def GetOrientations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+def CreateObservationGroup(dataCollectionGroup):
+    obGroup = dataCollectionGroup.createGroup("Observations")
+    obGroup.createDimension("faultObservationIndex",None)
+    obGroup.createDimension("foldObservationIndex",None)
+    obGroup.createDimension("foliationObservationIndex",None)
+    obGroup.createDimension("discontinuityObservationIndex",None)
+    obGroup.createDimension("stratigraphicObservationIndex",None)
+    faultObservationType_t = obGroup.createCompoundType(LoopProjectFile.faultObservationType,'faultObservationType')
+    obGroup.createVariable('faultObservations',faultObservationType_t,('faultObservationIndex'),zlib=True,complevel=9)
+    foldObservationType_t = obGroup.createCompoundType(LoopProjectFile.foldObservationType,'foldObservationType')
+    obGroup.createVariable('foldObservations',foldObservationType_t,('foldObservationIndex'),zlib=True,complevel=9)
+    foliationObservationType_t = obGroup.createCompoundType(LoopProjectFile.foliationObservationType,'foliationObservationType')
+    obGroup.createVariable('foliationObservations',foliationObservationType_t,('foliationObservationIndex'),zlib=True,complevel=9)
+    discontinuityObservationType_t = obGroup.createCompoundType(LoopProjectFile.discontinuityObservationType,'discontinuityObservationType')
+    obGroup.createVariable('discontinuityObservations',discontinuityObservationType_t,('discontinuityObservationIndex'),zlib=True,complevel=9)
+    stratigraphicObservationType_t = obGroup.createCompoundType(LoopProjectFile.stratigraphicObservationType,'stratigraphicObservationType')
+    obGroup.createVariable('stratigraphicObservations',stratigraphicObservationType_t,('stratigraphicObservationIndex'),zlib=True,complevel=9)
+    return obGroup
+
+#Extract observations
+def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0,0), keyword="", verbose=False):
     response = {"errorFlag":False}
-    resp = GetOrientationsGroup(root)
+    resp = GetObservationsGroup(root)
     if resp["errorFlag"]: response = resp
     else:
-        group = resp["value"]
+        if verbose: print("Getting variable " + variableName)
+        oGroup = resp["value"]
         data = []
         # Select all option
         if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
           and indexRange[1] == 0 and keyword == "":
-            # Create list of orientations as:
-            # ((northing,easting,altitude),dipdir,dip,formation,layer)
-            for i in range(0,group.dimensions['index'].size):
-                data.append(((group.variables.get('northing')[i].data.item(), \
-                          group.variables.get('easting')[i].data.item(), \
-                          group.variables.get('altitude')[i].data.item()), \
-                          group.variables.get('dipdir')[i].data.item(), \
-                          group.variables.get('dip')[i].data.item(), \
-                          group.variables.get('polarity')[i].data.item(), \
-                          group.variables.get('formation')[i], \
-                          group.variables.get('layer')[i]))
+            if verbose: print("Getting all")
+            # Create list of observations as:
+            # ((easting,northing,altitude),dipdir,dip,formation,layer)
+            for i in range(0,oGroup.dimensions[indexName].size):
+                data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on keyword and list of indices option
         elif keyword != "" and indexList != []:
+            if verbose: print("Getting keyword and index list")
             for i in indexList:
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size \
-                    and group.variables.get('layer')[i] == keyword:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('dipdir')[i].data.item(), \
-                              group.variables.get('dip')[i].data.item(), \
-                              group.variables.get('polarity')[i].data.item(), \
-                              group.variables.get('formation')[i], \
-                              group.variables.get('layer')[i]))
+                if int(i) >= 0 and int(i) < oGroup.dimensions[indexName].size \
+                    and oGroup.variables.get(variableName)[i] == keyword:
+                    data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on keyword option
         elif keyword != "":
-            for i in range(0,group.dimensions['index'].size):
-                if group.variables.get('layer')[i] == keyword:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('dipdir')[i].data.item(), \
-                              group.variables.get('dip')[i].data.item(), \
-                              group.variables.get('polarity')[i].data.item(), \
-                              group.variables.get('formation')[i], \
-                              group.variables.get('layer')[i]))
+            if verbose: print("Getting keyword")
+            for i in range(0,oGroup.dimensions[indexName].size):
+                if oGroup.variables.get(variableName)[i] == keyword:
+                    data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on list of indices option
         elif indexList != []:
+            if verbose: print("Getting index list")
             for i in indexList:
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('dipdir')[i].data.item(), \
-                              group.variables.get('dip')[i].data.item(), \
-                              group.variables.get('polarity')[i].data.item(), \
-                              group.variables.get('formation')[i], \
-                              group.variables.get('layer')[i]))
+                if int(i) >= 0 and int(i) < oGroup.dimensions[indexName].size:
+                    data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on indices range option
         elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            if verbose: print("Getting index range")
             for i in range(indexRange[0],indexRange[1]):
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('dipdir')[i].data.item(), \
-                              group.variables.get('dip')[i].data.item(), \
-                              group.variables.get('polarity')[i].data.item(), \
-                              group.variables.get('formation')[i], \
-                              group.variables.get('layer')[i]))
+                if int(i) >= 0 and int(i) < oGroup.dimensions[indexName].size:
+                    data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         else:
             errStr = "Non-implemented filter option"
@@ -134,11 +125,26 @@ def GetOrientations(root, indexList=[], indexRange=(0,0), keyword="", verbose=Fa
             response = {"errorFlag":True,"errorString":errStr}
     return response
 
+def GetFaultObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetObservations(root,'faultObservationIndex','faultObservations',indexList,indexRange,keyword,verbose)
 
-# Set orientations
-def SetOrientations(root, data, amend=False, verbose=False):
+def GetFoldObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetObservations(root,'foldObservationIndex','foldObservations',indexList,indexRange,keyword,verbose)
+
+def GetFoliationObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetObservations(root,'foliationObservationIndex','foliationObservations',indexList,indexRange,keyword,verbose)
+
+def GetDiscontinuityObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetObservations(root,'discontinuityObservationIndex','discontinuityObservations',indexList,indexRange,keyword,verbose)
+
+def GetStratigraphicObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetObservations(root,'stratigraphicObservationIndex','stratigraphicObservations',indexList,indexRange,keyword,verbose)
+
+# Set observations
+# Set observations
+def SetObservations(root, data, indexName, variableName, append=False, verbose=False):
     """
-    **SetOrientations** - Saves a list of orientations in ((northing,easting,
+    **SetObservations** - Saves a list of observations in ((easting,northing,
     altitude),dipdir,dip,layer) format into the netCDF Loop Project File
 
     Parameters
@@ -167,53 +173,45 @@ def SetOrientations(root, data, amend=False, verbose=False):
     else:
         dcGroup = resp["value"]
 
-    resp = GetOrientationsGroup(root)
+    resp = GetObservationsGroup(root)
     if resp["errorFlag"]:
-        group = dcGroup.createGroup("Orientations")
-        group.createDimension("index",None)
-        group.createVariable('northing' ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('easting'  ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('altitude' ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('dipdir'   ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('dip'      ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('polarity' ,'i4',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('formation','S20',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('layer'    ,'S20',('index'),zlib=True,complevel=9,fill_value=0)
+        oGroup = CreateObservationGroup(dcGroup)
     else:
-        group = resp["value"]
+        oGroup = resp["value"]
 
-    if group:
-        northingLocation = group.variables['northing']
-        eastingLocation = group.variables['easting']
-        altitudeLocation = group.variables['altitude']
-        dipdirLocation = group.variables['dipdir']
-        dipLocation = group.variables['dip']
-        polarityLocation = group.variables['polarity']
-        formationLocation = group.variables['formation']
-        layerLocation = group.variables['layer']
-        if amend: index = group.dimensions['index'].size
+    if oGroup:
+        observationLocation = oGroup.variables[variableName]
+        if append: index = oGroup.dimensions[indexName].size
         else: index = 0
         for i in data:
-            ((northing,easting,altitude),dipdir,dip,polarity,formation,layer) = i
-            northingLocation[index] = northing
-            eastingLocation[index] = easting
-            altitudeLocation[index] = altitude
-            dipdirLocation[index] = dipdir
-            dipLocation[index] = dip
-            polarityLocation[index] = polarity
-            formationLocation[index] = formation
-            layerLocation[index] = layer
+            observationLocation[index] = i
             index += 1
     else:
-        errStr = "(ERROR) Failed to Create orientation group for orientations setting"
+        errStr = "(ERROR) Failed to Create observations group for observations setting"
         if verbose: print(errStr)
         response = {"errorFlag":True,"errorString":errStr}
     return response
 
+def SetFaultObservations(root, data, append=False, verbose=False):
+    return SetObservations(root, data, 'faultObservationIndex', 'faultObservations', append, verbose)
+
+def SetFoldObservations(root, data, append=False, verbose=False):
+    return SetObservations(root, data, 'foldObservationIndex', 'foldObservations', append, verbose)
+
+def SetFoliationObservations(root, data, append=False, verbose=False):
+    return SetObservations(root, data, 'foliationObservationIndex', 'foliationObservations', append, verbose)
+
+def SetDiscontinuityObservations(root, data, append=False, verbose=False):
+    return SetObservations(root, data, 'discontinuityObservationIndex', 'discontinuityObservations', append, verbose)
+
+def SetStratigraphicObservations(root, data, append=False, verbose=False):
+    return SetObservations(root, data, 'stratigraphicObservationIndex', 'stratigraphicObservations', append, verbose)
+
 # Set contacts
-def SetContacts(root, data, amend=False, verbose=False):
+# Set contacts
+def SetContacts(root, data, append=False, verbose=False):
     """
-    **SetContacts** - Saves a list of contacts in ((northing,easting,
+    **SetContacts** - Saves a list of contacts in ((easting,northing,
     altitude),formation) format into the netCDF Loop Project File
 
     Parameters
@@ -246,26 +244,17 @@ def SetContacts(root, data, amend=False, verbose=False):
     if resp["errorFlag"]:
         group = dcGroup.createGroup("Contacts")
         group.createDimension("index",None)
-        group.createVariable('northing' ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('easting'  ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('altitude' ,'f8',('index'),zlib=True,complevel=9,fill_value=0)
-        group.createVariable('formation','S20',('index'),zlib=True,complevel=9,fill_value=0)
+        contactObservationType_t = group.createCompoundType(LoopProjectFile.contactObservationType,'contactObservationType')
+        group.createVariable('contacts',contactObservationType_t,('index'),zlib=True,complevel=9)
     else:
         group = resp["value"]
 
     if group:
-        northingLocation = group.variables['northing']
-        eastingLocation = group.variables['easting']
-        altitudeLocation = group.variables['altitude']
-        formationLocation = group.variables['formation']
-        if amend: index = group.dimensions['index'].size
+        contactsLocation = group.variables['contacts']
+        if append: index = group.dimensions['index'].size
         else: index = 0
         for i in data:
-            ((northing,easting,altitude),formation) = i
-            northingLocation[index] = northing
-            eastingLocation[index] = easting
-            altitudeLocation[index] = altitude
-            formationLocation[index] = formation
+            contactsLocation[index] = i
             index += 1
     else:
         errStr = "(ERROR) Failed to Create contacts group for contact setting"
@@ -284,50 +273,35 @@ def GetContacts(root, indexList=[], indexRange=(0,0), keyword="", verbose=False)
         # Select all option
         if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
           and indexRange[1] == 0 and keyword == "":
-            # Create list of orientations as:
-            # ((northing,easting,altitude),dipdir,dip,formation,layer)
+            # Create list of observations as:
+            # ((easting,northing,altitude),dipdir,dip,formation,layer)
             for i in range(0,group.dimensions['index'].size):
-                data.append(((group.variables.get('northing')[i].data.item(), \
-                          group.variables.get('easting')[i].data.item(), \
-                          group.variables.get('altitude')[i].data.item()), \
-                          group.variables.get('formation')[i]))
+                data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on keyword and list of indices option
         elif keyword != "" and indexList != []:
             for i in indexList:
                 if int(i) >= 0 and int(i) < group.dimensions['index'].size \
                     and group.variables.get('layer')[i] == keyword:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('formation')[i]))
+                    data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on keyword option
         elif keyword != "":
             for i in range(0,group.dimensions['index'].size):
                 if group.variables.get('layer')[i] == keyword:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('formation')[i]))
+                    data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on list of indices option
         elif indexList != []:
             for i in indexList:
                 if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('formation')[i]))
+                    data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on indices range option
         elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
             for i in range(indexRange[0],indexRange[1]):
                 if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append(((group.variables.get('northing')[i].data.item(), \
-                              group.variables.get('easting')[i].data.item(), \
-                              group.variables.get('altitude')[i].data.item()), \
-                              group.variables.get('formation')[i]))
+                    data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         else:
             errStr = "Non-implemented filter option"

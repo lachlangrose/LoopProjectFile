@@ -29,7 +29,7 @@ def CheckStructuralModelsValid(rootGroup, xyzGridSize=None, verbose=False):
 #        if verbose: print(smGroup)
         if xyzGridSize != None:
             # Check gridSize from extents matches models sizes
-            smGridSize = [smGroup.dimensions["northing"].size,smGroup.dimensions["easting"].size,smGroup.dimensions["depth"].size]
+            smGridSize = [smGroup.dimensions["easting"].size,smGroup.dimensions["northing"].size,smGroup.dimensions["depth"].size]
             if smGridSize != xyzGridSize:
                 print("(INVALID) Extents grid size and Structural Models Grid Size do NOT match")
                 print("(INVALID) Extents Grid Size :           ", xyzGridSize)
@@ -42,9 +42,9 @@ def CheckStructuralModelsValid(rootGroup, xyzGridSize=None, verbose=False):
     return valid
 
 # Get Structural Models group if present
-def GetStructuralModels(rootGroup, verbose=False):
+def GetStructuralModelsGroup(rootGroup, verbose=False):
     """
-    **GetStructuralModels** - Gets the stuctural models group node within the
+    **GetStructuralModelsGroup** - Gets the stuctural models group node within the
     netCDF Loop Project File
     
     Parameters
@@ -86,7 +86,7 @@ def GetStructuralModel(root, verbose=False, index=0):
         
     """    
     response = {"errorFlag":False}
-    resp = GetStructuralModels(root)
+    resp = GetStructuralModelsGroup(root)
     if resp["errorFlag"]: response = resp
     else:
         smGroup = resp["value"]
@@ -125,7 +125,7 @@ def SetStructuralModel(root, data, index=0, verbose=False):
     response = {"errorFlag":False}
     xyzGridSize = [0,0,0];
     Extents.CheckExtentsValid(root, xyzGridSize, verbose)
-    resp = GetStructuralModels(root)
+    resp = GetStructuralModelsGroup(root)
     if resp["errorFlag"]:
         # Create Structural Models Group and add data shape based on project extents
         structuralModelsGroup = root.createGroup("StructuralModels")
@@ -133,7 +133,7 @@ def SetStructuralModel(root, data, index=0, verbose=False):
         structuralModelsGroup.createDimension("northing",xyzGridSize[1])
         structuralModelsGroup.createDimension("depth",xyzGridSize[2])
         structuralModelsGroup.createDimension("index",None)
-        structuralModelsGroup.createVariable('data','f4',('northing','easting','depth','index'),zlib=True,complevel=9,fill_value=0)
+        structuralModelsGroup.createVariable('data','f4',('easting','northing','depth','index'),zlib=True,complevel=9,fill_value=0)
         structuralModelsGroup.createVariable('minVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
         structuralModelsGroup.createVariable('maxVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
         # Check creation worked??

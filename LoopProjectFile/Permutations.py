@@ -28,7 +28,7 @@ def checkBrokenRules(lst,rules):
 # Input:
 #   lst - a list of elements (as defined above)
 #   rules - a list of tuples of rules tuple[0] must be before tuple[1]
-#           for all rules. Tuple elements are of eventIds
+#           for all rules. Tuple elements are of eventIdsuu
 # Return: True if a rule is broken or if there are duplicate elements in lst
 def checkBrokenEventRules(lst,rules):
     if len(set(lst)) != len(lst): return True

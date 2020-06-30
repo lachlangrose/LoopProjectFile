@@ -1,5 +1,6 @@
 import LoopProjectFile as LPF
 import sys
+import numpy
 
 # Start Main function
 # Sanity check arguments
@@ -46,13 +47,27 @@ else:
     if resp3["errorFlag"]: print(resp3["errorString"])
     else: print("Data received again")
 
+stratigraphy = numpy.zeros(3,LPF.stratigraphicLayerType)
+stratigraphy[0] = (1,1.0,1.1,b'Thick One',1000.0,0,0,0,0,0,0)
+stratigraphy[1] = (2,1.1,1.2,b'Thin One',100.0,0,0,0,0,0,0)
+stratigraphy[2] = (2,1.1,1.2,b'Next One',50.0,0,0,0,0,0,0)
+LPF.Set(filename,"stratigraphicLog",data=stratigraphy)
+
 # Set some dummy observations within the region of interest
-LPF.Set(filename,"observations",data=[((6470000,550000,0),0,0,"fault","Cleave"),\
-    ((6470500,550500,1),0,0,"fold","Wavey")])
-LPF.Set(filename,"observationsAmend",data=[((6470000,551000,0),0,0,"fault","Cleave"),\
-    ((6470500,551500,1),0,0,"fold","Wavey")])
+contacts = numpy.zeros(3,LPF.contactObservationType)
+contacts[0] = (1,550500.0,6470000.0,0.0)
+contacts[1] = (2,550500.0,6070000.0,0.0)
+contacts[2] = (3,500500.0,6070000.0,0.0)
+LPF.Set(filename,"contacts",data=contacts)
+LPF.Set(filename,"contactsAppend",data=contacts)
+
 
 # Get the observation data back out to confirm it was saved
-resp = LPF.Get(filename,"observations",indexRange=(0,7), keyword="Cleave")
+resp = LPF.Get(filename,"stratigraphicLog")
+if resp["errorFlag"]: print(resp["errorString"])
+else: print(resp["value"])
+
+# Get the observation data back out to confirm it was saved
+resp = LPF.Get(filename,"contacts",indexRange=(0,7))
 if resp["errorFlag"]: print(resp["errorString"])
 else: print(resp["value"])

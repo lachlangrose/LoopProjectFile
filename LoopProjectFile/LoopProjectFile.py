@@ -124,8 +124,8 @@ def Set(filename, element, **kwargs):
         strModel    : "data" = the 3D scalar field of structural data
                       "index" = the index of the dataset to save
                       "verbose" = optional extra console logging
-        orientations: "data" = the orientations data in the following structure
-                        a list of orientations containing
+        observations: "data" = the observations data in the following structure
+                        a list of observations containing
                         ((northing,easting,altitude),   = the location (truple of doubles)
                         dipdir,                         = the dip direction (double)
                         dip,                            = the dip (double)
@@ -153,9 +153,9 @@ def Set(filename, element, **kwargs):
         utm=[1,1,10000000,9889363.77,833966.132,722587.169], depth=[1000,2000] \
         spacing=[1000,1000,10],preference="utm")
 
-    For saving field orientations:
+    For saving field observations:
     >>> data = ((northing,easting,altitude),dipdir,dip,polarity,formation,layer) * X rows
-    >>> resp = LoopProjectFile.Set("test.loop3d","orientations",data=data,amend=False,verbose=True)
+    >>> resp = LoopProjectFile.Set("test.loop3d","observations",data=data,append=False,verbose=True)
     >>> if resp["errorFlag"]: print resp["errorString"])
     
     
@@ -182,14 +182,28 @@ def Set(filename, element, **kwargs):
         if element == "version": response = Version.SetVersion(root, **kwargs)
         elif element == "extents": response = Extents.SetExtents(root, **kwargs)
         elif element == "strModel": response = StructuralModels.SetStructuralModel(root, **kwargs)
-        elif element == "orientations": response = DataCollection.SetOrientations(root, **kwargs)
-        elif element == "orientationsAmend": response = DataCollection.SetOrientations(root, amend=True, **kwargs)
+        elif element == "faultObservations": response = DataCollection.SetFaultObservations(root, **kwargs)
+        elif element == "faultObservationsAppend": response = DataCollection.SetFaultObservations(root, append=True, **kwargs)
+        elif element == "foldObservations": response = DataCollection.SetFoldObservations(root, **kwargs)
+        elif element == "foldObservationsAppend": response = DataCollection.SetFoldObservations(root, append=True, **kwargs)
+        elif element == "foliationObservations": response = DataCollection.SetFoliationObservations(root, **kwargs)
+        elif element == "foliationObservationsAppend": response = DataCollection.SetFoliationObservations(root, append=True, **kwargs)
+        elif element == "discontinuityObservations": response = DataCollection.SetDiscontinuityObservations(root, **kwargs)
+        elif element == "discontinuityObservationsAppend": response = DataCollection.SetDiscontinuityObservations(root, append=True, **kwargs)
+        elif element == "stratigraphicObservations": response = DataCollection.SetStratigraphicObservations(root, **kwargs)
+        elif element == "stratigraphicObservationsAppend": response = DataCollection.SetStratigraphicObservations(root, append=True, **kwargs)
         elif element == "contacts": response = DataCollection.SetContacts(root, **kwargs)
-        elif element == "contactsAmend": response = DataCollection.SetContacts(root, amend=True, **kwargs)
+        elif element == "contactsAppend": response = DataCollection.SetContacts(root, append=True, **kwargs)
         elif element == "stratigraphicLog": response = ExtractedInformation.SetStratigraphicLog(root, **kwargs)
-        elif element == "stratigraphicLogAmend": response = ExtractedInformation.SetStratigraphicLog(root, amend=True, **kwargs)
+        elif element == "stratigraphicLogAppend": response = ExtractedInformation.SetStratigraphicLog(root, append=True, **kwargs)
         elif element == "faultLog": response = ExtractedInformation.SetFaultLog(root, **kwargs)
-        elif element == "faultLogAmend": response = ExtractedInformation.SetFaultLog(root, amend=True, **kwargs)
+        elif element == "faultLogAppend": response = ExtractedInformation.SetFaultLog(root, append=True, **kwargs)
+        elif element == "foldLog": response = ExtractedInformation.SetFoldLog(root, **kwargs)
+        elif element == "foldLogAppend": response = ExtractedInformation.SetFoldLog(root, append=True, **kwargs)
+        elif element == "foliation": response = ExtractedInformation.SetFoliationLog(root, **kwargs)
+        elif element == "foliationAppend": response = ExtractedInformation.SetFoliationLog(root, append=True, **kwargs)
+        elif element == "discontinuity": response = ExtractedInformation.SetDiscontinuityLog(root, **kwargs)
+        elif element == "discontinuityAppend": response = ExtractedInformation.SetDiscontinuityLog(root, append=True, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
             print(errStr)
@@ -258,10 +272,17 @@ def Get(filename, element, **kwargs):
         if element == "version": response = Version.GetVersion(root)
         elif element == "extents": response = Extents.GetExtents(root)
         elif element == "strModel": response = StructuralModels.GetStructuralModel(root,**kwargs)
-        elif element == "orientations": response = DataCollection.GetOrientations(root,**kwargs)
+        elif element == "faultObservations": response = DataCollection.GetFaultObservations(root,**kwargs)
+        elif element == "foldObservations": response = DataCollection.GetFoldObservations(root,**kwargs)
+        elif element == "foliationObservations": response = DataCollection.GetFoliationObservations(root,**kwargs)
+        elif element == "discontinuityObservations": response = DataCollection.GetDiscontinuityObservations(root,**kwargs)
+        elif element == "stratigraphicObservations": response = DataCollection.GetStratigraphicObservations(root,**kwargs)
         elif element == "contacts": response = DataCollection.GetContacts(root,**kwargs)
         elif element == "stratigraphicLog": response = ExtractedInformation.GetStratigraphicLog(root,**kwargs)
         elif element == "faultLog": response = ExtractedInformation.GetFaultLog(root,**kwargs)
+        elif element == "foldLog": response = ExtractedInformation.GetFoldLog(root,**kwargs)
+        elif element == "foliationLog": response = ExtractedInformation.GetFoliationLog(root,**kwargs)
+        elif element == "discontinuityLog": response = ExtractedInformation.GetDiscontinuityLog(root,**kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
             print(errStr)
@@ -318,25 +339,33 @@ def CheckFileValid(filename, verbose=False):
 
 # Explicitly setup Compound Types used in the LoopProjectFile module
 faultObservationType = numpy.dtype([('eventId','<u4'),
-                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
                         ('dipDir','<f8'),('dip','<f8'),('dipPolarity','<f8'),
                         ('val','<f8'),('displacement','<f8')])
 
 foldObservationType = numpy.dtype([('eventId','<u4'),
-                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
                         ('axisX','<f8'),('axisY','<f8'),('axisZ','<f8'),
                         ('foliation','S30'),('whatIsFolded','S30')])
 
 foliationObservationType = numpy.dtype([('eventId','<u4'),
-                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
                         ('dipDir','<f8'),('dip','<f8')])
 
 discontinuityObservationType = numpy.dtype([('eventId','<u4'),
-                        ('X','<f8'),('Y','<f8'),('Z','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
                         ('dipDir','<f8'),('dip','<f8')])
 
+contactObservationType = numpy.dtype([('layerId','<u4'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8')])
+
+stratigraphicObservationType = numpy.dtype([('layerId','<u4'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
+                        ('dipDir','<f8'),('dip','<f8'),('dipPolarity','<f8'),
+                        ('layer','S30')])
+
 faultEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),
+                        ('minAge','<f8'),('maxAge','<f8'),('avgDisplacement','<f8'),
                         ('enabled','u1'),('name','S30')])
 
 foldEventType = numpy.dtype([('eventId','<u4'),
@@ -354,6 +383,12 @@ foliationEventType = numpy.dtype([('eventId','<u4'),
 discontinuityEventType = numpy.dtype([('eventId','<u4'),
                         ('minAge','<f8'),('maxAge','<f8'),
                         ('scalarValue','<f8'),('enabled','u1'),('name','S30')])
+
+stratigraphicLayerType = numpy.dtype([('layerId','<u4'),
+                        ('minAge','<f8'),('maxAge','<f8'),
+                        ('formation','S20'),('thickness','f8'),
+                        ('colour1Red','u1'),('colour1Green','u1'),('colour1Blue','u1'),
+                        ('colour2Red','u1'),('colour2Green','u1'),('colour2Blue','u1')])
 
 def ConvertDataFrame(df,dtype):
     if isinstance(df,pandas.DataFrame):
