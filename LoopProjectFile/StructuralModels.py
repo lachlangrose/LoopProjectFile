@@ -136,7 +136,7 @@ def SetStructuralModel(root, data, index=0, verbose=False):
         structuralModelsGroup.createVariable('data','f4',('easting','northing','depth','index'),zlib=True,complevel=9,fill_value=0)
         structuralModelsGroup.createVariable('minVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
         structuralModelsGroup.createVariable('maxVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
-        # Check creation worked??
+        structuralModelsGroup.createVariable('valid','S1',('index'),zlib=True,complevel=9,fill_value=0)
     else:
         structuralModelsGroup = resp["value"]
     if structuralModelsGroup:
@@ -154,4 +154,6 @@ def SetStructuralModel(root, data, index=0, verbose=False):
             minValLocation[index] = data.min()
             maxValLocation = structuralModelsGroup.variables['maxVal']
             maxValLocation[index] = data.max()
+            validLocation = structuralModelsGroup.variables['valid']
+            validLocation[index] = 1
     return response
