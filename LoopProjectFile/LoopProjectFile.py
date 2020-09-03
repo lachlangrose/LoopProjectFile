@@ -365,26 +365,31 @@ stratigraphicObservationType = numpy.dtype([('layerId','<u4'),
                         ('layer','S30')])
 
 faultEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('enabled','u1'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),
+                        ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('avgDisplacement','<f8')])
 
 foldEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('enabled','u1'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),
+                        ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('periodic','u1'),('wavelength','<f8'),('amplitude','<f8'),
                         ('asymmetry','u1'),('asymmetryShift','<f8'),
                         ('secondaryWavelength','<f8'),('secondaryAmplitude','<f8')])
 
 foliationEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('enabled','u1'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),
+                        ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('lowerScalarValue','<f8'),('upperScalarValue','<f8')])
 
 discontinuityEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('enabled','u1'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),
+                        ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('scalarValue','<f8')])
 
 stratigraphicLayerType = numpy.dtype([('layerId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),
-                        ('formation','S20'),('thickness','f8'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),
+                        ('enabled','u1'),('rank','<u4'),('type','<i4'),
+                        ('thickness','f8'),
                         ('colour1Red','u1'),('colour1Green','u1'),('colour1Blue','u1'),
                         ('colour2Red','u1'),('colour2Green','u1'),('colour2Blue','u1')])
 
