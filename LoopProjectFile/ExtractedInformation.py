@@ -57,13 +57,13 @@ def CreateEventLogGroup(extractedInformationGroup):
     elGroup.createDimension("foldEventIndex",None)
     elGroup.createDimension("foliationEventIndex",None)
     elGroup.createDimension("discontinuityEventIndex",None)
-    faultEventType_t = elGroup.createCompoundType(LoopProjectFile.faultEventType,'faultEventType')
+    faultEventType_t = elGroup.createCompoundType(LoopProjectFile.faultEventType,'FaultEvent')
     elGroup.createVariable('faultEvents',faultEventType_t,('faultEventIndex'),zlib=True,complevel=9)
-    foldEventType_t = elGroup.createCompoundType(LoopProjectFile.foldEventType,'foldEventType')
+    foldEventType_t = elGroup.createCompoundType(LoopProjectFile.foldEventType,'FoldEvent')
     elGroup.createVariable('foldEvents',foldEventType_t,('foldEventIndex'),zlib=True,complevel=9)
-    foliationEventType_t = elGroup.createCompoundType(LoopProjectFile.foliationEventType,'foliationEventType')
+    foliationEventType_t = elGroup.createCompoundType(LoopProjectFile.foliationEventType,'FoliationEvent')
     elGroup.createVariable('foliationEvents',foliationEventType_t,('foliationEventIndex'),zlib=True,complevel=9)
-    discontinuityEventType_t = elGroup.createCompoundType(LoopProjectFile.discontinuityEventType,'discontinuityEventType')
+    discontinuityEventType_t = elGroup.createCompoundType(LoopProjectFile.discontinuityEventType,'DiscontinuityEvent')
     elGroup.createVariable('discontinuityEvents',discontinuityEventType_t,('discontinuityEventIndex'),zlib=True,complevel=9)
     return elGroup
 
@@ -85,8 +85,9 @@ def SetEventLog(root, data, indexName, variableName, append=False, verbose=False
 
     if elGroup:
         eventLocation = elGroup.variables[variableName]
-        if append: index = elGroup.dimensions[indexName].size
-        else: index = 0
+        index = 0
+        if append:
+            index = elGroup.dimensions[indexName].size
         for i in data:
             eventLocation[index] = i
             index += 1
@@ -189,15 +190,15 @@ def SetStratigraphicLog(root, data, append=False, verbose=False):
         print(resp["errorString"])
         siGroup = eiGroup.createGroup("StratigraphicInformation")
         siGroup.createDimension("index",None)
-        stratigraphicLayerType_t = siGroup.createCompoundType(LoopProjectFile.stratigraphicLayerType,'stratigraphicLayerType')
+        stratigraphicLayerType_t = siGroup.createCompoundType(LoopProjectFile.stratigraphicLayerType,'StratigraphicLayer')
         siGroup.createVariable('stratigraphicLayers',stratigraphicLayerType_t,('index'),zlib=True,complevel=9)
     else:
         siGroup = resp["value"]
 
     if siGroup:
         stratigraphicLayersLocation = siGroup.variables['stratigraphicLayers']
+        index = 0
         if append: index = siGroup.dimensions['index'].size
-        else: index = 0
         for i in data:
             stratigraphicLayersLocation[index] = i
             index += 1
