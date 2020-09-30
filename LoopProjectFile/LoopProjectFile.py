@@ -339,28 +339,28 @@ def CheckFileValid(filename, verbose=False):
 
 # Explicitly setup Compound Types used in the LoopProjectFile module
 faultObservationType = numpy.dtype([('eventId','<u4'),
-                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('dipDir','<f8'),('dip','<f8'),('dipPolarity','<f8'),
                         ('val','<f8'),('displacement','<f8')])
 
 foldObservationType = numpy.dtype([('eventId','<u4'),
-                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('axisX','<f8'),('axisY','<f8'),('axisZ','<f8'),
                         ('foliation','S30'),('whatIsFolded','S30')])
 
 foliationObservationType = numpy.dtype([('eventId','<u4'),
-                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('dipDir','<f8'),('dip','<f8')])
 
 discontinuityObservationType = numpy.dtype([('eventId','<u4'),
-                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('dipDir','<f8'),('dip','<f8')])
 
 contactObservationType = numpy.dtype([('layerId','<u4'),
-                        ('easting','<f8'),('northing','<f8'),('altitude','<f8')])
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4')])
 
 stratigraphicObservationType = numpy.dtype([('layerId','<u4'),
-                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),
+                        ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('dipDir','<f8'),('dip','<f8'),('dipPolarity','<f8'),
                         ('layer','S30')])
 
