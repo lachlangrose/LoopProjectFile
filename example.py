@@ -14,7 +14,7 @@ else:
 LPF.CreateBasic(filename)
 geodes = [-31.90835,-31.863242,141.493799,141.546666]
 utm = [54,'S',6469600,6474600,546700,551700]
-depth = [1000,6000]
+depth = [-1000,-6000]
 spacing = [100,100,100]
 LPF.Set(filename,"extents",geodesic=geodes,utm=utm,depth=depth,spacing=spacing)
 

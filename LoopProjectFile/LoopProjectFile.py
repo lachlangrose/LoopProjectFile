@@ -118,7 +118,7 @@ def Set(filename, element, **kwargs):
         version     : "version" = [Major,Minor,Sub]
         extents     : "geodesic" = [minLat,maxLat,minLong,maxLong]
                       "utm" = [utmZone,utmNorthSouth,minNorthing,maxNorthing,minEasting,maxEasting]
-                      "depth" = [minDepth,maxDepth]
+                      "depth" = [topDepth,bottomDepth]
                       "spacing" = [N/SSpacing,E/WSpacing,DepthSpacing]
                       "preference" = "utm" or "geodesic" (optional)
         strModel    : "data" = the 3D scalar field of structural data
@@ -150,7 +150,7 @@ def Set(filename, element, **kwargs):
     
     For saving extents (in the middle of the pacific ocean):
     >>> LoopProjectFile.Set("test.loop3d","extents",geodesic=[0,1,-180,-179], \
-        utm=[1,1,10000000,9889363.77,833966.132,722587.169], depth=[1000,2000] \
+        utm=[1,1,10000000,9889363.77,833966.132,722587.169], depth=[-1000,-2000] \
         spacing=[1000,1000,10],preference="utm")
 
     For saving field observations:
@@ -220,7 +220,7 @@ def Get(filename, element, **kwargs):
         version     : "value" = [Major,Minor,Sub]
         extents     : "value" = {"geodesic" = [minLat,maxLat,minLong,maxLong]
                       "utm" = [utmZone,utmNorthSouth,minNorthing,maxNorthing,minEasting,maxEasting]
-                      "depth" = [minDepth,maxDepth]
+                      "depth" = [topDepth,bottomDepth]
                       "spacing" = [N/SSpacing,E/WSpacing,DepthSpacing]
                       "preference" = "utm" or "geodesic" (optional)}
         strModel    : "value" = the 3D scalar field of structural data

@@ -65,12 +65,12 @@ def CheckExtentsValid(rootGroup, xyzGridSize, verbose=False):
         valid = False
 
     # Check Depth Extents
-    if "minDepth" in rootGroup.ncattrs() \
-      and "maxDepth" in rootGroup.ncattrs():
+    if "topDepth" in rootGroup.ncattrs() \
+      and "bottomDepth" in rootGroup.ncattrs():
         if verbose:
             print("  Depth extents found (m)")
-            print("\t minDepth      = ", rootGroup.minDepth)
-            print("\t maxDepth      = ", rootGroup.maxDepth)
+            print("\t bottomDepth   = ", rootGroup.bottomDepth)
+            print("\t topDepth      = ", rootGroup.topDepth)
     else:
         print("(INVALID) No Depth extents found")
         valid = False
@@ -91,7 +91,7 @@ def CheckExtentsValid(rootGroup, xyzGridSize, verbose=False):
     if valid:
         xyzGridSize[0] =  int((rootGroup.maxEasting - rootGroup.minEasting) / rootGroup.spacingX + 1)
         xyzGridSize[1] =  int((rootGroup.maxNorthing - rootGroup.minNorthing) / rootGroup.spacingY + 1)
-        xyzGridSize[2] =  int((rootGroup.maxDepth - rootGroup.minDepth) / rootGroup.spacingZ + 1)
+        xyzGridSize[2] =  int((rootGroup.topDepth - rootGroup.bottomDepth) / rootGroup.spacingZ + 1)
         
     return valid
 
@@ -143,9 +143,9 @@ def GetExtents(rootGroup):
         errStr = "(ERROR) No or incomplete UTM boundary in loop project file"
         print(errStr)
         response = {"errorFlag":True,"errorString":errStr}
-    if "minDepth" in rootGroup.ncattrs() \
-      and "maxDepth" in rootGroup.ncattrs():
-        depth = [rootGroup.minDepth,rootGroup.maxDepth]
+    if "topDepth" in rootGroup.ncattrs() \
+      and "bottomDepth" in rootGroup.ncattrs():
+        depth = [rootGroup.bottomDepth,rootGroup.topDepth]
     else:
         errStr = "(ERROR) No or incomplete depth boundary in loop project file"
         print(errStr)
@@ -180,7 +180,7 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
         The utmZone, utmNorth/South, northing and easting extents in format:
         [utmZone,utmNorthSouth,minEasting,maxEasting,minNorthing,maxNorthing]
     depth: [double,double]
-        The depth minimum and maximums in format: [minDepth,maxDepth]
+        The depth minimum and maximums in format: [bottomDepth,topDepth]
     spacing: [double, double, double]
         The spacing of adjacent points in the grid for X/Y/Z.  This corresponds
         to [latitude/northing,longitude/easting,depth]
@@ -221,8 +221,8 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
         print(errStr)
         response = {"errorFlag":True,"errorString":errStr}
     else:
-        rootGroup.minDepth = depth[0]
-        rootGroup.maxDepth = depth[1]
+        rootGroup.bottomDepth = depth[0]
+        rootGroup.topDepth = depth[1]
     if len(spacing) != 3:
         errStr = "(ERROR) Invalid number of spacing values (" + str(len(depth)) + ")"
         print(errStr)
@@ -232,5 +232,28 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
         rootGroup.spacingY = spacing[1]
         rootGroup.spacingZ = spacing[2]
     rootGroup.workingFormat = 1 if preference == "utm" else 0
+
+    # Do a quick sanity check and swap min and max values if wrong
+    if rootGroup.minLatitude > rootGroup.maxLatitude:
+        tmp = rootGroup.minLatitude
+        rootGroup.minLatitude = rootGroup.maxLatitude
+        rootGroup.maxLatitude = tmp
+    if rootGroup.minLongitude > rootGroup.maxLongitude:
+        tmp = rootGroup.minLongitude
+        rootGroup.minLongitude = rootGroup.maxLongitude
+        rootGroup.maxLongitude = tmp
+    if rootGroup.minEasting > rootGroup.maxEasting:
+        tmp = rootGroup.minEasting
+        rootGroup.minEasting = rootGroup.maxEasting
+        rootGroup.maxEasting = tmp
+    if rootGroup.minNorthing > rootGroup.maxNorthing:
+        tmp = rootGroup.minNorthing
+        rootGroup.minNorthing = rootGroup.maxNorthing
+        rootGroup.maxNorthing = tmp
+    if rootGroup.bottomDepth > rootGroup.topDepth:
+        tmp = rootGroup.bottomDepth
+        rootGroup.bottomDepth = rootGroup.topDepth
+        rootGroup.topDepth = tmp
+
     return response
 
