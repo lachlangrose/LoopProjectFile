@@ -1,4 +1,4 @@
-{% set name = "loopprojectfile" %
+{% set name = "loopprojectfile" %}
 {% set version = "1.0.0" %}
 
 package:
