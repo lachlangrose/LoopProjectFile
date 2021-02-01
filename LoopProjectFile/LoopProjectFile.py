@@ -204,6 +204,7 @@ def Set(filename, element, **kwargs):
         elif element == "foliationAppend": response = ExtractedInformation.SetFoliationLog(root, append=True, **kwargs)
         elif element == "discontinuity": response = ExtractedInformation.SetDiscontinuityLog(root, **kwargs)
         elif element == "discontinuityAppend": response = ExtractedInformation.SetDiscontinuityLog(root, append=True, **kwargs)
+        elif element == "dataCollectionConfig": response = DataCollection.SetConfiguration(root, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
             print(errStr)
@@ -283,6 +284,7 @@ def Get(filename, element, **kwargs):
         elif element == "foldLog": response = ExtractedInformation.GetFoldLog(root,**kwargs)
         elif element == "foliationLog": response = ExtractedInformation.GetFoliationLog(root,**kwargs)
         elif element == "discontinuityLog": response = ExtractedInformation.GetDiscontinuityLog(root,**kwargs)
+        elif element == "dataCollectionConfig": response = DataCollection.GetConfiguration(root, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
             print(errStr)

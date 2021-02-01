@@ -208,7 +208,6 @@ def SetStratigraphicObservations(root, data, append=False, verbose=False):
     return SetObservations(root, data, 'stratigraphicObservationIndex', 'stratigraphicObservations', append, verbose)
 
 # Set contacts
-# Set contacts
 def SetContacts(root, data, append=False, verbose=False):
     """
     **SetContacts** - Saves a list of contacts in ((easting,northing,
@@ -307,4 +306,134 @@ def GetContacts(root, indexList=[], indexRange=(0,0), keyword="", verbose=False)
             errStr = "Non-implemented filter option"
             if verbose: print(errStr)
             response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+
+#Set data collection (map2loop) configuration settings
+def SetConfiguration(root, data, verbose=False):
+    """
+    **SetConfiguration** - Saves the settings for the data collection step
+
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    data: dictionary {str:str,...}
+        A dictionary with the data colletion settings
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+
+    Returns
+    -------
+       dict {"errorFlag","errorString"}
+        errorString exist and contains error message only when errorFlag is
+        True
+
+    """
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        dcGroup = root.createGroup("DataCollection")
+    else:
+        dcGroup = resp["value"]
+
+    if (data.contains("orientationDecimate")):
+        dcGroup.orientationDecimate = data.orientationDecimate
+    if (data.contains("contactDecimate")):
+        dcGroup.contactDecimate = data.contactDecimate
+    if (data.contains("intrusionMode")):
+        dcGroup.intrusionMode = data.intrusionMode
+    if (data.contains("interpolationSpacing")):
+        dcGroup.interpolationSpacing= data.interpolationSpacing
+    if (data.contains("misorientation")):
+        dcGroup.misorientation = data.misorientation
+    if (data.contains("interpolationScheme")):
+        dcGroup.interpolationScheme = data.interpolationScheme
+    if (data.contains("faultDecimate")):
+        dcGroup.faultDecimate = data.faultDecimate
+    if (data.contains("minFaultLength")):
+        dcGroup.minFaultLength = data.minFaultLength
+    if (data.contains("faultDip")):
+        dcGroup.faultDip = data.faultDip
+    if (data.contains("plutonDip")):
+        dcGroup.plutonDip = data.plutonDip
+    if (data.contains("plutonForm")):
+        dcGroup.plutonForm = data.plutonForm
+    if (data.contains("distBuffer")):
+        dcGroup.distBuffer = data.distBuffer
+    if (data.contains("contactDip")):
+        dcGroup.contactDip = data.contactDip
+    if (data.contains("contactOrientationDecimate")):
+        dcGroup.contactOrientationDecimate = data.contactOrientationDecimate
+    if (data.contains("nullScheme")):
+        dcGroup.nullScheme = data.nullScheme
+    if (data.contains("thicknessBuffer")):
+        dcGroup.thicknessBuffer = data.thicknessBuffer
+    if (data.contains("maxThicknessAllowed")):
+        dcGroup.maxThicknessAllowed = data.maxThicknessAllowed
+    if (data.contains("foldDecimate")):
+        dcGroup.foldDecimate = data.foldDecimate
+    if (data.contains("fatStep")):
+        dcGroup.fatStep = data.fatStep
+    if (data.contains("closeDip")):
+        dcGroup.closeDip = data.closeDip
+    if (data.contains("useInterpolations")):
+        dcGroup.useInterpolations = data.useInterpolations
+    if (data.contains("useFat")):
+        dcGroup.useFat = data.useFat
+
+#Extract data collection (map2loop) configuration settings
+def GetConfiguration(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        dcGroup = resp["value"]
+        data = {}
+        if "orientationDecimate" in dcGroup.ncattrs():
+            data["orientationDecimate"] = dcGroup.orientationDecimate
+        if "contactDecimate" in dcGroup.ncattrs():
+            data["contactDecimate"] = dcGroup.contactDecimate
+        if "intrusionMode" in dcGroup.ncattrs():
+            data["intrusionMode"] = dcGroup.intrusionMode
+        if "interpolationSpacing" in dcGroup.ncattrs():
+            data["interpolationSpacing"] = dcGroup.interpolationSpacing
+        if "misorientation" in dcGroup.ncattrs():
+            data["misorientation"] = dcGroup.misorientation
+        if "interpolationScheme" in dcGroup.ncattrs():
+            data["interpolationScheme"] = dcGroup.interpolationScheme
+        if "faultDecimate" in dcGroup.ncattrs():
+            data["faultDecimate"] = dcGroup.faultDecimate
+        if "minFaultLength" in dcGroup.ncattrs():
+            data["minFaultLength"] = dcGroup.minFaultLength
+        if "faultDip" in dcGroup.ncattrs():
+            data["faultDip"] = dcGroup.faultDip
+        if "plutonDip" in dcGroup.ncattrs():
+            data["plutonDip"] = dcGroup.plutonDip
+        if "plutonForm" in dcGroup.ncattrs():
+            data["plutonForm"] = dcGroup.plutonForm
+        if "distBuffer" in dcGroup.ncattrs():
+            data["distBuffer"] = dcGroup.distBuffer
+        if "contactDip" in dcGroup.ncattrs():
+            data["contactDip"] = dcGroup.contactDip
+        if "contactOrientationDecimate" in dcGroup.ncattrs():
+            data["contactOrientationDecimate"] = dcGroup.contactOrientationDecimate
+        if "nullScheme" in dcGroup.ncattrs():
+            data["nullScheme"] = dcGroup.nullScheme
+        if "thicknessBuffer" in dcGroup.ncattrs():
+            data["thicknessBuffer"] = dcGroup.thicknessBuffer
+        if "maxThicknessAllowed" in dcGroup.ncattrs():
+            data["maxThicknessAllowed"] = dcGroup.maxThicknessAllowed
+        if "foldDecimate" in dcGroup.ncattrs():
+            data["foldDecimate"] = dcGroup.foldDecimate
+        if "fatStep" in dcGroup.ncattrs():
+            data["fatStep"] = dcGroup.fatStep
+        if "closeDip" in dcGroup.ncattrs():
+            data["closeDip"] = dcGroup.closeDip
+        if "useInterpolations" in dcGroup.ncattrs():
+            data["useInterpolations"] = dcGroup.useInterpolations
+        if "useFat" in dcGroup.ncattrs():
+            data["useFat"] = dcGroup.useFat
+        response["value"] = data
     return response
