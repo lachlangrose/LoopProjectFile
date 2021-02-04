@@ -27,16 +27,19 @@ def CheckStructuralModelsValid(rootGroup, xyzGridSize=None, verbose=False):
         if verbose: print("  Structural Models Group Present")
         smGroup = rootGroup.groups.get("StructuralModels")
 #        if verbose: print(smGroup)
-        if xyzGridSize != None:
-            # Check gridSize from extents matches models sizes
-            smGridSize = [smGroup.dimensions["easting"].size,smGroup.dimensions["northing"].size,smGroup.dimensions["depth"].size]
-            if smGridSize != xyzGridSize:
-                print("(INVALID) Extents grid size and Structural Models Grid Size do NOT match")
-                print("(INVALID) Extents Grid Size :           ", xyzGridSize)
-                print("(INVALID) Structural Models Grid Size : ", smGridSize)
-                valid = False
-            else:
-                if verbose: print("  Structural Models grid size adheres to extents")
+        if "easting" in smGroup.ncattrs() and "northing" in smGroup.ncattrs() and "depth" in smGroup.ncattrs():
+            if xyzGridSize != None:
+                # Check gridSize from extents matches models sizes
+                smGridSize = [smGroup.dimensions["easting"].size,smGroup.dimensions["northing"].size,smGroup.dimensions["depth"].size]
+                if smGridSize != xyzGridSize:
+                    print("(INVALID) Extents grid size and Structural Models Grid Size do NOT match")
+                    print("(INVALID) Extents Grid Size :           ", xyzGridSize)
+                    print("(INVALID) Structural Models Grid Size : ", smGridSize)
+                    valid = False
+                else:
+                    if verbose: print("  Structural Models grid size adheres to extents")
+        else:
+            if verbose: print("No structural models extents in project file")
     else:
         if verbose: print("No Structural Models Group Present")
     return valid
