@@ -338,6 +338,12 @@ def SetConfiguration(root, data, verbose=False):
     else:
         dcGroup = resp["value"]
 
+    if (data.contains("quietMode")):
+        dcGroup.quietMode = data.quietMode
+    if (data.contains("deposits")):
+        dcGroup.deposits = data.deposits
+    if (data.contains("dtb")):
+        dcGroup.dtb = data.dtb
     if (data.contains("orientationDecimate")):
         dcGroup.orientationDecimate = data.orientationDecimate
     if (data.contains("contactDecimate")):
@@ -382,6 +388,7 @@ def SetConfiguration(root, data, verbose=False):
         dcGroup.useInterpolations = data.useInterpolations
     if (data.contains("useFat")):
         dcGroup.useFat = data.useFat
+    return response
 
 #Extract data collection (map2loop) configuration settings
 def GetConfiguration(root, verbose=False):
@@ -391,6 +398,12 @@ def GetConfiguration(root, verbose=False):
     else:
         dcGroup = resp["value"]
         data = {}
+        if "quietMode" in dcGroup.ncattrs():
+            data["quietMode"] = dcGroup.quietMode
+        if "deposits" in dcGroup.ncattrs():
+            data["deposits"] = dcGroup.deposits
+        if "dtb" in dcGroup.ncattrs():
+            data["dtb"] = dcGroup.dtb
         if "orientationDecimate" in dcGroup.ncattrs():
             data["orientationDecimate"] = dcGroup.orientationDecimate
         if "contactDecimate" in dcGroup.ncattrs():
@@ -435,5 +448,75 @@ def GetConfiguration(root, verbose=False):
             data["useInterpolations"] = dcGroup.useInterpolations
         if "useFat" in dcGroup.ncattrs():
             data["useFat"] = dcGroup.useFat
+        response["value"] = data
+    return response
+
+#Set data collection (map2loop) configuration settings
+def SetConfiguration(root, data, verbose=False):
+    """
+    **SetConfiguration** - Saves the settings for the data collection step
+
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    data: dictionary {str:str,...}
+        A dictionary with the data colletion settings
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+
+    Returns
+    -------
+       dict {"errorFlag","errorString"}
+        errorString exist and contains error message only when errorFlag is
+        True
+
+    """
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        dcGroup = root.createGroup("DataCollection")
+    else:
+        dcGroup = resp["value"]
+
+    if (data.contains("structureUrl")):
+        dcGroup.structureUrl = data.structureUrl
+    if (data.contains("geologyUrl")):
+        dcGroup.geologyUrl = data.geologyUrl
+    if (data.contains("faultUrl")):
+        dcGroup.faultUrl = data.faultUrl
+    if (data.contains("foldUrl")):
+        dcGroup.foldUrl = data.foldUrl
+    if (data.contains("mindepUrl")):
+        dcGroup.mindepUrl = data.mindepUrl
+    if (data.contains("metadataUrl")):
+        dcGroup.metadataUrl = data.metadataUrl
+    if (data.contains("sourceTags")):
+        dcGroup.sourceTags = data.sourceTags
+    return response
+
+#Extract data collection (map2loop) sources settings
+def GetConfiguration(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        dcGroup = resp["value"]
+        data = {}
+        if "structureUrl" in dcGroup.ncattrs():
+            data["structureUrl"] = dcGroup.structureUrl
+        if "geologyUrl" in dcGroup.ncattrs():
+            data["geologyUrl"] = dcGroup.geologyUrl
+        if "faultUrl" in dcGroup.ncattrs():
+            data["faultUrl"] = dcGroup.faultUrl
+        if "foldUrl" in dcGroup.ncattrs():
+            data["foldUrl"] = dcGroup.foldUrl
+        if "mindepUrl" in dcGroup.ncattrs():
+            data["mindepUrl"] = dcGroup.mindepUrl
+        if "metadataUrl" in dcGroup.ncattrs():
+            data["metadataUrl"] = dcGroup.metadataUrl
+        if "sourceTags" in dcGroup.ncattrs():
+            data["sourceTags"] = dcGroup.sourceTags
         response["value"] = data
     return response

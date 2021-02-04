@@ -205,6 +205,8 @@ def Set(filename, element, **kwargs):
         elif element == "discontinuity": response = ExtractedInformation.SetDiscontinuityLog(root, **kwargs)
         elif element == "discontinuityAppend": response = ExtractedInformation.SetDiscontinuityLog(root, append=True, **kwargs)
         elif element == "dataCollectionConfig": response = DataCollection.SetConfiguration(root, **kwargs)
+        elif element == "dataCollectionSources": response = DataCollection.SetSources(root, **kwargs)
+        elif element == "structuralModelsConfig": response = StructuralModels.SetConfiguration(root, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
             print(errStr)
@@ -285,6 +287,8 @@ def Get(filename, element, **kwargs):
         elif element == "foliationLog": response = ExtractedInformation.GetFoliationLog(root,**kwargs)
         elif element == "discontinuityLog": response = ExtractedInformation.GetDiscontinuityLog(root,**kwargs)
         elif element == "dataCollectionConfig": response = DataCollection.GetConfiguration(root, **kwargs)
+        elif element == "dataCollectionSources": response = DataCollection.GetSources(root, **kwargs)
+        elif element == "structuralModelsConfig": response = StructuralModels.GetConfiguration(root, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
             print(errStr)

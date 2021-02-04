@@ -157,3 +157,89 @@ def SetStructuralModel(root, data, index=0, verbose=False):
             validLocation = structuralModelsGroup.variables['valid']
             validLocation[index] = 1
     return response
+
+
+#Set data collection (loopStructural) configuration settings
+def SetConfiguration(root, data, verbose=False):
+    """
+    **SetConfiguration** - Saves the settings for the loop structural step
+
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    data: dictionary {str:str,...}
+        A dictionary with the loop structural settings
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+
+    Returns
+    -------
+       dict {"errorFlag","errorString"}
+        errorString exist and contains error message only when errorFlag is
+        True
+
+    """
+    response = {"errorFlag":False}
+    resp = GetStructuralModelsGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        smGroup = root.createGroup("StructuralModels")
+    else:
+        smGroup = resp["value"]
+
+    if (data.contains("foliationInterpolator")):
+        smGroup.foliationInterpolator = data.foliationInterpolator
+    if (data.contains("foliationNumElements")):
+        smGroup.foliationNumElements = data.foliationNumElements
+    if (data.contains("foliationBuffer")):
+        smGroup.foliationBuffer = data.foliationBuffer
+    if (data.contains("foliationSolver")):
+        smGroup.foliationSolver = data.foliationSolver
+    if (data.contains("foliationDamp")):
+        smGroup.foliationDamp = data.foliationDamp
+    if (data.contains("faultInterpolator")):
+        smGroup.faultInterpolator = data.faultInterpolator
+    if (data.contains("faultNumElements")):
+        smGroup.faultNumElements = data.faultNumElements
+    if (data.contains("faultDataRegion")):
+        smGroup.faultDataRegion = data.faultDataRegion
+    if (data.contains("faultSolver")):
+        smGroup.faultSolver = data.faultSolver
+    if (data.contains("faultCpw")):
+        smGroup.faultCpw = data.faultCpw
+    if (data.contains("faultNpw")):
+        smGroup.faultNpw = data.faultNpw
+
+#Extract data collection (loopStructural) configuration settings
+def GetConfiguration(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetStructuralModelsGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        smGroup = resp["value"]
+        foliationData = {}
+        if "foliationInterpolator" in smGroup.ncattrs():
+            foliationData["interpolatortype"] = smGroup.foliationInterpolator
+        if "foliationNumElements" in smGroup.ncattrs():
+            foliationData["nelements"] = smGroup.foliationNumElements
+        if "foliationBuffer" in smGroup.ncattrs():
+            foliationData["buffer"] = smGroup.foliationBuffer
+        if "foliationSolver" in smGroup.ncattrs():
+            foliationData["solver"] = smGroup.foliationSolver
+        if "foliationDamp" in smGroup.ncattrs():
+            foliationData["damp"] = smGroup.foliationDamp
+        faultData = {}
+        if "faultInterpolator" in smGroup.ncattrs():
+            foliationData["interpolatortype"] = smGroup.faultInterpolator
+        if "faultNumElements" in smGroup.ncattrs():
+            foliationData["nelements"] = smGroup.faultNumElements
+        if "faultDataRegion" in smGroup.ncattrs():
+            foliationData["data_region"] = smGroup.faultDataRegion
+        if "faultCpw" in smGroup.ncattrs():
+            foliationData["cpw"] = smGroup.faultCpw
+        if "faultNpw" in smGroup.ncattrs():
+            foliationData["npw"] = smGroup.faultNpw
+        data = {foliationData,faultData}
+        response["value"] = data
+    return response
