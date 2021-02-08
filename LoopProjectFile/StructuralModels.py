@@ -131,18 +131,18 @@ def SetStructuralModel(root, data, index=0, verbose=False):
     resp = GetStructuralModelsGroup(root)
     if resp["errorFlag"]:
         # Create Structural Models Group and add data shape based on project extents
-        structuralModelsGroup = root.createGroup("StructuralModels")
-        structuralModelsGroup.createDimension("easting",xyzGridSize[0])
-        structuralModelsGroup.createDimension("northing",xyzGridSize[1])
-        structuralModelsGroup.createDimension("depth",xyzGridSize[2])
-        structuralModelsGroup.createDimension("index",None)
-        structuralModelsGroup.createVariable('data','f4',('easting','northing','depth','index'),zlib=True,complevel=9,fill_value=0)
-        structuralModelsGroup.createVariable('minVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
-        structuralModelsGroup.createVariable('maxVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
-        structuralModelsGroup.createVariable('valid','S1',('index'),zlib=True,complevel=9,fill_value=0)
+        smGroup = root.createGroup("StructuralModels")
+        smGroup.createDimension("easting",xyzGridSize[0])
+        smGroup.createDimension("northing",xyzGridSize[1])
+        smGroup.createDimension("depth",xyzGridSize[2])
+        smGroup.createDimension("index",None)
+        smGroup.createVariable('data','f4',('easting','northing','depth','index'),zlib=True,complevel=9,fill_value=0)
+        smGroup.createVariable('minVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
+        smGroup.createVariable('maxVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
+        smGroup.createVariable('valid','S1',('index'),zlib=True,complevel=9,fill_value=0)
     else:
-        structuralModelsGroup = resp["value"]
-    if structuralModelsGroup:
+        smGroup = resp["value"]
+    if smGroup:
         # Do dimension checking between incoming data and existing netCDF data shape
         dataGridSize = list(data.shape)
         if dataGridSize != xyzGridSize:
@@ -150,14 +150,23 @@ def SetStructuralModel(root, data, index=0, verbose=False):
             print(errStr)
             response = {"errorFlag":True,"errorString":errStr}
         else:
-#            structuralModelsGroup.variables('data')[:,:,:,index] = data
-            dataLocation = structuralModelsGroup.variables['data']
+#            smGroup.variables('data')[:,:,:,index] = data
+            if "index" not in smGroup.ncattrs():
+                smGroup.createDimension("easting",xyzGridSize[0])
+                smGroup.createDimension("northing",xyzGridSize[1])
+                smGroup.createDimension("depth",xyzGridSize[2])
+                smGroup.createDimension("index",None)
+                smGroup.createVariable('data','f4',('easting','northing','depth','index'),zlib=True,complevel=9,fill_value=0)
+                smGroup.createVariable('minVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
+                smGroup.createVariable('maxVal','f4',('index'),zlib=True,complevel=9,fill_value=0)
+                smGroup.createVariable('valid','S1',('index'),zlib=True,complevel=9,fill_value=0)
+            dataLocation = smGroup.variables['data']
             dataLocation[:,:,:,index] = data
-            minValLocation = structuralModelsGroup.variables['minVal']
+            minValLocation = smGroup.variables['minVal']
             minValLocation[index] = data.min()
-            maxValLocation = structuralModelsGroup.variables['maxVal']
+            maxValLocation = smGroup.variables['maxVal']
             maxValLocation[index] = data.max()
-            validLocation = structuralModelsGroup.variables['valid']
+            validLocation = smGroup.variables['valid']
             validLocation[index] = 1
     return response
 
@@ -243,6 +252,6 @@ def GetConfiguration(root, verbose=False):
             foliationData["cpw"] = smGroup.faultCpw
         if "faultNpw" in smGroup.ncattrs():
             foliationData["npw"] = smGroup.faultNpw
-        data = {foliationData,faultData}
+        data = [foliationData,faultData]
         response["value"] = data
     return response
