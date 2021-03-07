@@ -347,7 +347,7 @@ def CheckFileValid(filename, verbose=False):
 faultObservationType = numpy.dtype([('eventId','<u4'),
                         ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('dipDir','<f8'),('dip','<f8'),('dipPolarity','<f8'),
-                        ('val','<f8'),('displacement','<f8')])
+                        ('val','<f8'),('displacement','<f8'),('posOnly','u1')])
 
 foldObservationType = numpy.dtype([('eventId','<u4'),
                         ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
@@ -373,7 +373,9 @@ stratigraphicObservationType = numpy.dtype([('layerId','<u4'),
 faultEventType = numpy.dtype([('eventId','<u4'),
                         ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
-                        ('avgDisplacement','<f8')])
+                        ('avgDisplacement','<f8'),('avgDownthrowDir','<f8'),
+                        ('influenceDistance','<f8'),('verticalRadius','<f8'),
+                        ('horizontalRadius','<f8'),('colour','S7')])
 
 foldEventType = numpy.dtype([('eventId','<u4'),
                         ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),

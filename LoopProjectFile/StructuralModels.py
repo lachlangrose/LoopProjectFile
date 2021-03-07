@@ -151,7 +151,7 @@ def SetStructuralModel(root, data, index=0, verbose=False):
             response = {"errorFlag":True,"errorString":errStr}
         else:
 #            smGroup.variables('data')[:,:,:,index] = data
-            if "index" not in smGroup.ncattrs():
+            if "index" not in smGroup.dimensions.keys():
                 smGroup.createDimension("easting",xyzGridSize[0])
                 smGroup.createDimension("northing",xyzGridSize[1])
                 smGroup.createDimension("depth",xyzGridSize[2])
