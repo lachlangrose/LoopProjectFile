@@ -50,6 +50,13 @@ def GetEventLogGroup(rootGroup,verbose=False):
     else:
         return LoopProjectFileUtils.GetGroup(resp["value"],"EventLog",verbose)
 
+def GetEventRelationshipsGroup(rootGroup,verbose=False):
+    response = {"errorFlag":False}
+    resp = GetExtractedInformationGroup(rootGroup,verbose)
+    if resp["errorFlag"]:
+        return resp
+    else:
+        return LoopProjectFileUtils.GetGroup(resp["value"],"EventRelationships",verbose)
 
 def CreateEventLogGroup(extractedInformationGroup):
     elGroup = extractedInformationGroup.createGroup("EventLog")
@@ -240,3 +247,48 @@ def GetStratigraphicLog(root, indexList=[], indexRange=(0,0), verbose=False):
             response = {"errorFlag":True,"errorString":errStr}
     return response
 
+
+def SetEventRelationships(root, data, append=False, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetExtractedInformationGroup(root)
+    if resp["errorFlag"]:
+        # Create  Extracted Information Group as it doesn't exist
+        eiGroup = root.createGroup("ExtractedInformation")
+    else:
+        eiGroup = resp["value"]
+
+    resp = GetEventRelationshipsGroup(root)
+    if resp["errorFlag"]:
+        print(resp["errorString"])
+        erGroup = erGroup.createGroup("EventRelationships")
+        erGroup.createDimension("index",None)
+        eventLinkType_t = erGroup.createCompoundType(LoopProjectFile.eventLinkType,'EventLink')
+        erGroup.createVariable('eventLinks',eventLinkType_t,('index'),zlib=True,complevel=9)
+    else:
+        erGroup = resp["value"]
+
+    if erGroup:
+        eventRelationshipsLocation = erGroup.variables['eventLinks']
+        index = 0
+        if append: index = er.dimensions['index'].size
+        for i in data:
+            eventRelationshipsLocation[index] = i
+            index += 1
+    else:
+        errStr = "(ERROR) Failed to create event relationships group for event links"
+        if verbose: print(errStr)
+        response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+
+def GetEventRelationships(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetEventRelationshipsGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        erGroup = resp["value"]
+        data = []
+        for i in range(0,erGroup.dimensions['index'].size):
+            data.append((erGroup.variables.get('eventLinks')[i]))
+        response["value"] = data
+    return response

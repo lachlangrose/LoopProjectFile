@@ -117,16 +117,16 @@ def Set(filename, element, **kwargs):
     Can set with element and kwargs:
         version     : "version" = [Major,Minor,Sub]
         extents     : "geodesic" = [minLat,maxLat,minLong,maxLong]
-                      "utm" = [utmZone,utmNorthSouth,minNorthing,maxNorthing,minEasting,maxEasting]
+                      "utm" = [utmZone,utmNorthSouth,minEasting,maxEasting,minNorthing,maxNorthing]
                       "depth" = [topDepth,bottomDepth]
-                      "spacing" = [N/SSpacing,E/WSpacing,DepthSpacing]
+                      "spacing" = [E/WSpacing,N/SSpacing,DepthSpacing]
                       "preference" = "utm" or "geodesic" (optional)
         strModel    : "data" = the 3D scalar field of structural data
                       "index" = the index of the dataset to save
                       "verbose" = optional extra console logging
         observations: "data" = the observations data in the following structure
                         a list of observations containing
-                        ((northing,easting,altitude),   = the location (truple of doubles)
+                        ((easting,northing,altitude),   = the location (truple of doubles)
                         dipdir,                         = the dip direction (double)
                         dip,                            = the dip (double)
                         polarity,                       = the polarity (int)
@@ -154,7 +154,7 @@ def Set(filename, element, **kwargs):
         spacing=[1000,1000,10],preference="utm")
 
     For saving field observations:
-    >>> data = ((northing,easting,altitude),dipdir,dip,polarity,formation,layer) * X rows
+    >>> data = ((easting,northing,altitude),dipdir,dip,polarity,formation,layer) * X rows
     >>> resp = LoopProjectFile.Set("test.loop3d","observations",data=data,append=False,verbose=True)
     >>> if resp["errorFlag"]: print resp["errorString"])
     
@@ -206,6 +206,7 @@ def Set(filename, element, **kwargs):
         elif element == "discontinuityAppend": response = ExtractedInformation.SetDiscontinuityLog(root, append=True, **kwargs)
         elif element == "dataCollectionConfig": response = DataCollection.SetConfiguration(root, **kwargs)
         elif element == "dataCollectionSources": response = DataCollection.SetSources(root, **kwargs)
+        elif element == "eventRelationships": response = ExtractedInformation.SetEventRelationships(root, **kwargs)
         elif element == "structuralModelsConfig": response = StructuralModels.SetConfiguration(root, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Set function \'" + element + "\'"
@@ -288,6 +289,7 @@ def Get(filename, element, **kwargs):
         elif element == "discontinuityLog": response = ExtractedInformation.GetDiscontinuityLog(root,**kwargs)
         elif element == "dataCollectionConfig": response = DataCollection.GetConfiguration(root, **kwargs)
         elif element == "dataCollectionSources": response = DataCollection.GetSources(root, **kwargs)
+        elif element == "eventRelationships": response = ExtractedInformation.GetEventRelationships(root, **kwargs)
         elif element == "structuralModelsConfig": response = StructuralModels.GetConfiguration(root, **kwargs)
         else:
             errStr = "(ERROR) Unknown element for Get function \'" + element + "\'"
@@ -375,7 +377,10 @@ faultEventType = numpy.dtype([('eventId','<u4'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('avgDisplacement','<f8'),('avgDownthrowDir','<f8'),
                         ('influenceDistance','<f8'),('verticalRadius','<f8'),
-                        ('horizontalRadius','<f8'),('colour','S7')])
+                        ('horizontalRadius','<f8'),('colour','S7'),
+                        ('centreEasting','<f8'),('centreNorthing','<f8'),('centreAltitude','<f8'),
+                        ('avgSlipDirEasting','<f8'),('avgSlipDirNorthing','<f8'),('avgSlipDirAltitude','<f8'),
+                        ('avgNormalEasting','<f8'),('avgNormalNorthing','<f8'),('avgNormalAltitude','<f8')])
 
 foldEventType = numpy.dtype([('eventId','<u4'),
                         ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),
@@ -400,6 +405,7 @@ stratigraphicLayerType = numpy.dtype([('layerId','<u4'),
                         ('thickness','f8'),
                         ('colour1Red','u1'),('colour1Green','u1'),('colour1Blue','u1'),
                         ('colour2Red','u1'),('colour2Green','u1'),('colour2Blue','u1')])
+eventRelationshipType = numpy.dtype([('eventId1','<u4'),('eventId2','<u4'),('bidirectional','u1')])
 
 def ConvertDataFrame(df,dtype):
     if isinstance(df,pandas.DataFrame):

@@ -54,10 +54,10 @@ def CheckExtentsValid(rootGroup, xyzGridSize, verbose=False):
       and "utmNorthSouth" in rootGroup.ncattrs():
         if verbose:
             print("  UTM extents found (m)")
-            print("\t minNorthing   = ", rootGroup.minNorthing)
-            print("\t maxNorthing   = ", rootGroup.maxNorthing)
             print("\t minEasting    = ", rootGroup.minEasting)
             print("\t maxEasting    = ", rootGroup.maxEasting)
+            print("\t minNorthing   = ", rootGroup.minNorthing)
+            print("\t maxNorthing   = ", rootGroup.maxNorthing)
             print("\t utmZone       = ", rootGroup.utmZone)
             print("\t utmNorthSouth = ", 'N' if (rootGroup.utmNorthSouth == 1) else 'S')
     else:
@@ -130,10 +130,10 @@ def GetExtents(rootGroup):
         response = {"errorFlag":True,"errorString":errStr}
     if "utmZone" in rootGroup.ncattrs() \
       and "utmNorthSouth" in rootGroup.ncattrs() \
-      and "minNorthing" in rootGroup.ncattrs() \
-      and "maxNorthing" in rootGroup.ncattrs() \
       and "minEasting" in rootGroup.ncattrs() \
-      and "maxEasting" in rootGroup.ncattrs():
+      and "maxEasting" in rootGroup.ncattrs() \
+      and "minNorthing" in rootGroup.ncattrs() \
+      and "maxNorthing" in rootGroup.ncattrs():
         utm = [
           rootGroup.utmZone,rootGroup.utmNorthSouth,
           rootGroup.minEasting,rootGroup.maxEasting,
@@ -177,13 +177,13 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
         The latitude and longitude limits of the region in format:
         [minLong,maxLong,minLat,maxLat]
     utm: [int,int,double,double,double,double]
-        The utmZone, utmNorth/South, northing and easting extents in format:
+        The utmZone, utmNorth/South, easting and northing extents in format:
         [utmZone,utmNorthSouth,minEasting,maxEasting,minNorthing,maxNorthing]
     depth: [double,double]
         The depth minimum and maximums in format: [bottomDepth,topDepth]
     spacing: [double, double, double]
         The spacing of adjacent points in the grid for X/Y/Z.  This corresponds
-        to [latitude/northing,longitude/easting,depth]
+        to [longitude/easting,latitude/northing,depth]
     preference: string (optional)
         A string ("utm" or "geodesic") which specifies which format the Loop GUI
         region of interest should be displayed
