@@ -187,14 +187,13 @@ def SetStratigraphicLog(root, data, append=False, verbose=False):
     response = {"errorFlag":False}
     resp = GetExtractedInformationGroup(root)
     if resp["errorFlag"]:
-        # Create  Extracted Information Group as it doesn't exist
+        # Create Extracted Information Group as it doesn't exist
         eiGroup = root.createGroup("ExtractedInformation")
     else:
         eiGroup = resp["value"]
 
     resp = GetStratigraphicInformationGroup(root)
     if resp["errorFlag"]:
-        print(resp["errorString"])
         siGroup = eiGroup.createGroup("StratigraphicInformation")
         siGroup.createDimension("index",None)
         stratigraphicLayerType_t = siGroup.createCompoundType(LoopProjectFile.stratigraphicLayerType,'StratigraphicLayer')
