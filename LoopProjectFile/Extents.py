@@ -201,10 +201,10 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
         print(errStr)
         response = {"errorFlag":True,"errorString":errStr}
     else:
-        rootGroup.minLatitude = geodesic[0]
-        rootGroup.maxLatitude = geodesic[1]
-        rootGroup.minLongitude = geodesic[2]
-        rootGroup.maxLongitude = geodesic[3]
+        rootGroup.minLongitude = geodesic[0]
+        rootGroup.maxLongitude = geodesic[1]
+        rootGroup.minLatitude = geodesic[2]
+        rootGroup.maxLatitude = geodesic[3]
     if len(utm) != 6:
         errStr = "(ERROR) Invalid number of UTM boundary values (" + str(len(utm)) + ")"
         print(errStr)

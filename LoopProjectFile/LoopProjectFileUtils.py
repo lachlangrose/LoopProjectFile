@@ -89,9 +89,30 @@ def FromCsv(loopFilename,importPath,overwrite=False):
             print(loopFilename, 'already exists and overwrite not set')
             return
 
+    importPath = importPath.replace('\\','/')
+    if importPath[-1] != '/' and importPath[-1] != '\\':
+        importPath += '/'
+
+    if not os.path.isdir(importPath):
+        print('Import path',importPath,'does not exist')
+        return
+
     # Create the basic loop project file
     print('Creating',loopFilename)
     LoopProjectFile.CreateBasic(loopFilename)
+
+
+    print('  Importing from',str(importPath)+'extents.csv','into project file')
+    if not os.path.isfile(importPath+'extents.csv'):
+        print(str(importPath)+'extents.csv','does not exist')
+    else:
+        df = pandas.read_csv(str(importPath)+'extents.csv')
+        extents = {}
+        extents['geodesic'] = list(df.values[0][0:4])
+        extents['utm'] = list(df.values[0][4:10])
+        extents['depth'] = list(df.values[0][10:12])
+        extents['spacing'] = list(df.values[0][12:15])
+        resp = LoopProjectFile.Set(loopFilename,'extents',**extents)
 
     # Import from various csvs
     print('  Importing from',str(importPath)+'contacts.csv','into project file')
@@ -175,12 +196,22 @@ def ToCsv(loopFilename,outputPath):
     if not os.path.isfile(loopFilename):
         print(loopFilename, 'does not exist')
         return
+
+    outputPath = outputPath.replace('\\','/')
+    if outputPath[-1] != '/' and outputPath[-1] != '\\':
+        outputPath += '/'
+
+    if not os.path.isdir(outputPath):
+        print('Output Path',outputPath,'does not exist. Creating now.')
+        os.mkdir(outputPath)
+
     # Extract and print version
     print(loopFilename, ':')
     resp = LoopProjectFile.Get(loopFilename,'version')
     if resp['errorFlag']:
         print(loopFilename,'is not a loop project file')
         return
+    print('  Exporting extents into',str(outputPath)+'extents.csv')
     resp = LoopProjectFile.Get(loopFilename,'extents')
     if resp['errorFlag']:
         print(resp['errorString'])
@@ -192,34 +223,40 @@ def ToCsv(loopFilename,outputPath):
         print('    easting: ',resp['value']['utm'][2],'-',resp['value']['utm'][3])
         print('    northing:',resp['value']['utm'][4],'-',resp['value']['utm'][5])
         print('    altitude:',resp['value']['depth'][0],'-',resp['value']['depth'][1])
+        columns = ['minLong','maxLong','minLat','maxLat','utmZone','isUtmZoneNorth','minEasting','maxEasting','minNorthing','maxNorthing','lowerBound','upperBound','spacingEastWest','spacingNorthSouth','spacingDepth']
+        df = pandas.DataFrame(columns=columns)
+        df.loc[0] = list(resp['value']['geodesic']+resp['value']['utm']+resp['value']['depth']+resp['value']['spacing'])
+        df.set_index(columns[0],inplace=True)
+        df.to_csv(str(outputPath)+'extents.csv')
+
     # Extract each element into separate csv files
-    print('  Extracting contacts into',str(outputPath)+'contacts.csv')
+    print('  Exporting contacts into',str(outputPath)+'contacts.csv')
     ElementToCsv(loopFilename,outputPath+'contacts.csv','contacts',LoopProjectFile.contactObservationType)
 
-    print('  Extracting fault event log into',str(outputPath)+'faultLog.csv')
+    print('  Exporting fault event log into',str(outputPath)+'faultLog.csv')
     ElementToCsv(loopFilename,outputPath+'faultLog.csv','faultLog',LoopProjectFile.faultEventType)
-    print('  Extracting fault observations into',str(outputPath)+'faultObs.csv')
+    print('  Exporting fault observations into',str(outputPath)+'faultObs.csv')
     ElementToCsv(loopFilename,outputPath+'faultObs.csv','faultObservations',LoopProjectFile.faultObservationType)
 
-    print('  Extracting fold event log into',str(outputPath)+'foldLog.csv')
+    print('  Exporting fold event log into',str(outputPath)+'foldLog.csv')
     ElementToCsv(loopFilename,outputPath+'foldLog.csv','foldLog',LoopProjectFile.foldEventType)
-    print('  Extracting fold observations into',str(outputPath)+'foldObs.csv')
+    print('  Exporting fold observations into',str(outputPath)+'foldObs.csv')
     ElementToCsv(loopFilename,outputPath+'foldObs.csv','foldObservations',LoopProjectFile.foldObservationType)
 
-    print('  Extracting foliation event log into',str(outputPath)+'foliationLog.csv')
+    print('  Exporting foliation event log into',str(outputPath)+'foliationLog.csv')
     ElementToCsv(loopFilename,outputPath+'foliationLog.csv','foliationLog',LoopProjectFile.foliationEventType)
-    print('  Extracting foliation observations into',str(outputPath)+'foliationObs.csv')
+    print('  Exporting foliation observations into',str(outputPath)+'foliationObs.csv')
     ElementToCsv(loopFilename,outputPath+'foliationObs.csv','foliationObservations',LoopProjectFile.foliationObservationType)
 
-    print('  Extracting discontinuity event log into',str(outputPath)+'discontinuityLog.csv')
+    print('  Exporting discontinuity event log into',str(outputPath)+'discontinuityLog.csv')
     ElementToCsv(loopFilename,outputPath+'discontinuityLog.csv','discontinuityLog',LoopProjectFile.discontinuityEventType)
-    print('  Extracting discontinuity observations into',str(outputPath)+'discontinuityObs.csv')
+    print('  Exporting discontinuity observations into',str(outputPath)+'discontinuityObs.csv')
     ElementToCsv(loopFilename,outputPath+'discontinuityObs.csv','discontinuityObservations',LoopProjectFile.discontinuityObservationType)
 
-    print('  Extracting stratigraphic event log into',str(outputPath)+'stratigraphicLog.csv')
+    print('  Exporting stratigraphic event log into',str(outputPath)+'stratigraphicLog.csv')
     ElementToCsv(loopFilename,outputPath+'stratigraphicLog.csv','stratigraphicLog',LoopProjectFile.stratigraphicLayerType)
-    print('  Extracting stratigraphic observations into',str(outputPath)+'stratigraphicObs.csv')
+    print('  Exporting stratigraphic observations into',str(outputPath)+'stratigraphicObs.csv')
     ElementToCsv(loopFilename,outputPath+'stratigraphicObs.csv','stratigraphicObservations',LoopProjectFile.stratigraphicObservationType)
 
-    print('  Extracting event relationships into',str(outputPath)+'eventRel.csv')
+    print('  Exporting event relationships into',str(outputPath)+'eventRel.csv')
     ElementToCsv(loopFilename,outputPath+'eventRel.csv','eventRelationships',LoopProjectFile.eventRelationshipType)
