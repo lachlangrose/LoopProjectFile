@@ -141,7 +141,6 @@ def GetStratigraphicObservations(root, indexList=[], indexRange=(0,0), keyword="
     return GetObservations(root,'stratigraphicObservationIndex','stratigraphicObservations',indexList,indexRange,keyword,verbose)
 
 # Set observations
-# Set observations
 def SetObservations(root, data, indexName, variableName, append=False, verbose=False):
     """
     **SetObservations** - Saves a list of observations in ((easting,northing,
@@ -451,8 +450,45 @@ def GetConfiguration(root, verbose=False):
         response["value"] = data
     return response
 
+#Set default data collection (map2loop) configuration settings
+def SetDefaultConfiguration(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        dcGroup = root.createGroup("DataCollection")
+    else:
+        dcGroup = resp["value"]
+
+    dcGroup.quietMode = 0
+    dcGroup.deposits = "Fe,Cu,Au,NONE"
+    dcGroup.dtb = ""
+    dcGroup.orientationDecimate = 0
+    dcGroup.contactDecimate = 5
+    dcGroup.intrusionMode = 0
+    dcGroup.interpolationSpacing = 500
+    dcGroup.misorientation = 30
+    dcGroup.interpolationScheme = "scipy_rbf"
+    dcGroup.faultDecimate = 5
+    dcGroup.minFaultLength = 5000
+    dcGroup.faultDip = 90
+    dcGroup.plutonDip = 45
+    dcGroup.plutonForm = "domes"
+    dcGroup.distBuffer = 10
+    dcGroup.contactDip = -999
+    dcGroup.contactOrientationDecimate = 5
+    dcGroup.nullScheme = "null"
+    dcGroup.thicknessBuffer = 5000
+    dcGroup.maxThicknessAllowed = 10000
+    dcGroup.foldDecimate = 5
+    dcGroup.fatStep = 750
+    dcGroup.closeDip = -999
+    dcGroup.useInterpolations = 0
+    dcGroup.useFat = 1
+    return response
+
 #Set data collection (map2loop) configuration settings
-def SetConfiguration(root, data, verbose=False):
+def SetSources(root, data, verbose=False):
     """
     **SetConfiguration** - Saves the settings for the data collection step
 
@@ -497,7 +533,7 @@ def SetConfiguration(root, data, verbose=False):
     return response
 
 #Extract data collection (map2loop) sources settings
-def GetConfiguration(root, verbose=False):
+def GetSources(root, verbose=False):
     response = {"errorFlag":False}
     resp = GetDataCollectionGroup(root)
     if resp["errorFlag"]: response = resp
@@ -519,4 +555,23 @@ def GetConfiguration(root, verbose=False):
         if "sourceTags" in dcGroup.ncattrs():
             data["sourceTags"] = dcGroup.sourceTags
         response["value"] = data
+    return response
+
+#Create Default data collection (map2loop) source settings
+def SetDefaultSources(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        dcGroup = root.createGroup("DataCollection")
+    else:
+        dcGroup = resp["value"]
+
+    dcGroup.structureUrl = ""
+    dcGroup.geologyUrl = ""
+    dcGroup.faultUrl = ""
+    dcGroup.foldUrl = ""
+    dcGroup.mindepUrl = ""
+    dcGroup.metadataUrl = ""
+    dcGroup.sourceTags = ""
     return response

@@ -70,6 +70,9 @@ def CreateBasic(filename):
     else:
         rootGroup = netCDF4.Dataset(filename,"w",format="NETCDF4")
         response = Version.SetVersion(rootGroup, version=Version.LoopVersion())
+        if not response['errorFlag']: response = DataCollection.SetDefaultSources(rootGroup)
+        if not response['errorFlag']: response = DataCollection.SetDefaultConfiguration(rootGroup)
+        if not response['errorFlag']: response = StructuralModels.SetDefaultConfiguration(rootGroup)
         rootGroup.close()
     return response
 

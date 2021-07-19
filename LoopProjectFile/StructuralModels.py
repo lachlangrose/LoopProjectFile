@@ -222,6 +222,7 @@ def SetConfiguration(root, data, verbose=False):
         smGroup.faultCpw = data.faultCpw
     if (data.contains("faultNpw")):
         smGroup.faultNpw = data.faultNpw
+    return response
 
 #Extract data collection (loopStructural) configuration settings
 def GetConfiguration(root, verbose=False):
@@ -254,4 +255,27 @@ def GetConfiguration(root, verbose=False):
             foliationData["npw"] = smGroup.faultNpw
         data = [foliationData,faultData]
         response["value"] = data
+    return response
+
+#Set default data collection (loopStructural) configuration settings
+def SetDefaultConfiguration(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetStructuralModelsGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        smGroup = root.createGroup("StructuralModels")
+    else:
+        smGroup = resp["value"]
+
+    smGroup.foliationInterpolator = "PLI"
+    smGroup.foliationNumElements = 100000
+    smGroup.foliationBuffer = 0.8
+    smGroup.foliationSolver = "pyamg"
+    smGroup.foliationDamp = 1
+    smGroup.faultInterpolator = "FDI"
+    smGroup.faultNumElements = 10000
+    smGroup.faultDataRegion = 0.3
+    smGroup.faultSolver = "pyamg"
+    smGroup.faultCpw = 10
+    smGroup.faultNpw = 10
     return response
