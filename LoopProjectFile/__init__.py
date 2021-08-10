@@ -4,5 +4,5 @@ from .LoopProjectFile import CreateBasic, Get, Set, OpenProjectFile, CheckFileVa
         stratigraphicLayerType, stratigraphicObservationType, contactObservationType, \
         eventRelationshipType, ConvertDataFrame
 from .Permutations import Event, perm, ApproxPerm, CalcPermutation, checkBrokenRules, checkBrokenEventRules
-from .LoopProjectFileUtils import ToCsv, FromCsv, ElementToCsv, ElementFromCsv
+from .LoopProjectFileUtils import ToCsv, FromCsv, ElementToCsv, ElementFromCsv, ElementToDataframe, ElementFromDataframe
 
