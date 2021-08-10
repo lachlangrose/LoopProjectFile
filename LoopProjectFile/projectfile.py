@@ -23,6 +23,18 @@ compoundTypeMap = {"version":None,
 
 class ProjectFile:
     def __init__(self, project_filename):
+        """Python interface for the Loop project file.
+
+        Parameters
+        ----------
+        project_filename : string
+            name/path of projectfile
+
+        Raises
+        ------
+        BaseException
+            Exception if project file doesn't exist
+        """
         error  = OpenProjectFile(project_filename)
         if error['errorFlag']:
             raise BaseException('Project file does not exist') 
@@ -45,10 +57,24 @@ class ProjectFile:
                 "dataCollectionSources",
                 "eventRelationships",
                 "structuralModelsConfig"]
+    
     @classmethod
     def new(cls, filename):
+        """Create a new project file.
+
+        Parameters
+        ----------
+        filename : string
+            name of projectfile
+
+        Returns
+        -------
+        ProjectFile
+            the new projectfile class
+        """
         LoopProjectFile.CreateBasic(filename)
         return self.__init__(filename)
+    
     @property
     def extents(self):
         resp = Get(self.project_filename,'extents')
