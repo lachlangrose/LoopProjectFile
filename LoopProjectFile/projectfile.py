@@ -11,8 +11,8 @@ compoundTypeMap = {"version":None,
                 "discontinuityObservations":LoopProjectFile.discontinuityObservationType,
                 "stratigraphicObservations":LoopProjectFile.stratigraphicObservationType,
                 "contacts":LoopProjectFile.contactObservationType,
-                "stratigraphicLog":None,
-                "faultLog":None,
+                "stratigraphicLog":LoopProjectFile.stratigraphicLayerType,
+                "faultLog":LoopProjectFile.faultEventType,
                 "foldLog":None,
                 "foliationLog":None,
                 "discontinuityLog":None,
@@ -75,6 +75,13 @@ class ProjectFile:
         LoopProjectFile.CreateBasic(filename)
         return self.__init__(filename)
     
+    def _add_names_to_df(self, log, df):
+        df['name'] = 'none'
+        for stratigraphic_id in log.index:
+            df.loc[df.index== stratigraphic_id,'name'] = \
+            log.loc[stratigraphic_id,'name']
+
+
     @property
     def extents(self):
         resp = Get(self.project_filename,'extents')
@@ -94,13 +101,45 @@ class ProjectFile:
         return self.__getitem__('faultObservations')
 
     @property
+    def faultLocations(self):
+        df = self.__getitem__('faultObservations')
+        self._add_names_to_df(self.faultLog,df)
+        return df.loc[df['posOnly']==1,:]
+
+    @property
+    def faultOrientations(self):
+        df = self.__getitem__('faultObservations')
+        self._add_names_to_df(self.faultLog,df)
+        return df.loc[df['posOnly']==0,:]
+
+    @property
+    def faultLog(self):
+        return self.__getitem__('faultLog')
+            
+    @property
     def foliationObservations(self):
         return self.__getitem__('foliationObservations')
 
     @property
     def foldObservations(self):
         return self.__getitem__('foldObservations')
+    @property
+    def stratigraphicLog(self):
+        return self.__getitem__('stratigraphicLog')
 
+    
+
+    @property
+    def stratigraphyLocations(self):
+        df = self.__getitem__('contacts')
+        self._add_names_to_df(self.stratigraphicLog,df)
+        return df
+
+    @property
+    def stratigraphyOrientations(self):
+        df = self.__getitem__('stratigraphicObservations')
+        self._add_names_to_df(self.stratigraphicLog,df)
+        return df
 
     def _ipython_key_completions_(self):
         return self.element_names
