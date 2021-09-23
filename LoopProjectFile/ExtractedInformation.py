@@ -259,17 +259,17 @@ def SetEventRelationships(root, data, append=False, verbose=False):
     resp = GetEventRelationshipsGroup(root)
     if resp["errorFlag"]:
         print(resp["errorString"])
-        erGroup = erGroup.createGroup("EventRelationships")
+        erGroup = eiGroup.createGroup("EventRelationships")
         erGroup.createDimension("index",None)
-        eventLinkType_t = erGroup.createCompoundType(LoopProjectFile.eventLinkType,'EventLink')
-        erGroup.createVariable('eventLinks',eventLinkType_t,('index'),zlib=True,complevel=9)
+        eventRelationshipType_t = erGroup.createCompoundType(LoopProjectFile.eventRelationshipType,'EventRelationship')
+        erGroup.createVariable('eventRelationships',eventRelationshipType_t,('index'),zlib=True,complevel=9)
     else:
         erGroup = resp["value"]
 
     if erGroup:
-        eventRelationshipsLocation = erGroup.variables['eventLinks']
+        eventRelationshipsLocation = erGroup.variables['eventRelationships']
         index = 0
-        if append: index = er.dimensions['index'].size
+        if append: index = erGroup.dimensions['index'].size
         for i in data:
             eventRelationshipsLocation[index] = i
             index += 1
@@ -288,6 +288,6 @@ def GetEventRelationships(root, verbose=False):
         erGroup = resp["value"]
         data = []
         for i in range(0,erGroup.dimensions['index'].size):
-            data.append((erGroup.variables.get('eventLinks')[i]))
+            data.append((erGroup.variables.get('eventRelationships')[i]))
         response["value"] = data
     return response

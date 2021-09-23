@@ -245,7 +245,7 @@ def Get(filename, element, **kwargs):
     >>> else: data = resp["value"]
     
     For extracting the extents:
-    >>> resp = LoopProjectFile.Get("test.loop3d","extents",index=0)
+    >>> resp = LoopProjectFile.Get("test.loop3d","extents")
     >>> if resp["errorFlag"]: print(resp["errorString"])
     >>> else:
     >>>     data = resp["value"]

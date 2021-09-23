@@ -94,11 +94,17 @@ def GetStructuralModel(root, verbose=False, index=0):
     else:
         smGroup = resp["value"]
         # Check data exists at the specified index value 
-        # TODO Better checking to remove back indexing or out-of-bounds access
-#        if smGroup.variables.
-        data = smGroup.variables.get('data')[:,:,:,index].data
-        if verbose: print("The shape of the structuralModel is", data.shape)
-        response["value"] = data
+        # Also checking for back indexing or out-of-bounds access
+        if smGroup.dimensions.get('index') == None:
+            response = {"errorFlag":True,"errorString":"(ERROR) There are no structural models to get"}
+            if verbose: print(response["errorString"])
+        elif smGroup.dimensions['index'].size < index or index < 0:
+            response = {"errorFlag":True,"errorString":"(ERROR) The requested index " + str(index) + " does not exist"}
+            if verbose: print(response["errorString"])
+        else:
+            data = smGroup.variables.get('data')[:,:,:,index].data
+            if verbose: print("The shape of the structuralModel is", data.shape)
+            response["value"] = data
     return response
 
 # Set structural model (with dimension checking)
