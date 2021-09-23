@@ -1,6 +1,7 @@
-from .LoopProjectFile import Get, Set, CreateBasic, OpenProjectFile
-# from .LoopProjectFileUtils import ElementToDataframe, ElementFromDataframe
+from .LoopProjectFile import Get, Set, CreateBasic, OpenProjectFile, CheckFileValid,CheckFileIsLoopProjectFile
+from .LoopProjectFileUtils import ElementToDataframe, ElementFromDataframe
 import LoopProjectFile
+import pandas as pd
 
 compoundTypeMap = {"version":None,
                 "extents":None,
@@ -35,8 +36,8 @@ class ProjectFile:
         BaseException
             Exception if project file doesn't exist
         """
-        error  = OpenProjectFile(project_filename)
-        if error['errorFlag']:
+        valid  = CheckFileIsLoopProjectFile(project_filename)
+        if valid == False:
             raise BaseException('Project file does not exist') 
         self.project_filename = project_filename
         self.element_names = ["version",
@@ -73,12 +74,16 @@ class ProjectFile:
             the new projectfile class
         """
         LoopProjectFile.CreateBasic(filename)
-        return self.__init__(filename)
+        projectfile = ProjectFile(filename)
+        return projectfile
     
+    def is_valid(self):
+        return CheckFileValid(self.project_filename)
+
     def _add_names_to_df(self, log, df):
         df['name'] = 'none'
         for stratigraphic_id in log.index:
-            df.loc[df.index== stratigraphic_id,'name'] = \
+            df.loc[df['layerId'] == stratigraphic_id,'name'] = \
             log.loc[stratigraphic_id,'name']
 
 
@@ -89,6 +94,12 @@ class ProjectFile:
             return None
         return resp['value']
 
+    @extents.setter
+    def extents(self,extents):
+        Set(self.project_filename,'extents',**extents)
+        pass
+    
+    
     @property
     def version(self):
         resp = Get(self.project_filename,'version')
@@ -96,38 +107,89 @@ class ProjectFile:
             return None
         return "{}.{}.{}".format(*resp['value'])
 
+    # should we be able to set the version or should this be fixed?
+    # @version.setter
+    # def version(self, version):
+    #     if isinstance(version, str):
+    #         version = version.split('.')
+    #         if len(version) != 3:
+    #             raise ValueError('Version must be in the format major.minor.patch')
+    #         version = list(map(int, version))
+    #     resp = Set(self.project_filename,'version',version=version)
+    #     if resp['errorFlag'] == True:
+    #         raise ValueError('Version must be in the format major.minor.patch')        
+
     @property
     def faultObservations(self):
         return self.__getitem__('faultObservations')
 
+    @faultObservations.setter
+    def faultObservations(self, value):
+        self.__setitem__('faultObservations', value)
+        
+
     @property
     def faultLocations(self):
         df = self.__getitem__('faultObservations')
-        self._add_names_to_df(self.faultLog,df)
+        # self._add_names_to_df(self.faultLog,df)
         return df.loc[df['posOnly']==1,:]
+
+    @faultLocations.setter
+    def faultLocations(self, value):
+        df = self.__getitem__('faultObservations')
+        value = pd.concat([value,df.loc[df['posOnly']==1,:]])
+        value.reset_index(inplace=True)
+        self.__setitem__('faultObservations', value)
+        
 
     @property
     def faultOrientations(self):
         df = self.__getitem__('faultObservations')
-        self._add_names_to_df(self.faultLog,df)
         return df.loc[df['posOnly']==0,:]
+
+    @faultOrientations.setter
+    def faultOrientations(self, value):
+        df = self.__getitem__('faultObservations')
+        value = pd.concat([value,df.loc[df['posOnly']==0,:]])
+        value.reset_index(inplace=True)
+        self.__setitem__('faultObservations', value)
+        
 
     @property
     def faultLog(self):
         return self.__getitem__('faultLog')
-            
+    
+    @faultLog.setter
+    def faultLog(self, value):
+        self.__setitem__('faultLog',value)
+        
+
     @property
     def foliationObservations(self):
         return self.__getitem__('foliationObservations')
 
+    @foliationObservations.setter
+    def foliationObservations(self, value):
+        self.__setitem__('foliationObservations',value)
+        
+
     @property
     def foldObservations(self):
         return self.__getitem__('foldObservations')
+
+    @foldObservations.setter
+    def foldObservations(self, value):
+        self.__setitem__('foldObservations', value)
+        
+
     @property
     def stratigraphicLog(self):
         return self.__getitem__('stratigraphicLog')
 
-    
+    @stratigraphicLog.setter
+    def stratigraphicLog(self, value):
+        self.__setitem__('stratigraphicLog', value)
+        
 
     @property
     def stratigraphyLocations(self):
@@ -135,12 +197,21 @@ class ProjectFile:
         self._add_names_to_df(self.stratigraphicLog,df)
         return df
 
+    @stratigraphyLocations.setter
+    def stratigraphyLocations(self, value):
+        self.__setitem__('contacts',value)
+
     @property
     def stratigraphyOrientations(self):
         df = self.__getitem__('stratigraphicObservations')
         self._add_names_to_df(self.stratigraphicLog,df)
         return df
 
+    @stratigraphyOrientations.setter
+    def stratigraphyOrientations(self, value):
+        self.__setitem__('stratigraphicObservations',value)
+        
+        
     def _ipython_key_completions_(self):
         return self.element_names
 
@@ -156,6 +227,14 @@ class ProjectFile:
     
     def __setitem__(self, element, value):
         if compoundTypeMap[element] == None:
-            Set(self.project_filename,element,value)
+            Set(self.project_filename,element,  value)
         else:
-            LoopProjectFileUtils.ElementFromDataframe(self.project_filename,element,compoundTypeMap[self.element],value)
+            if isinstance(value,pd.DataFrame):
+                names = compoundTypeMap[element].names
+                if pd.Index(names).isin(value.columns).all():
+                    ElementFromDataframe(self.project_filename,value.loc[:,names],element,compoundTypeMap[element])                
+                else:
+                    raise ValueError('Dataframe must have columns: {}'.format(names))
+            else:
+                raise TypeError('Cannot set project file with {}'.format(type(value)))
+
