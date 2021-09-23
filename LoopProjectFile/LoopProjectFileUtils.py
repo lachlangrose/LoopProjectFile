@@ -53,7 +53,7 @@ def ElementFromDataframe(loopFilename,df,element,loopCompoundType):
         print(loopFilename,'does not exist. Try LoopProjectFile.CreateBasic first')
         return
     if len(df.columns) != len(loopCompoundType):
-        print('In ',importFilename,'columns do not match compound type')
+        print('In dataframe columns do not match compound type')
         print('  Dataframe:',df.columns,' does not match\n  Compound type:',loopCompoundType.names)
         return
     struct = LoopProjectFile.ConvertDataFrame(df,loopCompoundType)
@@ -201,7 +201,7 @@ def ElementToDataframe(loopFilename,element,loopCompoundType):
         columns = list(loopCompoundType.names)
         df = pandas.DataFrame.from_records(resp['value'],columns=columns)
         df = df.applymap(lambda x:x.decode() if isinstance(x,bytes) else x)
-        df.set_index(columns[0],inplace=True)
+        # df.set_index(columns[0],inplace=True)
         return df#.to_csv(outputFilename)
 
 def ElementToCsv(loopFilename,outputFilename,element,loopCompoundType):
