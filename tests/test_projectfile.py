@@ -11,9 +11,6 @@ def test_set_stratigraphic_log():
 
     pass
 
-def test_set_version():
-    pass
-
 def test_set_extents():
     file = ProjectFile.new('test.loop3d')
     file.extents = {'geodesic': [0, 1, -180, -179],
@@ -34,7 +31,8 @@ def test_set_extents():
     assert file.is_valid() 
 
 def test_set_fault_observations():
-    
+    file = ProjectFile.new('test.loop3d')
+
     pass
 
 def test_set_fault_locations():
