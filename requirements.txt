@@ -1,3 +1,2 @@
 netCDF4
 numpy
-enum

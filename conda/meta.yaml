@@ -22,7 +22,6 @@ requirements:
     - numpy
     - pandas
     - netcdf4
-    - enum
 
 about:
   home: "https://github.com/Loop3D/LoopProjectFile.git"
