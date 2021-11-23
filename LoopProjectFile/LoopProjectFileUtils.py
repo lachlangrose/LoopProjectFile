@@ -200,6 +200,8 @@ def ElementToDataframe(loopFilename,element,loopCompoundType):
     else:
         columns = list(loopCompoundType.names)
         df = pandas.DataFrame.from_records(resp['value'],columns=columns)
+        for name in columns:
+            df[name] = df[name].astype(loopCompoundType[name])
         df = df.applymap(lambda x:x.decode() if isinstance(x,bytes) else x)
         # df.set_index(columns[0],inplace=True)
         return df#.to_csv(outputFilename)
