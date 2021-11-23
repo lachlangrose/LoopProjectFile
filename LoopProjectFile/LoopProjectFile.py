@@ -33,6 +33,7 @@ import numpy
 import pandas
 import sys
 import os
+import enum
 
 import netCDF4
 import LoopProjectFile.Version as Version
@@ -42,6 +43,22 @@ import LoopProjectFile.DataCollection as DataCollection
 import LoopProjectFile.ExtractedInformation as ExtractedInformation
 import LoopProjectFile.GeophysicalModels as GeophysicalModels
 import LoopProjectFile.ProbabilityModels as ProbabilityModels
+
+class EventType(enum.IntEnum):
+    INVALIDEVENT= -1,
+    FAULTEVENT = 0,
+    FOLDEVENT = 1,
+    FOLIATIONSEVENT = 2,
+    DISCONTINUITYEVENT = 3,
+    STRATIGRAPHICLAYER = 4
+
+class EventRelationshipType(enum.IntEnum):
+    INVALIDTYPE = -1
+    STRATA_STRATA = 0
+    FAULT_STRATA = 1
+    FAULT_FAULT_SPLAY = 2
+    FAULT_FAULT_ABUT = 3
+    FAULT_FAULT_OVERPRINT = 4
 
 ####  External Accessors ####
 
@@ -376,7 +393,7 @@ stratigraphicObservationType = numpy.dtype([('layerId','<u4'),
                         ('layer','S30')])
 
 faultEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('avgDisplacement','<f8'),('avgDownthrowDir','<f8'),
                         ('influenceDistance','<f8'),('verticalRadius','<f8'),
@@ -386,29 +403,30 @@ faultEventType = numpy.dtype([('eventId','<u4'),
                         ('avgNormalEasting','<f8'),('avgNormalNorthing','<f8'),('avgNormalAltitude','<f8')])
 
 foldEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('periodic','u1'),('wavelength','<f8'),('amplitude','<f8'),
                         ('asymmetry','u1'),('asymmetryShift','<f8'),
                         ('secondaryWavelength','<f8'),('secondaryAmplitude','<f8')])
 
 foliationEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('lowerScalarValue','<f8'),('upperScalarValue','<f8')])
 
 discontinuityEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('scalarValue','<f8')])
 
 stratigraphicLayerType = numpy.dtype([('layerId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
-                        ('thickness','f8'),
+                        ('thickness','<f8'),
                         ('colour1Red','u1'),('colour1Green','u1'),('colour1Blue','u1'),
                         ('colour2Red','u1'),('colour2Green','u1'),('colour2Blue','u1')])
-eventRelationshipType = numpy.dtype([('eventId1','<u4'),('eventId2','<u4'),('bidirectional','u1')])
+eventRelationshipType = numpy.dtype([('eventId1','<u4'),('eventId2','<u4'),('bidirectional','u1'),
+                        ('angle','<f8'),('type','<i4')])
 
 def ConvertDataFrame(df,dtype):
     if isinstance(df,pandas.DataFrame):
