@@ -42,6 +42,14 @@ def GetStratigraphicInformationGroup(rootGroup,verbose=False):
     else:
         return LoopProjectFileUtils.GetGroup(resp["value"],"StratigraphicInformation",verbose)
 
+def GetDrillholeDescriptionGroup(rootGroup,verbose=False):
+    response = {"errorFlag":False}
+    resp = GetExtractedInformationGroup(rootGroup,verbose)
+    if resp["errorFlag"]:
+        return resp
+    else:
+        return LoopProjectFileUtils.GetGroup(resp["value"],"DrillholeInformation",verbose)
+
 def GetEventLogGroup(rootGroup,verbose=False):
     response = {"errorFlag":False}
     resp = GetExtractedInformationGroup(rootGroup,verbose)
@@ -246,6 +254,91 @@ def GetStratigraphicLog(root, indexList=[], indexRange=(0,0), verbose=False):
             response = {"errorFlag":True,"errorString":errStr}
     return response
 
+# Set drillhole log
+def SetDrillholeLog(root, data, append=False, verbose=False):
+    """
+    **SetDrillholeLog** - Saves a list of drillholes in (collarId, name,
+    location(X,Y,Z)) format into the netCDF Loop Project File
+
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    data: list of (collarId, name, location)
+        The data to save
+    append: bool
+        Flag of whether to append new data to existing log
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+
+    Returns
+    -------
+       dict {"errorFlag","errorString"}
+        errorString exist and contains error message only when errorFlag is
+        True
+
+    """
+    response = {"errorFlag":False}
+    resp = GetExtractedInformationGroup(root)
+    if resp["errorFlag"]:
+        # Create Extracted Information Group as it doesn't exist
+        eiGroup = root.createGroup("ExtractedInformation")
+    else:
+        eiGroup = resp["value"]
+
+    resp = GetStratigraphicInformationGroup(root)
+    if resp["errorFlag"]:
+        siGroup = eiGroup.createGroup("DrillholeInformation")
+        siGroup.createDimension("index",None)
+        drillholeDescriptionType_t = siGroup.createCompoundType(LoopProjectFile.drillholeDescriptionType,'DrillholeDescription')
+        siGroup.createVariable('drillholeDescriptions',drillholeDescriptionType_t,('index'),zlib=True,complevel=9)
+    else:
+        siGroup = resp["value"]
+
+    if siGroup:
+        drillholeDescriptionsLocation = siGroup.variables['drillholeDescriptions']
+        index = 0
+        if append: index = siGroup.dimensions['index'].size
+        for i in data:
+            drillholeDescriptionsLocation[index] = i
+            index += 1
+    else:
+        errStr = "(ERROR) Failed to create drillhole description log group for setting drillhole data"
+        if verbose: print(errStr)
+        response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+def GetDrillholeLog(root, indexList=[], indexRange=(0,0), verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDrillholeDescriptionGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        siGroup = resp["value"]
+        data = []
+        # Select all option
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
+          and indexRange[1] == 0:
+            # Select all
+            for i in range(0,siGroup.dimensions['index'].size):
+                data.append((siGroup.variables.get('drillholeDescriptions')[i]))
+            response["value"] = data
+        # Select based on list of indices option
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < siGroup.dimensions['index'].size:
+                    data.append((siGroup.variables.get('drillholeDescriptions')[i]))
+            response["value"] = data
+        # Select based on indices range option
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < siGroup.dimensions['index'].size:
+                    data.append((siGroup.variables.get('drillholeDescriptions')[i]))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errorString":errStr}
+    return response
 
 def SetEventRelationships(root, data, append=False, verbose=False):
     response = {"errorFlag":False}

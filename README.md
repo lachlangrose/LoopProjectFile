@@ -23,5 +23,5 @@ There are several benefits to using a single project file.  These include encaps
 netCDF enables multi-dimensional data structure storage in a highly compressed format as well as data attribution for meta-data all within a single data file.
 
 # Licencing
-The Loop Project File python repository is under the MIT license 
+The Loop Project File python repository is under the MIT license
 

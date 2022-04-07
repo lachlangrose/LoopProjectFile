@@ -1,5 +1,5 @@
 {% set name = "loopprojectfile" %}
-{% set version = "0.0.17" %}
+{% set version = "0.0.18" %}
 
 package:
   name: "{{ name|lower }}"
@@ -27,10 +27,10 @@ about:
   home: "https://github.com/Loop3D/LoopProjectFile.git"
   license: MIT
   license_family: MIT
-  license_file: 
+  license_file:
   summary: "An interface between the Loop backend and GUI"
-  doc_url: 
-  dev_url: 
+  doc_url:
+  dev_url:
 
 extra:
   recipe-maintainers:

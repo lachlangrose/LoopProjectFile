@@ -5,7 +5,7 @@ import LoopProjectFile
 # Check Data Collection valid if present
 def CheckDataCollectionValid(rootGroup, verbose=False):
     """
-    **CheckDataCollectionValid** - Checks for valid data collection group data 
+    **CheckDataCollectionValid** - Checks for valid data collection group data
     given a netCDF root node
 
     Parameters
@@ -18,7 +18,7 @@ def CheckDataCollectionValid(rootGroup, verbose=False):
     Returns
     -------
     bool
-        True if valid data collection formatting in project file, False 
+        True if valid data collection formatting in project file, False
         otherwise.
 
     """
@@ -52,6 +52,15 @@ def GetContactsGroup(rootGroup,verbose=False):
         return resp
     else:
         return LoopProjectFileUtils.GetGroup(resp["value"],"Contacts",verbose)
+
+# Get Drillhole group if present
+def GetDrillholesGroup(rootGroup,verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(rootGroup,verbose)
+    if resp["errorFlag"]:
+        return resp
+    else:
+        return LoopProjectFileUtils.GetGroup(resp["value"],"Drillholes",verbose)
 
 def CreateObservationGroup(dataCollectionGroup):
     obGroup = dataCollectionGroup.createGroup("Observations")
@@ -238,11 +247,12 @@ def SetContacts(root, data, append=False, verbose=False):
     else:
         dcGroup = resp["value"]
 
+    # Note contacts use a different group node "Contacts" hence we cannot use SetObservations function
     resp = GetContactsGroup(root)
     if resp["errorFlag"]:
         group = dcGroup.createGroup("Contacts")
         group.createDimension("index",None)
-        contactObservationType_t = group.createCompoundType(LoopProjectFile.contactObservationType,'contactObservationType')
+        contactObservationType_t = group.createCompoundType(LoopProjectFile.contactObservationType,'contactObservation')
         group.createVariable('contacts',contactObservationType_t,('index'),zlib=True,complevel=9)
     else:
         group = resp["value"]
@@ -260,9 +270,65 @@ def SetContacts(root, data, append=False, verbose=False):
         response = {"errorFlag":True,"errorString":errStr}
     return response
 
-#Extract contacts 
+# Set drillhole observations
+def SetDrillholeObservations(root, data, append=False, verbose=False):
+    """
+    **SetDrillholeObservations** - Saves a list of drillhole observaions in ((easting,northing,
+    altitude),(easting,northing,altitude),formation,dip,dipDir) format into the netCDF Loop Project File
+
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    data: list of ((X,Y,Z),(X,Y,Z),formation,dip,dipDir)
+        The data to save
+    index: int
+        The index of this data
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+
+    Returns
+    -------
+       dict {"errorFlag","errorString"}
+        errorString exist and contains error message only when errorFlag is
+        True
+
+    """
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        dcGroup = root.createGroup("DataCollection")
+    else:
+        dcGroup = resp["value"]
+
+    # Note drillholes use a different group node "Drillholes" hence we cannot use SetObservations function
+    resp = GetDrillholesGroup(root)
+    if resp["errorFlag"]:
+        group = dcGroup.createGroup("Drillholes")
+        group.createDimension("index",None)
+        drillholeObservationType_t = group.createCompoundType(LoopProjectFile.drillholeObservationType,'drillholeObservation')
+        group.createVariable('drillholeObservations',drillholeObservationType_t,('index'),zlib=True,complevel=9)
+    else:
+        group = resp["value"]
+
+    if group:
+        drillholeObservationsLocation = group.variables['drillholeObservations']
+        if append: index = group.dimensions['index'].size
+        else: index = 0
+        for i in data:
+            drillholeObservationsLocation[index] = i
+            index += 1
+    else:
+        errStr = "(ERROR) Failed to Create contacts group for contact setting"
+        if verbose: print(errStr)
+        response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+#Extract contacts
 def GetContacts(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
     response = {"errorFlag":False}
+    # Note contacts use a different group node "Contacts" hence we cannot use GetObservations function
     resp = GetContactsGroup(root)
     if resp["errorFlag"]: response = resp
     else:
@@ -307,6 +373,53 @@ def GetContacts(root, indexList=[], indexRange=(0,0), keyword="", verbose=False)
             response = {"errorFlag":True,"errorString":errStr}
     return response
 
+#Extract drillhole observaions
+def GetDrillholeObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    response = {"errorFlag":False}
+    # Note contacts use a different group node "Contacts" hence we cannot use GetObservations function
+    resp = GetDrillholesGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        group = resp["value"]
+        data = []
+        # Select all option
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
+          and indexRange[1] == 0 and keyword == "":
+            # Create list of observations as:
+            # ((easting,northing,altitude),dipdir,dip,formation,layer)
+            for i in range(0,group.dimensions['index'].size):
+                data.append((group.variables.get('drillholeObservations')[i]))
+            response["value"] = data
+        # Select based on keyword and list of indices option
+        elif keyword != "" and indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size \
+                    and group.variables.get('layer')[i] == keyword:
+                    data.append((group.variables.get('drillholeObservations')[i]))
+            response["value"] = data
+        # Select based on keyword option
+        elif keyword != "":
+            for i in range(0,group.dimensions['index'].size):
+                if group.variables.get('layer')[i] == keyword:
+                    data.append((group.variables.get('drillholeObservations')[i]))
+            response["value"] = data
+        # Select based on list of indices option
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('drillholeObservations')[i]))
+            response["value"] = data
+        # Select based on indices range option
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('drillholeObservations')[i]))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errorString":errStr}
+    return response
 
 #Set data collection (map2loop) configuration settings
 def SetConfiguration(root, data, verbose=False):
