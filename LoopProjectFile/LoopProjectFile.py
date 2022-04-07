@@ -439,7 +439,7 @@ drillholeDescriptionType = numpy.dtype([('collarId','<u4'),('holeName','S30'),
                         ('surfaceX','<f8'),('surfaceY','<f8'),('surfaceZ','<f8')])
 
 drillholeObservationType = numpy.dtype([('collarId','<u4'),
-                        ('topX','<f8'),('topY','<f8'),('topZ','<f8'), ('layerId','<u4')
+                        ('topX','<f8'),('topY','<f8'),('topZ','<f8'), ('layerId','<u4'),
                         ('baseX','<f8'),('baseY','<f8'),('baseZ','<f8'),
                         ('beddingDip','<f8'),('beddingAzimuth','<f8')])
 
