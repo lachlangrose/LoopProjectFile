@@ -2,7 +2,7 @@ from .LoopProjectFile import Get, Set, CreateBasic, OpenProjectFile, CheckFileVa
 from .LoopProjectFileUtils import ElementToDataframe, ElementFromDataframe
 import LoopProjectFile
 import pandas as pd
-
+import numpy as np  
 compoundTypeMap = {"version":None,
                 "extents":None,
                 "strModel":None,
@@ -107,6 +107,20 @@ class ProjectFile:
             return None
         return "{}.{}.{}".format(*resp['value'])
 
+    @property
+    def origin(self):
+        origin = np.zeros(3)
+        origin[0] = self.extents['utm'][2]
+        origin[1] = self.extents['utm'][4]
+        origin[2] = self.extents['depth'][0]
+        return origin
+    @property
+    def maximum(self):
+        maximum = np.zeros(3)
+        maximum[0] = self.extents['utm'][3]
+        maximum[1] = self.extents['utm'][5]
+        maximum[2] = self.extents['depth'][1]
+        return maximum
     # should we be able to set the version or should this be fixed?
     # @version.setter
     # def version(self, version):
@@ -157,7 +171,7 @@ class ProjectFile:
 
     @property
     def faultLog(self):
-        return self.__getitem__('faultLog')
+        return self.__getitem__('faultLog').set_index('name')
     
     @faultLog.setter
     def faultLog(self, value):

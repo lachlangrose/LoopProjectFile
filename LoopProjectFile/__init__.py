@@ -6,4 +6,4 @@ from .LoopProjectFile import CreateBasic, Get, Set, OpenProjectFile, CheckFileVa
 from .Permutations import Event, perm, ApproxPerm, CalcPermutation, checkBrokenRules, checkBrokenEventRules
 from .LoopProjectFileUtils import ToCsv, FromCsv, ElementToCsv, ElementFromCsv, ElementToDataframe, ElementFromDataframe
 from .Version import LoopVersion
-
+from .projectfile import ProjectFile
