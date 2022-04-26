@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from .LoopProjectFile import Get, Set, CreateBasic, OpenProjectFile, CheckFileValid,CheckFileIsLoopProjectFile
 from .LoopProjectFileUtils import ElementToDataframe, ElementFromDataframe
 import LoopProjectFile
@@ -77,10 +78,30 @@ class ProjectFile:
         projectfile = ProjectFile(filename)
         return projectfile
     
-    def is_valid(self):
+    @property
+    def valid(self) -> bool:
+        """Check if the project file is valid
+
+        Returns
+        -------
+        bool
+            true if project file is valid, false if not
+        """
+        return self.is_valid()    
+    
+    def is_valid(self) -> bool:
         return CheckFileValid(self.project_filename)
 
     def _add_names_to_df(self, log, df):
+        """_summary_
+
+        Parameters
+        ----------
+        log : _type_
+            _description_
+        df : _type_
+            _description_
+        """
         df['name'] = 'none'
         for stratigraphic_id in log.index:
             df.loc[df['layerId'] == stratigraphic_id,'name'] = \
@@ -88,7 +109,14 @@ class ProjectFile:
 
 
     @property
-    def extents(self):
+    def extents(self)->np.ndarray:
+        """Get the extents of the model
+
+        Returns
+        -------
+        np.ndarray
+            _description_
+        """
         resp = Get(self.project_filename,'extents')
         if resp['errorFlag'] == True:
             return None
@@ -101,128 +129,180 @@ class ProjectFile:
     
     
     @property
-    def version(self):
+    def version(self) -> str:
+        """Get version of the project file
+
+        Returns
+        -------
+        str
+            version string major.minor.patch
+        """
         resp = Get(self.project_filename,'version')
         if resp['errorFlag'] == True:
             return None
         return "{}.{}.{}".format(*resp['value'])
 
     @property
-    def origin(self):
+    def origin(self) -> np.ndarray:
+        """Get the origin of the model"""
         origin = np.zeros(3)
         origin[0] = self.extents['utm'][2]
         origin[1] = self.extents['utm'][4]
         origin[2] = self.extents['depth'][0]
         return origin
     @property
-    def maximum(self):
+    def maximum(self) -> np.ndarray:
+        """Get top right hand coordinate of the bouinding box
+
+        Returns
+        -------
+        np.ndarray
+            _description_
+        """
         maximum = np.zeros(3)
         maximum[0] = self.extents['utm'][3]
         maximum[1] = self.extents['utm'][5]
         maximum[2] = self.extents['depth'][1]
         return maximum
-    # should we be able to set the version or should this be fixed?
-    # @version.setter
-    # def version(self, version):
-    #     if isinstance(version, str):
-    #         version = version.split('.')
-    #         if len(version) != 3:
-    #             raise ValueError('Version must be in the format major.minor.patch')
-    #         version = list(map(int, version))
-    #     resp = Set(self.project_filename,'version',version=version)
-    #     if resp['errorFlag'] == True:
-    #         raise ValueError('Version must be in the format major.minor.patch')        
+      
 
     @property
-    def faultObservations(self):
+    def faultObservations(self) ->pd.DataFrame:
         return self.__getitem__('faultObservations')
 
     @faultObservations.setter
-    def faultObservations(self, value):
+    def faultObservations(self, value:pd.DataFrame):
+        if isinstance(value, pd.DataFrame):
+            self.__setitem__('faultObservations', value)
+        self._validate_data_frame_columns(value, [	'eventId',	'easting',	'northing',	'altitude'	,'type'	,'dipDir'	,'dip',	'dipPolarity',	'val',	'displacement','posOnly'])
         self.__setitem__('faultObservations', value)
         
 
     @property
-    def faultLocations(self):
+    def faultLocations(self)->pd.DataFrame:
+        """Get only the observations of the fault location
+
+        Returns
+        -------
+        pd.DataFrame
+            _description_
+        """
         df = self.__getitem__('faultObservations')
         # self._add_names_to_df(self.faultLog,df)
         return df.loc[df['posOnly']==1,:]
 
+    def _validate_data_frame_columns(self, df:pd.DataFrame, columns:list):
+        for c in columns.keys():
+            if c in df.columns:
+                columns[c] = True
+        columns_in_df = True
+        for c in columns.keys():
+            if columns[c] == False:
+                columns_in_df = False
+                print(f'Column: {c} not dataframe')
+                # logger.error(f'Column: {c} not dataframe')
+        if columns_in_df == False:
+            raise ValueError('Columns not in dataframe')
     @faultLocations.setter
-    def faultLocations(self, value):
-        df = self.__getitem__('faultObservations')
-        value = pd.concat([value,df.loc[df['posOnly']==1,:]])
-        value.reset_index(inplace=True)
-        self.__setitem__('faultObservations', value)
-        
+    def faultLocations(self, value:pd.DataFrame):
+        """Update the faultObservations with new fault locations
 
-    @property
-    def faultOrientations(self):
+        Parameters
+        ----------
+        value : pd.DataFrame
+            _description_
+        """
+        if isinstance(value, pd.DataFrame) == False:
+            raise TypeError('faultLocations must be set with a pandas dataframe')
+        columns = {'eventId':False, 'easting':False, 'northing':False, 'altitude':False, 'val':False}
+        self._validate_data_frame_columns(value, columns)
         df = self.__getitem__('faultObservations')
-        return df.loc[df['posOnly']==0,:]
-
-    @faultOrientations.setter
-    def faultOrientations(self, value):
-        df = self.__getitem__('faultObservations')
+        value['posOnly'] == 1
         value = pd.concat([value,df.loc[df['posOnly']==0,:]])
         value.reset_index(inplace=True)
         self.__setitem__('faultObservations', value)
         
 
     @property
-    def faultLog(self):
+    def faultOrientations(self)->pd.DataFrame:
+        df = self.__getitem__('faultObservations')
+        return df.loc[df['posOnly']==0,:]
+
+    @faultOrientations.setter
+    def faultOrientations(self, value:pd.DataFrame):
+        if isinstance(value, pd.DataFrame) == False:
+            raise TypeError('faultOrientations must be set with a pandas dataframe')
+        columns = {'eventId':False, 'easting':False, 'northing':False, 'altitude':False, 'dipDir':False, 'dip':False, 'dipPolarity':False}
+        self._validate_data_frame_columns(value, columns)
+
+        df = self.__getitem__('faultObservations')
+        value['posOnly'] == 0
+        value = pd.concat([value,df.loc[df['posOnly']==1,:]])
+        value.reset_index(inplace=True)
+        self.__setitem__('faultObservations', value)
+        
+
+    @property
+    def faultLog(self)->pd.DataFrame:
         return self.__getitem__('faultLog').set_index('name')
     
     @faultLog.setter
-    def faultLog(self, value):
+    def faultLog(self, value:pd.DataFrame):
         self.__setitem__('faultLog',value)
         
 
     @property
-    def foliationObservations(self):
+    def foliationObservations(self)->pd.DataFrame:
         return self.__getitem__('foliationObservations')
 
     @foliationObservations.setter
-    def foliationObservations(self, value):
+    def foliationObservations(self, value:pd.DataFrame):
         self.__setitem__('foliationObservations',value)
         
 
     @property
-    def foldObservations(self):
+    def foldObservations(self)->pd.DataFrame:
         return self.__getitem__('foldObservations')
 
     @foldObservations.setter
-    def foldObservations(self, value):
+    def foldObservations(self, value:pd.DataFrame):
         self.__setitem__('foldObservations', value)
         
 
     @property
-    def stratigraphicLog(self):
+    def stratigraphicLog(self)->pd.DataFrame:
         return self.__getitem__('stratigraphicLog')
 
     @stratigraphicLog.setter
-    def stratigraphicLog(self, value):
+    def stratigraphicLog(self, value:pd.DataFrame):
+        ## TODO add a validator
         self.__setitem__('stratigraphicLog', value)
         
 
     @property
-    def stratigraphyLocations(self):
+    def stratigraphyLocations(self)->pd.DataFrame:
         df = self.__getitem__('contacts')
         self._add_names_to_df(self.stratigraphicLog,df)
         return df
 
     @stratigraphyLocations.setter
-    def stratigraphyLocations(self, value):
+    def stratigraphyLocations(self, value:pd.DataFrame):
+        if isinstance(value, pd.DataFrame) == False:
+            raise TypeError('stratigraphyLocations must be set with a pandas dataframe')
+        self._validate_data_frame_columns(value, ['layerId','easting','northing','altitude',	'type',	'name'])
         self.__setitem__('contacts',value)
 
     @property
-    def stratigraphyOrientations(self):
+    def stratigraphyOrientations(self)->pd.DataFrame:
         df = self.__getitem__('stratigraphicObservations')
         self._add_names_to_df(self.stratigraphicLog,df)
         return df
 
     @stratigraphyOrientations.setter
-    def stratigraphyOrientations(self, value):
+    def stratigraphyOrientations(self, value:pd.DataFrame):
+        if isinstance(value, pd.DataFrame) == False:
+            raise TypeError('stratigraphyOrientations must be set with a pandas dataframe')
+        self._validate_data_frame_columns(value, ['layerId','easting','northing','altitude','type',	'name','dipDir','dip','dipPolarity','layer'])
         self.__setitem__('stratigraphicObservations',value)
         
         
@@ -237,6 +317,12 @@ class ProjectFile:
             else: 
                 return LoopProjectFile.ElementToDataframe(self.project_filename,
                                                                 element,compoundTypeMap[element])
+        # if the project file is empty for a given element, return an empty dataframe with the correct headers
+        if resp['errorFlag'] == True:
+            if resp['errorString'] == 'No Observations present in DataCollection for access request':
+                ## this isn't really ideal and maybe need to be removed but at least it gives an idea of the column 
+                ## names needed.
+                return pd.DataFrame(columns=list(compoundTypeMap[element].names))
         # return ProjectFileElement(self.project_filename, element).value
     
     def __setitem__(self, element, value):
