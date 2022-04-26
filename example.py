@@ -48,26 +48,35 @@ else:
     else: print("Data received again")
 
 stratigraphy = numpy.zeros(3,LPF.stratigraphicLayerType)
-stratigraphy[0] = (1,1.0,1.1,b'Thick One',1000.0,0,0,0,0,0,0)
-stratigraphy[1] = (2,1.1,1.2,b'Thin One',100.0,0,0,0,0,0,0)
-stratigraphy[2] = (2,1.1,1.2,b'Next One',50.0,0,0,0,0,0,0)
+stratigraphy[0] = (1,1.0,1.1,b'Thick One',b'Hammersley',b'S0',1,0,1,1000.0,0,0,0,0,0,0)
+stratigraphy[1] = (2,1.1,1.2,b'Thin One',b'Hammersley',b'S0',1,0,1,100.0,0,0,0,0,0,0)
+stratigraphy[2] = (3,1.1,1.2,b'Next One',b'Hammersley',b'S0',1,0,1,50.0,0,0,0,0,0,0)
 LPF.Set(filename,"stratigraphicLog",data=stratigraphy)
 
 # Set some dummy observations within the region of interest
 contacts = numpy.zeros(3,LPF.contactObservationType)
-contacts[0] = (1,550500.0,6470000.0,0.0)
-contacts[1] = (2,550500.0,6070000.0,0.0)
-contacts[2] = (3,500500.0,6070000.0,0.0)
+contacts[0] = (1,550500.0,6470000.0,0.0,4)
+contacts[1] = (2,550500.0,6070000.0,0.0,4)
+contacts[2] = (3,500500.0,6070000.0,0.0,4)
 LPF.Set(filename,"contacts",data=contacts)
 LPF.Set(filename,"contactsAppend",data=contacts)
 
+drillholes = numpy.zeros(3,LPF.drillholeObservationType)
+drillholes[0] = (1023, 10342.342,6034243.226, 113.34, 1, 10342.342,6034243.226,  13.34,90.0,180.0)
+drillholes[1] = (1023, 10342.342,6034243.226,  13.34, 2, 10342.342,6034243.226, -86.66,90.0,180.0)
+drillholes[2] = (1023, 10342.342,6034243.226, -86.66, 3, 10342.342,6034243.226,-186.66,90.0,180.0)
+LPF.Set(filename,"drillholeObservations",data=drillholes)
 
 # Get the observation data back out to confirm it was saved
 resp = LPF.Get(filename,"stratigraphicLog")
 if resp["errorFlag"]: print(resp["errorString"])
-else: print(resp["value"])
+else: print(LPF.ConvertToDataFrame(resp["value"],LPF.stratigraphicLayerType))
 
 # Get the observation data back out to confirm it was saved
 resp = LPF.Get(filename,"contacts",indexRange=(0,7))
 if resp["errorFlag"]: print(resp["errorString"])
-else: print(resp["value"])
+else: print(LPF.ConvertToDataFrame(resp["value"],LPF.contactObservationType))
+
+resp = LPF.Get(filename,"drillholeObservations")
+if resp["errorFlag"]: print(resp["errorString"])
+else: print(LPF.ConvertToDataFrame(resp["value"],LPF.drillholeObservationType))
