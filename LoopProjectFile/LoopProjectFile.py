@@ -449,6 +449,21 @@ def ConvertDataFrame(df,dtype):
     else:
         raise NotADataFrame
 
+def CheckFileIsLoopProjectFile(filename, verbose=False):
+    """
+    Check that the file is a valid Loop Project File
+    """
+    fileResp = OpenProjectFile(filename, readOnly=True, verbose=verbose)
+    if fileResp["errorFlag"]: 
+        valid = False
+        print('Project file is not a LoopProjectFile')
+    else:
+        rootgrp = fileResp["root"]
+        rootgrp.close()
+        valid = True
+    return valid
+
+    
 def ConvertToDataFrame(data,loopCompoundType):
     columns = list(loopCompoundType.names)
     df = pandas.DataFrame.from_records(data, columns=columns)

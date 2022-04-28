@@ -26,6 +26,41 @@ def GetGroup(node,groupName,verbose=False):
         if verbose: print(errStr)
         return {"errorFlag":True,"errorString":errStr}
 
+def ElementFromDataframe(loopFilename,df,element,loopCompoundType):
+    """
+    **ElementFromCsv** - Imports one element of the loop project file
+    from a csv file into the project file
+
+    Parameters
+    ----------
+    loopFilename: string
+        The filename of the loop project file
+    importFilename: string
+        The filename of the csv file containing the element data
+    element: string
+        The name of the element to extract
+    loopCompoundType: numpy.compoundType
+        The numpy data structure that the element is stored in
+
+    Returns
+    -------
+
+    """
+    if isinstance(df,pandas.DataFrame) == False:
+        print('not a dataframedoes not exist')
+        return
+    if not os.path.isfile(loopFilename):
+        print(loopFilename,'does not exist. Try LoopProjectFile.CreateBasic first')
+        return
+    if len(df.columns) != len(loopCompoundType):
+        print('In dataframe columns do not match compound type')
+        print('  Dataframe:',df.columns,' does not match\n  Compound type:',loopCompoundType.names)
+        return
+    struct = LoopProjectFile.ConvertDataFrame(df,loopCompoundType)
+    resp = LoopProjectFile.Set(loopFilename,element,data=struct)
+    if resp['errorFlag']:
+        print(resp['errorString'])
+
 def ElementFromCsv(loopFilename,importFilename,element,loopCompoundType):
     """
     **ElementFromCsv** - Imports one element of the loop project file
@@ -53,14 +88,8 @@ def ElementFromCsv(loopFilename,importFilename,element,loopCompoundType):
         print(loopFilename,'does not exist. Try LoopProjectFile.CreateBasic first')
         return
     df = pandas.read_csv(importFilename)
-    if len(df.columns) != len(loopCompoundType):
-        print('In ',importFilename,'columns do not match compound type')
-        print('  Dataframe:',df.columns,' does not match\n  Compound type:',loopCompoundType.names)
-        return
-    struct = LoopProjectFile.ConvertDataFrame(df,loopCompoundType)
-    resp = LoopProjectFile.Set(loopFilename,element,data=struct)
-    if resp['errorFlag']:
-        print(resp['errorString'])
+    ElementFromDataframe(loopFilename,df,element,loopCompoundType)
+    
 
 def FromCsv(loopFilename,importPath,overwrite=False):
     """
@@ -146,6 +175,37 @@ def FromCsv(loopFilename,importPath,overwrite=False):
     print('  Importing from',str(importPath)+'eventRel.csv','into project file')
     ElementFromCsv(loopFilename,importPath+'eventRel.csv','eventRelationships',LoopProjectFile.eventRelationshipType)
 
+def ElementToDataframe(loopFilename,element,loopCompoundType):
+    """
+    **ElementToCsv** - Exports one element of the loop project file
+    to a csv file outputFilename
+
+    Parameters
+    ----------
+    loopFilename: string
+        The filename of the loop project file
+    element: string
+        The name of the element to extract
+    loopCompoundType: numpy.compoundType
+        The numpy data structure that the element is stored in
+
+    Returns
+    -------
+
+    """
+    resp = LoopProjectFile.Get(loopFilename,element)
+    if resp['errorFlag']:
+        print(resp['errorString'])
+        return None
+    else:
+        columns = list(loopCompoundType.names)
+        df = pandas.DataFrame.from_records(resp['value'],columns=columns)
+        for name in columns:
+            df[name] = df[name].astype(loopCompoundType[name])
+        df = df.applymap(lambda x:x.decode() if isinstance(x,bytes) else x)
+        # df.set_index(columns[0],inplace=True)
+        return df#.to_csv(outputFilename)
+
 def ElementToCsv(loopFilename,outputFilename,element,loopCompoundType):
     """
     **ElementToCsv** - Exports one element of the loop project file
@@ -166,15 +226,10 @@ def ElementToCsv(loopFilename,outputFilename,element,loopCompoundType):
     -------
 
     """
-    resp = LoopProjectFile.Get(loopFilename,element)
-    if resp['errorFlag']:
-        print(resp['errorString'])
-    else:
-        columns = list(loopCompoundType.names)
-        df = pandas.DataFrame.from_records(resp['value'],columns=columns)
-        df = df.applymap(lambda x:x.decode() if isinstance(x,bytes) else x)
-        df.set_index(columns[0],inplace=True)
+    df = ElementToDataframe(loopFilename,element,loopCompoundType)
+    if df:
         df.to_csv(outputFilename)
+    
 
 def ToCsv(loopFilename,outputPath):
     """
