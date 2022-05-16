@@ -81,6 +81,19 @@ def CreateObservationGroup(dataCollectionGroup):
     obGroup.createVariable('stratigraphicObservations',stratigraphicObservationType_t,('stratigraphicObservationIndex'),zlib=True,complevel=9)
     return obGroup
 
+def CreateDrillholeGroup(dataCollectionGroup):
+    dhGroup = dataCollectionGroup.createGroup("Drillholes")
+    dhGroup.createDimension("drillholeObservationIndex",None)
+    dhGroup.createDimension("drillholeSurveyIndex",None)
+    dhGroup.createDimension("drillholePropertyIndex",None)
+    drillholeObservationType_t = dhGroup.createCompoundType(LoopProjectFile.drillholeObservationType,'DrillholeObservation')
+    dhGroup.createVariable('drillholeObservations',drillholeObservationType_t,('drillholeObservationIndex'),zlib=True,complevel=9)
+    drillholeSurveyType_t = dhGroup.createCompoundType(LoopProjectFile.drillholeSurveyType,'DrillholeSurvey')
+    dhGroup.createVariable('drillholeSurveys',drillholeSurveyType_t,('drillholeSurveyIndex'),zlib=True,complevel=9)
+    drillholePropertyType_t = dhGroup.createCompoundType(LoopProjectFile.drillholePropertyType,'DrillholeProperty')
+    dhGroup.createVariable('drillholeProperties',drillholePropertyType_t,('drillholePropertyIndex'),zlib=True,complevel=9)
+    return dhGroup
+
 #Extract observations
 def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0,0), keyword="", verbose=False):
     response = {"errorFlag":False}
@@ -215,6 +228,54 @@ def SetDiscontinuityObservations(root, data, append=False, verbose=False):
 def SetStratigraphicObservations(root, data, append=False, verbose=False):
     return SetObservations(root, data, 'stratigraphicObservationIndex', 'stratigraphicObservations', append, verbose)
 
+#Extract contacts
+def GetContacts(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    response = {"errorFlag":False}
+    # Note contacts use a different group node "Contacts" hence we cannot use GetObservations function
+    resp = GetContactsGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        group = resp["value"]
+        data = []
+        # Select all option
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
+          and indexRange[1] == 0 and keyword == "":
+            # Create list of observations as:
+            # ((easting,northing,altitude),dipdir,dip,formation,layer)
+            for i in range(0,group.dimensions['index'].size):
+                data.append((group.variables.get('contacts')[i]))
+            response["value"] = data
+        # Select based on keyword and list of indices option
+        elif keyword != "" and indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size \
+                    and group.variables.get('layer')[i] == keyword:
+                    data.append((group.variables.get('contacts')[i]))
+            response["value"] = data
+        # Select based on keyword option
+        elif keyword != "":
+            for i in range(0,group.dimensions['index'].size):
+                if group.variables.get('layer')[i] == keyword:
+                    data.append((group.variables.get('contacts')[i]))
+            response["value"] = data
+        # Select based on list of indices option
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('contacts')[i]))
+            response["value"] = data
+        # Select based on indices range option
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
+                    data.append((group.variables.get('contacts')[i]))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errorString":errStr}
+    return response
+
 # Set contacts
 def SetContacts(root, data, append=False, verbose=False):
     """
@@ -270,8 +331,65 @@ def SetContacts(root, data, append=False, verbose=False):
         response = {"errorFlag":True,"errorString":errStr}
     return response
 
+#Extract drillhole observaions
+def GetDrillholeData(root, indexName, variableName, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    response = {"errorFlag":False}
+    # Note contacts use a different group node "Contacts" hence we cannot use GetObservations function
+    resp = GetDrillholesGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        group = resp["value"]
+        data = []
+        # Select all option
+        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
+          and indexRange[1] == 0 and keyword == "":
+            # Create list of observations as:
+            # ((easting,northing,altitude),dipdir,dip,formation,layer)
+            for i in range(0,group.dimensions[indexName].size):
+                data.append((group.variables.get(variableName)[i]))
+            response["value"] = data
+        # Select based on keyword and list of indices option
+        elif keyword != "" and indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions[indexName].size \
+                    and group.variables.get('layer')[i] == keyword:
+                    data.append((group.variables.get(variableName)[i]))
+            response["value"] = data
+        # Select based on keyword option
+        elif keyword != "":
+            for i in range(0,group.dimensions[indexName].size):
+                if group.variables.get('layer')[i] == keyword:
+                    data.append((group.variables.get(variableName)[i]))
+            response["value"] = data
+        # Select based on list of indices option
+        elif indexList != []:
+            for i in indexList:
+                if int(i) >= 0 and int(i) < group.dimensions[indexName].size:
+                    data.append((group.variables.get(variableName)[i]))
+            response["value"] = data
+        # Select based on indices range option
+        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
+            for i in range(indexRange[0],indexRange[1]):
+                if int(i) >= 0 and int(i) < group.dimensions[indexName].size:
+                    data.append((group.variables.get(variableName)[i]))
+            response["value"] = data
+        else:
+            errStr = "Non-implemented filter option"
+            if verbose: print(errStr)
+            response = {"errorFlag":True,"errorString":errStr}
+    return response
+
+def GetDrillholeObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetDrillholeData(root,'drillholeObservationIndex','drillholeObservations',indexList,indexRange,keyword,verbose)
+
+def GetDrillholeSurveys(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetDrillholeData(root,'drillholeSurveyIndex','drillholeSurveys',indexList,indexRange,keyword,verbose)
+
+def GetDrillholeProperties(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+    return GetDrillholeData(root,'drillholePropertyIndex','drillholeProperties',indexList,indexRange,keyword,verbose)
+
 # Set drillhole observations
-def SetDrillholeObservations(root, data, append=False, verbose=False):
+def SetDrillholeData(root, data, indexName, variableName, append=False, verbose=False):
     """
     **SetDrillholeObservations** - Saves a list of drillhole observaions in ((easting,northing,
     altitude),(easting,northing,altitude),formation,dip,dipDir) format into the netCDF Loop Project File
@@ -305,120 +423,91 @@ def SetDrillholeObservations(root, data, append=False, verbose=False):
     # Note drillholes use a different group node "Drillholes" hence we cannot use SetObservations function
     resp = GetDrillholesGroup(root)
     if resp["errorFlag"]:
-        group = dcGroup.createGroup("Drillholes")
-        group.createDimension("index",None)
-        drillholeObservationType_t = group.createCompoundType(LoopProjectFile.drillholeObservationType,'drillholeObservation')
-        group.createVariable('drillholeObservations',drillholeObservationType_t,('index'),zlib=True,complevel=9)
+        group = CreateDrillholeGroup(dcGroup)
     else:
         group = resp["value"]
 
     if group:
-        drillholeObservationsLocation = group.variables['drillholeObservations']
-        if append: index = group.dimensions['index'].size
+        drillholeObservationsLocation = group.variables[variableName]
+        if append: index = group.dimensions[indexName].size
         else: index = 0
         for i in data:
             drillholeObservationsLocation[index] = i
             index += 1
     else:
-        errStr = "(ERROR) Failed to Create contacts group for contact setting"
+        errStr = "(ERROR) Failed to Create drillhole group for drillhole setting"
         if verbose: print(errStr)
         response = {"errorFlag":True,"errorString":errStr}
     return response
 
-#Extract contacts
-def GetContacts(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
-    response = {"errorFlag":False}
-    # Note contacts use a different group node "Contacts" hence we cannot use GetObservations function
-    resp = GetContactsGroup(root)
-    if resp["errorFlag"]: response = resp
-    else:
-        group = resp["value"]
-        data = []
-        # Select all option
-        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
-          and indexRange[1] == 0 and keyword == "":
-            # Create list of observations as:
-            # ((easting,northing,altitude),dipdir,dip,formation,layer)
-            for i in range(0,group.dimensions['index'].size):
-                data.append((group.variables.get('contacts')[i]))
-            response["value"] = data
-        # Select based on keyword and list of indices option
-        elif keyword != "" and indexList != []:
-            for i in indexList:
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size \
-                    and group.variables.get('layer')[i] == keyword:
-                    data.append((group.variables.get('contacts')[i]))
-            response["value"] = data
-        # Select based on keyword option
-        elif keyword != "":
-            for i in range(0,group.dimensions['index'].size):
-                if group.variables.get('layer')[i] == keyword:
-                    data.append((group.variables.get('contacts')[i]))
-            response["value"] = data
-        # Select based on list of indices option
-        elif indexList != []:
-            for i in indexList:
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append((group.variables.get('contacts')[i]))
-            response["value"] = data
-        # Select based on indices range option
-        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
-            for i in range(indexRange[0],indexRange[1]):
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append((group.variables.get('contacts')[i]))
-            response["value"] = data
-        else:
-            errStr = "Non-implemented filter option"
-            if verbose: print(errStr)
-            response = {"errorFlag":True,"errorString":errStr}
-    return response
+def SetDrillholeObservations(root, data, append=False, verbose=False):
+    return SetDrillholeData(root, data, 'drillholeObservationIndex', 'drillholeObservations', append, verbose)
 
-#Extract drillhole observaions
-def GetDrillholeObservations(root, indexList=[], indexRange=(0,0), keyword="", verbose=False):
+def SetDrillholeSurveys(root, data, append=False, verbose=False):
+    return SetDrillholeData(root, data, 'drillholeSurveyIndex', 'drillholeSurveys', append, verbose)
+
+def SetDrillholeProperties(root, data, append=False, verbose=False):
+    return SetDrillholeData(root, data, 'drillholePropertyIndex', 'drillholeProperties', append, verbose)
+
+#Extract data collection (map2loop) configuration settings
+def GetConfiguration(root, verbose=False):
     response = {"errorFlag":False}
-    # Note contacts use a different group node "Contacts" hence we cannot use GetObservations function
-    resp = GetDrillholesGroup(root)
+    resp = GetDataCollectionGroup(root)
     if resp["errorFlag"]: response = resp
     else:
-        group = resp["value"]
-        data = []
-        # Select all option
-        if indexList==[] and len(indexRange) == 2 and indexRange[0] == 0 \
-          and indexRange[1] == 0 and keyword == "":
-            # Create list of observations as:
-            # ((easting,northing,altitude),dipdir,dip,formation,layer)
-            for i in range(0,group.dimensions['index'].size):
-                data.append((group.variables.get('drillholeObservations')[i]))
-            response["value"] = data
-        # Select based on keyword and list of indices option
-        elif keyword != "" and indexList != []:
-            for i in indexList:
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size \
-                    and group.variables.get('layer')[i] == keyword:
-                    data.append((group.variables.get('drillholeObservations')[i]))
-            response["value"] = data
-        # Select based on keyword option
-        elif keyword != "":
-            for i in range(0,group.dimensions['index'].size):
-                if group.variables.get('layer')[i] == keyword:
-                    data.append((group.variables.get('drillholeObservations')[i]))
-            response["value"] = data
-        # Select based on list of indices option
-        elif indexList != []:
-            for i in indexList:
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append((group.variables.get('drillholeObservations')[i]))
-            response["value"] = data
-        # Select based on indices range option
-        elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
-            for i in range(indexRange[0],indexRange[1]):
-                if int(i) >= 0 and int(i) < group.dimensions['index'].size:
-                    data.append((group.variables.get('drillholeObservations')[i]))
-            response["value"] = data
-        else:
-            errStr = "Non-implemented filter option"
-            if verbose: print(errStr)
-            response = {"errorFlag":True,"errorString":errStr}
+        dcGroup = resp["value"]
+        data = {}
+        if "quietMode" in dcGroup.ncattrs():
+            data["quietMode"] = dcGroup.quietMode
+        if "deposits" in dcGroup.ncattrs():
+            data["deposits"] = dcGroup.deposits
+        if "dtb" in dcGroup.ncattrs():
+            data["dtb"] = dcGroup.dtb
+        if "orientationDecimate" in dcGroup.ncattrs():
+            data["orientationDecimate"] = dcGroup.orientationDecimate
+        if "contactDecimate" in dcGroup.ncattrs():
+            data["contactDecimate"] = dcGroup.contactDecimate
+        if "intrusionMode" in dcGroup.ncattrs():
+            data["intrusionMode"] = dcGroup.intrusionMode
+        if "interpolationSpacing" in dcGroup.ncattrs():
+            data["interpolationSpacing"] = dcGroup.interpolationSpacing
+        if "misorientation" in dcGroup.ncattrs():
+            data["misorientation"] = dcGroup.misorientation
+        if "interpolationScheme" in dcGroup.ncattrs():
+            data["interpolationScheme"] = dcGroup.interpolationScheme
+        if "faultDecimate" in dcGroup.ncattrs():
+            data["faultDecimate"] = dcGroup.faultDecimate
+        if "minFaultLength" in dcGroup.ncattrs():
+            data["minFaultLength"] = dcGroup.minFaultLength
+        if "faultDip" in dcGroup.ncattrs():
+            data["faultDip"] = dcGroup.faultDip
+        if "plutonDip" in dcGroup.ncattrs():
+            data["plutonDip"] = dcGroup.plutonDip
+        if "plutonForm" in dcGroup.ncattrs():
+            data["plutonForm"] = dcGroup.plutonForm
+        if "distBuffer" in dcGroup.ncattrs():
+            data["distBuffer"] = dcGroup.distBuffer
+        if "contactDip" in dcGroup.ncattrs():
+            data["contactDip"] = dcGroup.contactDip
+        if "contactOrientationDecimate" in dcGroup.ncattrs():
+            data["contactOrientationDecimate"] = dcGroup.contactOrientationDecimate
+        if "nullScheme" in dcGroup.ncattrs():
+            data["nullScheme"] = dcGroup.nullScheme
+        if "thicknessBuffer" in dcGroup.ncattrs():
+            data["thicknessBuffer"] = dcGroup.thicknessBuffer
+        if "maxThicknessAllowed" in dcGroup.ncattrs():
+            data["maxThicknessAllowed"] = dcGroup.maxThicknessAllowed
+        if "foldDecimate" in dcGroup.ncattrs():
+            data["foldDecimate"] = dcGroup.foldDecimate
+        if "fatStep" in dcGroup.ncattrs():
+            data["fatStep"] = dcGroup.fatStep
+        if "closeDip" in dcGroup.ncattrs():
+            data["closeDip"] = dcGroup.closeDip
+        if "useInterpolations" in dcGroup.ncattrs():
+            data["useInterpolations"] = dcGroup.useInterpolations
+        if "useFat" in dcGroup.ncattrs():
+            data["useFat"] = dcGroup.useFat
+        response["value"] = data
     return response
 
 #Set data collection (map2loop) configuration settings
@@ -502,67 +591,6 @@ def SetConfiguration(root, data, verbose=False):
         dcGroup.useFat = data.useFat
     return response
 
-#Extract data collection (map2loop) configuration settings
-def GetConfiguration(root, verbose=False):
-    response = {"errorFlag":False}
-    resp = GetDataCollectionGroup(root)
-    if resp["errorFlag"]: response = resp
-    else:
-        dcGroup = resp["value"]
-        data = {}
-        if "quietMode" in dcGroup.ncattrs():
-            data["quietMode"] = dcGroup.quietMode
-        if "deposits" in dcGroup.ncattrs():
-            data["deposits"] = dcGroup.deposits
-        if "dtb" in dcGroup.ncattrs():
-            data["dtb"] = dcGroup.dtb
-        if "orientationDecimate" in dcGroup.ncattrs():
-            data["orientationDecimate"] = dcGroup.orientationDecimate
-        if "contactDecimate" in dcGroup.ncattrs():
-            data["contactDecimate"] = dcGroup.contactDecimate
-        if "intrusionMode" in dcGroup.ncattrs():
-            data["intrusionMode"] = dcGroup.intrusionMode
-        if "interpolationSpacing" in dcGroup.ncattrs():
-            data["interpolationSpacing"] = dcGroup.interpolationSpacing
-        if "misorientation" in dcGroup.ncattrs():
-            data["misorientation"] = dcGroup.misorientation
-        if "interpolationScheme" in dcGroup.ncattrs():
-            data["interpolationScheme"] = dcGroup.interpolationScheme
-        if "faultDecimate" in dcGroup.ncattrs():
-            data["faultDecimate"] = dcGroup.faultDecimate
-        if "minFaultLength" in dcGroup.ncattrs():
-            data["minFaultLength"] = dcGroup.minFaultLength
-        if "faultDip" in dcGroup.ncattrs():
-            data["faultDip"] = dcGroup.faultDip
-        if "plutonDip" in dcGroup.ncattrs():
-            data["plutonDip"] = dcGroup.plutonDip
-        if "plutonForm" in dcGroup.ncattrs():
-            data["plutonForm"] = dcGroup.plutonForm
-        if "distBuffer" in dcGroup.ncattrs():
-            data["distBuffer"] = dcGroup.distBuffer
-        if "contactDip" in dcGroup.ncattrs():
-            data["contactDip"] = dcGroup.contactDip
-        if "contactOrientationDecimate" in dcGroup.ncattrs():
-            data["contactOrientationDecimate"] = dcGroup.contactOrientationDecimate
-        if "nullScheme" in dcGroup.ncattrs():
-            data["nullScheme"] = dcGroup.nullScheme
-        if "thicknessBuffer" in dcGroup.ncattrs():
-            data["thicknessBuffer"] = dcGroup.thicknessBuffer
-        if "maxThicknessAllowed" in dcGroup.ncattrs():
-            data["maxThicknessAllowed"] = dcGroup.maxThicknessAllowed
-        if "foldDecimate" in dcGroup.ncattrs():
-            data["foldDecimate"] = dcGroup.foldDecimate
-        if "fatStep" in dcGroup.ncattrs():
-            data["fatStep"] = dcGroup.fatStep
-        if "closeDip" in dcGroup.ncattrs():
-            data["closeDip"] = dcGroup.closeDip
-        if "useInterpolations" in dcGroup.ncattrs():
-            data["useInterpolations"] = dcGroup.useInterpolations
-        if "useFat" in dcGroup.ncattrs():
-            data["useFat"] = dcGroup.useFat
-        response["value"] = data
-    return response
-
 #Set default data collection (map2loop) configuration settings
 def SetDefaultConfiguration(root, verbose=False):
     response = {"errorFlag":False}
@@ -598,6 +626,31 @@ def SetDefaultConfiguration(root, verbose=False):
     dcGroup.closeDip = -999
     dcGroup.useInterpolations = 0
     dcGroup.useFat = 1
+    return response
+
+#Extract data collection (map2loop) sources settings
+def GetSources(root, verbose=False):
+    response = {"errorFlag":False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]: response = resp
+    else:
+        dcGroup = resp["value"]
+        data = {}
+        if "structureUrl" in dcGroup.ncattrs():
+            data["structureUrl"] = dcGroup.structureUrl
+        if "geologyUrl" in dcGroup.ncattrs():
+            data["geologyUrl"] = dcGroup.geologyUrl
+        if "faultUrl" in dcGroup.ncattrs():
+            data["faultUrl"] = dcGroup.faultUrl
+        if "foldUrl" in dcGroup.ncattrs():
+            data["foldUrl"] = dcGroup.foldUrl
+        if "mindepUrl" in dcGroup.ncattrs():
+            data["mindepUrl"] = dcGroup.mindepUrl
+        if "metadataUrl" in dcGroup.ncattrs():
+            data["metadataUrl"] = dcGroup.metadataUrl
+        if "sourceTags" in dcGroup.ncattrs():
+            data["sourceTags"] = dcGroup.sourceTags
+        response["value"] = data
     return response
 
 #Set data collection (map2loop) configuration settings
@@ -643,31 +696,6 @@ def SetSources(root, data, verbose=False):
         dcGroup.metadataUrl = data.metadataUrl
     if (data.contains("sourceTags")):
         dcGroup.sourceTags = data.sourceTags
-    return response
-
-#Extract data collection (map2loop) sources settings
-def GetSources(root, verbose=False):
-    response = {"errorFlag":False}
-    resp = GetDataCollectionGroup(root)
-    if resp["errorFlag"]: response = resp
-    else:
-        dcGroup = resp["value"]
-        data = {}
-        if "structureUrl" in dcGroup.ncattrs():
-            data["structureUrl"] = dcGroup.structureUrl
-        if "geologyUrl" in dcGroup.ncattrs():
-            data["geologyUrl"] = dcGroup.geologyUrl
-        if "faultUrl" in dcGroup.ncattrs():
-            data["faultUrl"] = dcGroup.faultUrl
-        if "foldUrl" in dcGroup.ncattrs():
-            data["foldUrl"] = dcGroup.foldUrl
-        if "mindepUrl" in dcGroup.ncattrs():
-            data["mindepUrl"] = dcGroup.mindepUrl
-        if "metadataUrl" in dcGroup.ncattrs():
-            data["metadataUrl"] = dcGroup.metadataUrl
-        if "sourceTags" in dcGroup.ncattrs():
-            data["sourceTags"] = dcGroup.sourceTags
-        response["value"] = data
     return response
 
 #Create Default data collection (map2loop) source settings

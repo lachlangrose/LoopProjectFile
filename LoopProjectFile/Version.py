@@ -11,7 +11,7 @@ def LoopVersion():
         List of current version [Major,Minor,Sub]version
     
     """
-    return [0,0,19]
+    return [0,0,20]
 
 # Check version of Loop Project File is valid
 def CheckVersionValid(rootGroup, verbose=False):

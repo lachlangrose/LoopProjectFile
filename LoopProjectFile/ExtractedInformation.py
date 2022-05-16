@@ -286,7 +286,7 @@ def SetDrillholeLog(root, data, append=False, verbose=False):
     else:
         eiGroup = resp["value"]
 
-    resp = GetStratigraphicInformationGroup(root)
+    resp = GetDrillholeDescriptionGroup(root)
     if resp["errorFlag"]:
         siGroup = eiGroup.createGroup("DrillholeInformation")
         siGroup.createDimension("index",None)

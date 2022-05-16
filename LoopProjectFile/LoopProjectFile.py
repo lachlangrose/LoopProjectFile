@@ -216,6 +216,10 @@ def Set(filename, element, **kwargs):
         elif element == "contactsAppend": response = DataCollection.SetContacts(root, append=True, **kwargs)
         elif element == "drillholeObservations": response = DataCollection.SetDrillholeObservations(root, **kwargs)
         elif element == "drillholeObservationsAppend": response = DataCollection.SetDrillholeObservations(root, append=True, **kwargs)
+        elif element == "drillholeSurveys": response = DataCollection.SetDrillholeSurveys(root, **kwargs)
+        elif element == "drillholeSurveysAppend": response = DataCollection.SetDrillholeSurveys(root, append=True, **kwargs)
+        elif element == "drillholeProperties": response = DataCollection.SetDrillholeProperties(root, **kwargs)
+        elif element == "drillholePropertiesAppend": response = DataCollection.SetDrillholeProperties(root, append=True, **kwargs)
         elif element == "stratigraphicLog": response = ExtractedInformation.SetStratigraphicLog(root, **kwargs)
         elif element == "stratigraphicLogAppend": response = ExtractedInformation.SetStratigraphicLog(root, append=True, **kwargs)
         elif element == "faultLog": response = ExtractedInformation.SetFaultLog(root, **kwargs)
@@ -307,6 +311,8 @@ def Get(filename, element, **kwargs):
         elif element == "stratigraphicObservations": response = DataCollection.GetStratigraphicObservations(root,**kwargs)
         elif element == "contacts": response = DataCollection.GetContacts(root,**kwargs)
         elif element == "drillholeObservations": response = DataCollection.GetDrillholeObservations(root,**kwargs)
+        elif element == "drillholeSurveys": response = DataCollection.GetDrillholeSurveys(root,**kwargs)
+        elif element == "drillholeProperties": response = DataCollection.GetDrillholeProperties(root,**kwargs)
         elif element == "stratigraphicLog": response = ExtractedInformation.GetStratigraphicLog(root,**kwargs)
         elif element == "faultLog": response = ExtractedInformation.GetFaultLog(root,**kwargs)
         elif element == "foldLog": response = ExtractedInformation.GetFoldLog(root,**kwargs)
@@ -438,10 +444,15 @@ eventRelationshipType = numpy.dtype([('eventId1','<u4'),('eventId2','<u4'),('bid
 drillholeDescriptionType = numpy.dtype([('collarId','<u4'),('holeName','S30'),
                         ('surfaceX','<f8'),('surfaceY','<f8'),('surfaceZ','<f8')])
 
+drillholePropertyType = numpy.dtype([('collarId','<u4'),('propertyName','S30'),('propertyValue','S80')])
+
 drillholeObservationType = numpy.dtype([('collarId','<u4'),
-                        ('topX','<f8'),('topY','<f8'),('topZ','<f8'), ('layerId','<u4'),
-                        ('baseX','<f8'),('baseY','<f8'),('baseZ','<f8'),
-                        ('beddingDip','<f8'),('beddingAzimuth','<f8')])
+                        ('fromX','<f8'),('fromY','<f8'),('fromZ','<f8'), ('layerId','<u4'),
+                        ('toX','<f8'),('toY','<f8'),('toZ','<f8'),('from','<f8'),('to','<f8'),
+                        ('propertyCode','S30'),('property1','S30'),('property2','S30'),('unit','S30')])
+
+drillholeSurveyType = numpy.dtype([('collarId','<u4'),('depth','<f8'),
+                        ('angle1','<f8'),('angle2','<f8'),('unit','S30')])
 
 def ConvertDataFrame(df,dtype):
     if isinstance(df,pandas.DataFrame):
