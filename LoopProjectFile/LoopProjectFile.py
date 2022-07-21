@@ -386,7 +386,7 @@ faultObservationType = numpy.dtype([('eventId','<u4'),
 foldObservationType = numpy.dtype([('eventId','<u4'),
                         ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('axisX','<f8'),('axisY','<f8'),('axisZ','<f8'),
-                        ('foliation','S30'),('whatIsFolded','S30')])
+                        ('foliation','S120'),('whatIsFolded','S120')])
 
 foliationObservationType = numpy.dtype([('eventId','<u4'),
                         ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
@@ -402,10 +402,10 @@ contactObservationType = numpy.dtype([('layerId','<u4'),
 stratigraphicObservationType = numpy.dtype([('layerId','<u4'),
                         ('easting','<f8'),('northing','<f8'),('altitude','<f8'),('type','<i4'),
                         ('dipDir','<f8'),('dip','<f8'),('dipPolarity','<f8'),
-                        ('layer','S30')])
+                        ('layer','S120')])
 
 faultEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S120'),('group','S120'),('supergroup','S120'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('avgDisplacement','<f8'),('avgDownthrowDir','<f8'),
                         ('influenceDistance','<f8'),('verticalRadius','<f8'),
@@ -415,24 +415,24 @@ faultEventType = numpy.dtype([('eventId','<u4'),
                         ('avgNormalEasting','<f8'),('avgNormalNorthing','<f8'),('avgNormalAltitude','<f8')])
 
 foldEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S120'),('group','S120'),('supergroup','S120'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('periodic','u1'),('wavelength','<f8'),('amplitude','<f8'),
                         ('asymmetry','u1'),('asymmetryShift','<f8'),
                         ('secondaryWavelength','<f8'),('secondaryAmplitude','<f8')])
 
 foliationEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S120'),('group','S120'),('supergroup','S120'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('lowerScalarValue','<f8'),('upperScalarValue','<f8')])
 
 discontinuityEventType = numpy.dtype([('eventId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S120'),('group','S120'),('supergroup','S120'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('scalarValue','<f8')])
 
 stratigraphicLayerType = numpy.dtype([('layerId','<u4'),
-                        ('minAge','<f8'),('maxAge','<f8'),('name','S30'),('group','S30'),('supergroup','S30'),
+                        ('minAge','<f8'),('maxAge','<f8'),('name','S120'),('group','S120'),('supergroup','S120'),
                         ('enabled','u1'),('rank','<u4'),('type','<i4'),
                         ('thickness','<f8'),
                         ('colour1Red','u1'),('colour1Green','u1'),('colour1Blue','u1'),
@@ -441,18 +441,18 @@ stratigraphicLayerType = numpy.dtype([('layerId','<u4'),
 eventRelationshipType = numpy.dtype([('eventId1','<u4'),('eventId2','<u4'),('bidirectional','u1'),
                         ('angle','<f8'),('type','<i4')])
 
-drillholeDescriptionType = numpy.dtype([('collarId','<u4'),('holeName','S30'),
+drillholeDescriptionType = numpy.dtype([('collarId','<u4'),('holeName','S120'),
                         ('surfaceX','<f8'),('surfaceY','<f8'),('surfaceZ','<f8')])
 
-drillholePropertyType = numpy.dtype([('collarId','<u4'),('propertyName','S30'),('propertyValue','S80')])
+drillholePropertyType = numpy.dtype([('collarId','<u4'),('propertyName','S120'),('propertyValue','S80')])
 
 drillholeObservationType = numpy.dtype([('collarId','<u4'),
                         ('fromX','<f8'),('fromY','<f8'),('fromZ','<f8'), ('layerId','<u4'),
                         ('toX','<f8'),('toY','<f8'),('toZ','<f8'),('from','<f8'),('to','<f8'),
-                        ('propertyCode','S30'),('property1','S30'),('property2','S30'),('unit','S30')])
+                        ('propertyCode','S120'),('property1','S120'),('property2','S120'),('unit','S120')])
 
 drillholeSurveyType = numpy.dtype([('collarId','<u4'),('depth','<f8'),
-                        ('angle1','<f8'),('angle2','<f8'),('unit','S30')])
+                        ('angle1','<f8'),('angle2','<f8'),('unit','S120')])
 
 def ConvertDataFrame(df,dtype):
     if isinstance(df,pandas.DataFrame):
