@@ -371,10 +371,11 @@ def CheckFileValid(filename, verbose=False):
         # Close and report
         rootgrp.close()
 
-        if valid and verbose == True:
-            print("\nThis is a valid Loop Project File")
-        else:
-            print("\nThis Loop Project File is NOT valid")
+        if verbose == True:
+            if valid:
+                print("\nThis is a valid Loop Project File")
+            else:
+                print("\nThis Loop Project File is NOT valid")
     return valid
 
 # Explicitly setup Compound Types used in the LoopProjectFile module
