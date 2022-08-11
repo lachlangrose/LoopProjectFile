@@ -1,4 +1,4 @@
-import netCDF4
+__version__ = "0.0.21"
 
 #Current Loop Project File Version
 def LoopVersion():
@@ -11,7 +11,7 @@ def LoopVersion():
         List of current version [Major,Minor,Sub]version
     
     """
-    return [0,0,21]
+    return list(map(int,(__version__.split('.'))))
 
 # Check version of Loop Project File is valid
 def CheckVersionValid(rootGroup, verbose=False):
