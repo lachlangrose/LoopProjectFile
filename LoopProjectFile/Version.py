@@ -1,4 +1,4 @@
-__version__ = "0.0.21"
+__version__ = "0.0.22"
 
 #Current Loop Project File Version
 def LoopVersion():
