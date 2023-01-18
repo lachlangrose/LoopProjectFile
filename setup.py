@@ -9,7 +9,7 @@ with open(os.path.join(package_root, "LoopProjectFile/Version.py")) as fp:
 version = version["__version__"]
 
 setup(
-	name="LoopProjectFile",
+    name="LoopProjectFile",
     install_requires=["netCDF4>=1.5.4", "numpy", "pandas"],
     description="Open source structural geology data storage for Loop Projects",
     author="Roy Thomson",
@@ -31,4 +31,4 @@ setup(
     ],
     version=version,
     packages=find_packages()
-	)
+    )
