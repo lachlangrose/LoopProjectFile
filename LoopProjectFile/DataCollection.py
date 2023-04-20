@@ -683,7 +683,7 @@ def SetDefaultConfiguration(root, verbose=False):
     return response
 
 
-# Extract data collection (map2loop) sources settings
+# Extract data collection (map2loop) source urls
 def GetSources(root, verbose=False):
     response = {"errorFlag": False}
     resp = GetDataCollectionGroup(root)
@@ -710,7 +710,7 @@ def GetSources(root, verbose=False):
     return response
 
 
-# Set data collection (map2loop) configuration settings
+# Set data collection (map2loop) source urls
 def SetSources(root, data, verbose=False):
     """
     **SetConfiguration** - Saves the settings for the data collection step
@@ -756,7 +756,7 @@ def SetSources(root, data, verbose=False):
     return response
 
 
-# Create Default data collection (map2loop) source settings
+# Create Default data collection (map2loop) source urls
 def SetDefaultSources(root, verbose=False):
     response = {"errorFlag": False}
     resp = GetDataCollectionGroup(root)
@@ -773,4 +773,82 @@ def SetDefaultSources(root, verbose=False):
     dcGroup.mindepUrl = ""
     dcGroup.metadataUrl = ""
     dcGroup.sourceTags = ""
+    return response
+
+
+# Extract data collection (map2loop) raw data
+def GetRawSourceData(root, verbose=False):
+    response = {"errorFlag": False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        response = resp
+    else:
+        dcGroup = resp["value"]
+        data = {}
+        if "structureRawData" in dcGroup.ncattrs():
+            data["structureRawData"] = dcGroup.structureRawData
+        if "geologyRawData" in dcGroup.ncattrs():
+            data["geologyRawData"] = dcGroup.geologyRawData
+        if "faultRawData" in dcGroup.ncattrs():
+            data["faultRawData"] = dcGroup.faultRawData
+        if "foldRawData" in dcGroup.ncattrs():
+            data["foldRawData"] = dcGroup.foldRawData
+        response["value"] = data
+    return response
+
+
+# Set data collection raw data
+def SetRawSourceData(root, data, verbose=False):
+    """
+    **SetConfiguration** - Saves the settings for the data collection step
+
+    Parameters
+    ----------
+    rootGroup: netCDF4.Group
+        The root group node of a Loop Project File
+    data: dictionary {str: str,...}
+        A dictionary with the data colletion settings
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+
+    Returns
+    -------
+       dict {"errorFlag", "errorString"}
+        errorString exist and contains error message only when errorFlag is
+        True
+
+    """
+    response = {"errorFlag": False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        # Create Structural Models Group and add data shape based on project extents
+        dcGroup = root.createGroup("DataCollection")
+    else:
+        dcGroup = resp["value"]
+
+    if (data.contains("structureRawData")):
+        dcGroup.structureRawData = data.structureRawData
+    if (data.contains("geologyRawData")):
+        dcGroup.geologyRawData = data.geologyRawData
+    if (data.contains("faultRawData")):
+        dcGroup.faultRawData = data.faultRawData
+    if (data.contains("foldRawData")):
+        dcGroup.foldRawData = data.foldRawData
+    return response
+
+
+# Create blank data collection data
+def SetDefaultRawSourceData(root, verbose=False):
+    response = {"errorFlag": False}
+    resp = GetDataCollectionGroup(root)
+    if resp["errorFlag"]:
+        dcGroup = root.createGroup("DataCollection")
+    else:
+        dcGroup = resp["value"]
+
+    dcGroup.structureRawData = ""
+    dcGroup.geologyRawData = ""
+    dcGroup.faultRawData = ""
+    dcGroup.foldRawData = ""
+
     return response

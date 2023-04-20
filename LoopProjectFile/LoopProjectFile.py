@@ -93,6 +93,8 @@ def CreateBasic(filename):
         if not response['errorFlag']:
             response = DataCollection.SetDefaultSources(rootGroup)
         if not response['errorFlag']:
+            response = DataCollection.SetDefaultRawSourceData(rootGroup)
+        if not response['errorFlag']:
             response = DataCollection.SetDefaultConfiguration(rootGroup)
         if not response['errorFlag']:
             response = StructuralModels.SetDefaultConfiguration(rootGroup)
@@ -279,6 +281,8 @@ def Set(filename, element, **kwargs):
             response = DataCollection.SetConfiguration(root, **kwargs)
         elif element == "dataCollectionSources":
             response = DataCollection.SetSources(root, **kwargs)
+        elif element == "dataCollectionRawSourceData":
+            response = DataCollection.SetRawSourceData(root, **kwargs)
         elif element == "eventRelationships":
             response = ExtractedInformation.SetEventRelationships(root, **kwargs)
         elif element == "structuralModelsConfig":
@@ -390,6 +394,8 @@ def Get(filename, element, **kwargs):
             response = DataCollection.GetConfiguration(root, **kwargs)
         elif element == "dataCollectionSources":
             response = DataCollection.GetSources(root, **kwargs)
+        elif element == "dataCollectionRawSourceData":
+            response = DataCollection.GetRawSourceData(root, **kwargs)
         elif element == "eventRelationships":
             response = ExtractedInformation.GetEventRelationships(root, **kwargs)
         elif element == "structuralModelsConfig":

@@ -1,4 +1,4 @@
-__version__ = "0.0.22"
+__version__ = "0.0.23"
 
 
 # Current Loop Project File Version
@@ -68,8 +68,8 @@ def GetVersion(rootGroup):
         value is a [int,int,int] of the version of this project file
 
     """
-    if CheckVersionValid(rootGroup, True):
-        return {"errorFlag": False, "value": [rootGroup.loopMajorVersion, rootGroup.loopMinorVersion, rootGroup.loopSubVersion]}
+    if CheckVersionValid(rootGroup):
+        return {"errorFlag": False, "value": list(map(int, [rootGroup.loopMajorVersion, rootGroup.loopMinorVersion, rootGroup.loopSubVersion]))}
     else:
         return {"errorFlag": True, "errorString": "No valid Version in Loop Project File"}
 
