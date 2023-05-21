@@ -12,7 +12,7 @@
 The Loop platform is an open source 3D probabilistic geological and geophysical modelling platform, initiated by Geoscience Australia and the OneGeology consortium. The project is funded by Australian territory, State and Federal Geological Surveys, the Australian Research Council and the MinEx Collaborative Research Centre.
 
 # What is a Loop Project File?
-A Loop Project File encapsulates all the data and models used or created in a Loop workflow.  This includes the ability to create meta-data which provides provenance of the data and the methodology and history of how models are used and produced.  The Loop Project File is based on netCDF and has APIs for C/C++, Python and Fortran.
+A Loop Project File encapsulates all the data and models used or created in a Loop workflow.  This includes the ability to create meta-data which provides provenance of the data and the methodology and history of how models are used and produced.  The Loop Project File is based on netCDF and has APIs for C/C++ and Python (with the intention of creating a Fortran API in the future).
 - [Loop Project File - C/C++](https://github.com/Loop3D/LoopProjectFile-cpp)
 - [Loop Project File - Python](https://github.com/Loop3D/LoopProjectFile)
 
