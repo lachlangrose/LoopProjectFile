@@ -407,6 +407,59 @@ def Get(filename, element, **kwargs):
         root.close()
     return response
 
+# Check which element are valid
+def CheckValidElements(filename, verbose=False):
+    """
+    **CheckValidElements** - A function to check through a Loop Project File's
+    elements to see whether there is information in each element
+
+    Parameters
+    ----------
+    filename: string
+        The name of the file to load data from
+    verbose: bool
+        A flag to indicate a higher level of console logging (more if True)
+
+    Returns
+    -------
+    dict or None
+        A dictionary of all the elements with a boolean indicating if the
+        element contains information
+
+    """
+    elements = {
+        "version":False,
+        "extents":False,
+        "strModel":False,
+        "faultObservations":False,
+        "foldObservations":False,
+        "foliationObservations":False,
+        "discontinuityObservations":False,
+        "stratigraphicObservations":False,
+        "contacts":False,
+        "drillholeObservations":False,
+        "drillholeSurveys":False,
+        "drillholeProperties":False,
+        "stratigraphicLog":False,
+        "faultLog":False,
+        "foldLog":False,
+        "foliationLog":False,
+        "discontinuityLog":False,
+        "drillholeLog":False,
+        "dataCollectionConfig":False,
+        "dataCollectionSources":False,
+        "dataCollectionRawSourceData":False,
+        "eventRelationships":False,
+        "structuralModelsConfig":False,
+    }
+    if (not CheckFileIsLoopProjectFile(filename)):
+        if (verbose):
+            print(f"{filename} is not a valid loop project file")
+        return None
+    else:
+        for element in elements:
+            elements[element] = Get(filename, element)["errorFlag"]
+        return elements
 
 # Check full project structure
 def CheckFileValid(filename, verbose=False):
