@@ -117,7 +117,7 @@ def SetEventLog(root, data, indexName, variableName, append=False, verbose=False
         for i in data:
             eventLocation[index] = i
             index += 1
-        elGroup.setncattr(indexName + "_MaxValid", index - 1)
+        elGroup.setncattr(indexName + "_MaxValid", index)
     else:
         errStr = "(ERROR) Failed to create event log group"
         if verbose:
@@ -150,24 +150,24 @@ def GetEventLog(root, indexName, variableName, indexList=[], indexRange=(0, 0), 
     else:
         elGroup = resp["value"]
         data = []
-        maxIndex = min(elGroup.dimensions[indexName].size, elGroup.getncattr(indexName + "_MaxValid"))
+        maxValidIndex = min(elGroup.dimensions[indexName].size, elGroup.getncattr(indexName + "_MaxValid"))
         # Select all option
         if (indexList == [] and len(indexRange) == 2 and indexRange[0] == 0
                 and indexRange[1] == 0):
             # Select all
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 data.append((elGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on list of indices option
         elif indexList != []:
             for i in indexList:
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((elGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on indices range option
         elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
             for i in range(indexRange[0], indexRange[1]):
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((elGroup.variables.get(variableName)[i]))
             response["value"] = data
         else:
@@ -244,7 +244,7 @@ def SetStratigraphicLog(root, data, append=False, verbose=False):
         for i in data:
             stratigraphicLayersLocation[index] = i
             index += 1
-        siGroup.setncattr("index_MaxValid", index - 1)
+        siGroup.setncattr("index_MaxValid", index)
     else:
         errStr = "(ERROR) Failed to create stratigraphic log group for strata setting"
         if verbose:
@@ -261,24 +261,24 @@ def GetStratigraphicLog(root, indexList=[], indexRange=(0, 0), verbose=False):
     else:
         siGroup = resp["value"]
         data = []
-        maxIndex = min(siGroup.dimensions['index'].size, siGroup.getncattr("index_MaxValid"))
+        maxValidIndex = min(siGroup.dimensions['index'].size, siGroup.getncattr("index_MaxValid"))
         # Select all option
         if (indexList == [] and len(indexRange) == 2 and indexRange[0] == 0
                 and indexRange[1] == 0):
             # Select all
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 data.append((siGroup.variables.get('stratigraphicLayers')[i]))
             response["value"] = data
         # Select based on list of indices option
         elif indexList != []:
             for i in indexList:
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((siGroup.variables.get('stratigraphicLayers')[i]))
             response["value"] = data
         # Select based on indices range option
         elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
             for i in range(indexRange[0], indexRange[1]):
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((siGroup.variables.get('stratigraphicLayers')[i]))
             response["value"] = data
         else:
@@ -339,7 +339,7 @@ def SetDrillholeLog(root, data, append=False, verbose=False):
         for i in data:
             drillholeDescriptionsLocation[index] = i
             index += 1
-        diGroup.setncattr("index_MaxValid", index - 1)
+        diGroup.setncattr("index_MaxValid", index)
     else:
         errStr = "(ERROR) Failed to create drillhole description log group for setting drillhole data"
         if verbose:
@@ -356,24 +356,24 @@ def GetDrillholeLog(root, indexList=[], indexRange=(0, 0), verbose=False):
     else:
         diGroup = resp["value"]
         data = []
-        maxIndex = min(diGroup.dimensions['index'].size, diGroup.getncattr("index_MaxValid"))
+        maxValidIndex = min(diGroup.dimensions['index'].size, diGroup.getncattr("index_MaxValid"))
         # Select all option
         if (indexList == [] and len(indexRange) == 2 and indexRange[0] == 0
                 and indexRange[1] == 0):
             # Select all
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 data.append((diGroup.variables.get('drillholeDescriptions')[i]))
             response["value"] = data
         # Select based on list of indices option
         elif indexList != []:
             for i in indexList:
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((diGroup.variables.get('drillholeDescriptions')[i]))
             response["value"] = data
         # Select based on indices range option
         elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
             for i in range(indexRange[0], indexRange[1]):
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((diGroup.variables.get('drillholeDescriptions')[i]))
             response["value"] = data
         else:
@@ -412,7 +412,7 @@ def SetEventRelationships(root, data, append=False, verbose=False):
         for i in data:
             eventRelationshipsLocation[index] = i
             index += 1
-        erGroup.setncattr("index_MaxValid", index - 1)
+        erGroup.setncattr("index_MaxValid", index)
     else:
         errStr = "(ERROR) Failed to create event relationships group for event links"
         if verbose:
@@ -428,9 +428,9 @@ def GetEventRelationships(root, verbose=False):
         response = resp
     else:
         erGroup = resp["value"]
-        maxIndex = min(erGroup.dimensions['index'].size, erGroup.getncattr("index_MaxValid"))
+        maxValidIndex = min(erGroup.dimensions['index'].size, erGroup.getncattr("index_MaxValid"))
         data = []
-        for i in range(0, maxIndex):
+        for i in range(0, maxValidIndex):
             data.append((erGroup.variables.get('eventRelationships')[i]))
         response["value"] = data
     return response

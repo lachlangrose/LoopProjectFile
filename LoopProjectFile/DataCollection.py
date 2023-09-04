@@ -121,7 +121,7 @@ def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0, 
             print("Getting variable " + variableName)
         oGroup = resp["value"]
         data = []
-        maxIndex = min(oGroup.dimensions[indexName].size, oGroup.getncattr(indexName + "_MaxValid"))
+        maxValidIndex = min(oGroup.dimensions[indexName].size, oGroup.getncattr(indexName + "_MaxValid"))
         # Select all option
         if (indexList == [] and len(indexRange) == 2 and indexRange[0] == 0
                 and indexRange[1] == 0 and keyword == ""):
@@ -129,7 +129,7 @@ def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0, 
                 print("Getting all")
             # Create list of observations as:
             # ((easting, northing, altitude), dipdir, dip, formation, layer)
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on keyword and list of indices option
@@ -137,7 +137,7 @@ def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0, 
             if verbose:
                 print("Getting keyword and index list")
             for i in indexList:
-                if (int(i) >= 0 and int(i) < maxIndex
+                if (int(i) >= 0 and int(i) < maxValidIndex
                         and oGroup.variables.get(variableName)[i] == keyword):
                     data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
@@ -145,7 +145,7 @@ def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0, 
         elif keyword != "":
             if verbose:
                 print("Getting keyword")
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 if oGroup.variables.get(variableName)[i] == keyword:
                     data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
@@ -154,7 +154,7 @@ def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0, 
             if verbose:
                 print("Getting index list")
             for i in indexList:
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on indices range option
@@ -162,7 +162,7 @@ def GetObservations(root, indexName, variableName, indexList=[], indexRange=(0, 
             if verbose:
                 print("Getting index range")
             for i in range(indexRange[0], indexRange[1]):
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((oGroup.variables.get(variableName)[i]))
             response["value"] = data
         else:
@@ -239,7 +239,7 @@ def SetObservations(root, data, indexName, variableName, append=False, verbose=F
         for i in data:
             observationLocation[index] = i
             index += 1
-        oGroup.setncattr(indexName + "_MaxValid", index - 1)
+        oGroup.setncattr(indexName + "_MaxValid", index)
     else:
         errStr = "(ERROR) Failed to Create observations group for observations setting"
         if verbose:
@@ -278,38 +278,38 @@ def GetContacts(root, indexList=[], indexRange=(0, 0), keyword="", verbose=False
     else:
         group = resp["value"]
         data = []
-        maxIndex = min(group.dimensions['index'].size, group.getncattr("index_MaxValid"))
+        maxValidIndex = min(group.dimensions['index'].size, group.getncattr("index_MaxValid"))
         # Select all option
         if (indexList == [] and len(indexRange) == 2 and indexRange[0] == 0
                 and indexRange[1] == 0 and keyword == ""):
             # Create list of observations as:
             # ((easting, northing, altitude), dipdir, dip, formation, layer)
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on keyword and list of indices option
         elif keyword != "" and indexList != []:
             for i in indexList:
-                if (int(i) >= 0 and int(i) < maxIndex
+                if (int(i) >= 0 and int(i) < maxValidIndex
                         and group.variables.get('layer')[i] == keyword):
                     data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on keyword option
         elif keyword != "":
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 if group.variables.get('layer')[i] == keyword:
                     data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on list of indices option
         elif indexList != []:
             for i in indexList:
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         # Select based on indices range option
         elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
             for i in range(indexRange[0], indexRange[1]):
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((group.variables.get('contacts')[i]))
             response["value"] = data
         else:
@@ -371,7 +371,7 @@ def SetContacts(root, data, append=False, verbose=False):
         for i in data:
             contactsLocation[index] = i
             index += 1
-        group.setncattr("index_MaxValid", index - 1)
+        group.setncattr("index_MaxValid", index)
     else:
         errStr = "(ERROR) Failed to Create contacts group for contact setting"
         if verbose:
@@ -390,38 +390,38 @@ def GetDrillholeData(root, indexName, variableName, indexList=[], indexRange=(0,
     else:
         group = resp["value"]
         data = []
-        maxIndex = min(group.dimensions[indexName].size, group.getncattr(indexName + "_MaxValid"))
+        maxValidIndex = min(group.dimensions[indexName].size, group.getncattr(indexName + "_MaxValid"))
         # Select all option
         if (indexList == [] and len(indexRange) == 2 and indexRange[0] == 0
                 and indexRange[1] == 0 and keyword == ""):
             # Create list of observations as:
             # ((easting, northing, altitude), dipdir, dip, formation, layer)
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 data.append((group.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on keyword and list of indices option
         elif keyword != "" and indexList != []:
             for i in indexList:
-                if (int(i) >= 0 and int(i) < maxIndex
+                if (int(i) >= 0 and int(i) < maxValidIndex
                         and group.variables.get('layer')[i] == keyword):
                     data.append((group.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on keyword option
         elif keyword != "":
-            for i in range(0, maxIndex):
+            for i in range(0, maxValidIndex):
                 if group.variables.get('layer')[i] == keyword:
                     data.append((group.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on list of indices option
         elif indexList != []:
             for i in indexList:
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((group.variables.get(variableName)[i]))
             response["value"] = data
         # Select based on indices range option
         elif len(indexRange) == 2 and indexRange[0] >= 0 and indexRange[1] >= indexRange[0]:
             for i in range(indexRange[0], indexRange[1]):
-                if int(i) >= 0 and int(i) < maxIndex:
+                if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((group.variables.get(variableName)[i]))
             response["value"] = data
         else:
@@ -491,7 +491,7 @@ def SetDrillholeData(root, data, indexName, variableName, append=False, verbose=
         for i in data:
             drillholeObservationsLocation[index] = i
             index += 1
-        group.setncattr(indexName + "_MaxValid", index - 1)
+        group.setncattr(indexName + "_MaxValid", index)
     else:
         errStr = "(ERROR) Failed to Create drillhole group for drillhole setting"
         if verbose:
