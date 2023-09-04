@@ -246,7 +246,7 @@ class ProjectFile:
 
     @property
     def faultLog(self) -> pd.DataFrame:
-        return self.__getitem__('faultLog').set_index('name')
+        return self.__getitem__('faultLog') # .set_index('name')
 
     @faultLog.setter
     def faultLog(self, value: pd.DataFrame):
