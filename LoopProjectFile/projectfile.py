@@ -64,6 +64,7 @@ class ProjectFile:
                 "eventRelationships",
                 "structuralModelsConfig"
         ]
+        self.compoundTypeMap = compoundTypeMap
 
     @classmethod
     def new(cls, filename):
