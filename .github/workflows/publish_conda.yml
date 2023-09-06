@@ -5,13 +5,13 @@ on:
       types: [published]
 jobs:
   conda-deploy:
-    name: Uploading to Loop3d for python ${{ matrix.os }})
+    name: Uploading to Loop3d for python ${{ matrix.os }} ${{matrix.python-version}})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest",  "windows-latest"] #"macos-latest",
-        python-version: ["3.7","3.8","3.9"]
+        python-version: ["3.8","3.9","3.10"]
     steps:
       - uses: conda-incubator/setup-miniconda@v2
         with:
