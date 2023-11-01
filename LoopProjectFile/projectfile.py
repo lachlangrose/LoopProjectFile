@@ -21,7 +21,7 @@ compoundTypeMap = {
                 "discontinuityLog": None,
                 "dataCollectionConfig": None,
                 "dataCollectionSources": None,
-                "eventRelationships": None,
+                "eventRelationships": LoopProjectFile.eventRelationshipType,
                 "structuralModelsConfig": None
 }
 
@@ -324,7 +324,10 @@ class ProjectFile:
 
     def __setitem__(self, element, value):
         if compoundTypeMap[element] is None:
-            Set(self.project_filename, element, value)
+            if isinstance(value, dict):
+                Set(self.project_filename, element, **value)
+            else:
+                Set(self.project_filename, element, {element:value})
         else:
             if isinstance(value, pd.DataFrame):
                 names = compoundTypeMap[element].names

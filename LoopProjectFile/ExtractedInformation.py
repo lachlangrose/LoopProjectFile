@@ -395,7 +395,6 @@ def SetEventRelationships(root, data, append=False, verbose=False):
 
     resp = GetEventRelationshipsGroup(root)
     if resp["errorFlag"]:
-        print(resp["errorString"])
         erGroup = eiGroup.createGroup("EventRelationships")
         erGroup.setncattr("index_MaxValid", -1)
         erGroup.createDimension("index", None)
