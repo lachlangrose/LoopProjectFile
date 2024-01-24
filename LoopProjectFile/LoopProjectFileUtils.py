@@ -3,6 +3,7 @@ import pandas
 import os
 import LoopProjectFile
 
+import sys
 
 def GetGroup(node, groupName, verbose=False):
     """
@@ -30,6 +31,7 @@ def GetGroup(node, groupName, verbose=False):
 
 
 def ElementFromDataframe(loopFilename, df, element, loopCompoundType):
+    # print('Entered ElementFromDataframe',file=sys.stderr)
     """
     **ElementFromCsv** - Imports one element of the loop project file
     from a csv file into the project file
@@ -50,19 +52,23 @@ def ElementFromDataframe(loopFilename, df, element, loopCompoundType):
 
     """
     if isinstance(df, pandas.DataFrame) is False:
-        print('not a dataframedoes not exist')
-        return
+        print('not a dataframedoes not exist',file=sys.stderr)
+        raise Exception('not a dataframedoes not exist')
     if not os.path.isfile(loopFilename):
-        print(loopFilename, 'does not exist. Try LoopProjectFile.CreateBasic first')
-        return
+        print(loopFilename, 'does not exist. Try LoopProjectFile.CreateBasic first',file=sys.stderr)
+        raise Exception(f'{loopFilename} does not exist. Try LoopProjectFile.CreateBasic first')
     if len(df.columns) != len(loopCompoundType):
-        print('In dataframe columns do not match compound type')
-        print('  Dataframe:', df.columns, ' does not match\n  Compound type:', loopCompoundType.names)
-        return
-    struct = LoopProjectFile.ConvertDataFrame(df, loopCompoundType)
-    resp = LoopProjectFile.Set(loopFilename, element, data=struct)
-    if resp['errorFlag']:
-        print(resp['errorString'])
+        print('In dataframe columns do not match compound type',file=sys.stderr)
+        print('  Dataframe:', df.columns, ' does not match\n  Compound type:', loopCompoundType.names,file=sys.stderr)
+        raise Exception(f'In dataframe columns do not match compound type')
+    try:
+        struct = LoopProjectFile.ConvertDataFrame(df, loopCompoundType)
+        resp = LoopProjectFile.Set(loopFilename, element, data=struct)
+        if resp['errorFlag']:
+            raise Exception(resp['errorString'])
+    except Exception as e:
+        print(f"Error in ElementFromDataframe for {element}: {e}",file=sys.stderr)
+        return f"Error in ElementFromDataframe for {element}: {e}"
 
 
 def ElementFromCsv(loopFilename, importFilename, element, loopCompoundType):
@@ -86,16 +92,22 @@ def ElementFromCsv(loopFilename, importFilename, element, loopCompoundType):
 
     """
     if not os.path.isfile(importFilename):
-        print(importFilename, 'does not exist')
+        # print(importFilename, 'does not exist',file=sys.stderr)
         return
     if not os.path.isfile(loopFilename):
-        print(loopFilename, 'does not exist. Try LoopProjectFile.CreateBasic first')
+        # print(loopFilename, 'does not exist. Try LoopProjectFile.CreateBasic first',file=sys.stderr)
         return
-    df = pandas.read_csv(importFilename)
-    ElementFromDataframe(loopFilename, df, element, loopCompoundType)
+    print('Entered ElementFromCsv',file=sys.stderr)
+    try:
+        df = pandas.read_csv(importFilename)
+        ElementFromDataframe(loopFilename, df, element, loopCompoundType)
+    except Exception as e:
+        # print(f"Error processing {importFilename}: {e}",file=sys.stderr)
+        raise Exception( f"Error processing {importFilename}: {e}")
 
 
 def FromCsv(loopFilename, importPath, overwrite=False):
+    # print('Entered Fromcsv','loopFilename',loopFilename,'importPath',importPath,file=sys.stderr)
     """
     **FromCsv** - Imports all elements of the loop project file
     from csv files into the project file
@@ -137,6 +149,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
     print('  Importing from', str(importPath)+'extents.csv', 'into project file')
     if not os.path.isfile(importPath+'extents.csv'):
         print(str(importPath)+'extents.csv', 'does not exist')
+        raise Exception('extents.csv is required')
     else:
         df = pandas.read_csv(str(importPath)+'extents.csv')
         extents = {}
@@ -147,37 +160,41 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         LoopProjectFile.Set(loopFilename, 'extents', **extents)
 
     # Import from various csvs
-    print('  Importing from', str(importPath)+'contacts.csv', 'into project file')
+    # try:
+    print('  Importing from', str(importPath)+'contacts.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'contacts.csv', 'contacts', LoopProjectFile.contactObservationType)
 
-    print('  Importing from', str(importPath)+'faultLog.csv', 'into project file')
+    print('  Importing from', str(importPath)+'faultLog.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'faultLog.csv', 'faultLog', LoopProjectFile.faultEventType)
-    print('  Importing from', str(importPath)+'faultObs.csv', 'into project file')
+    print('  Importing from', str(importPath)+'faultObs.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'faultObs.csv', 'faultObservations', LoopProjectFile.faultObservationType)
 
-    print('  Importing from', str(importPath)+'foldLog.csv', 'into project file')
+    print('  Importing from', str(importPath)+'foldLog.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'foldLog.csv', 'foldLog', LoopProjectFile.foldEventType)
-    print('  Importing from', str(importPath)+'foldObs.csv', 'into project file')
+    print('  Importing from', str(importPath)+'foldObs.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'foldObs.csv', 'foldObservations', LoopProjectFile.foldObservationType)
 
-    print('  Importing from', str(importPath)+'foliationLog.csv', 'into project file')
+    print('  Importing from', str(importPath)+'foliationLog.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'foliationLog.csv', 'foliationLog', LoopProjectFile.foliationEventType)
-    print('  Importing from', str(importPath)+'foliationObs.csv', 'into project file')
+    print('  Importing from', str(importPath)+'foliationObs.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'foliationObs.csv', 'foliationObservations', LoopProjectFile.foliationObservationType)
 
-    print('  Importing from', str(importPath)+'discontinuityLog.csv', 'into project file')
+    print('  Importing from', str(importPath)+'discontinuityLog.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'discontinuityLog.csv', 'discontinuityLog', LoopProjectFile.discontinuityEventType)
-    print('  Importing from', str(importPath)+'discontinuityObs.csv', 'into project file')
+    print('  Importing from', str(importPath)+'discontinuityObs.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'discontinuityObs.csv', 'discontinuityObservations', LoopProjectFile.discontinuityObservationType)
 
-    print('  Importing from', str(importPath)+'stratigraphicLog.csv', 'into project file')
+    print('  Importing from', str(importPath)+'stratigraphicLog.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'stratigraphicLog.csv', 'stratigraphicLog', LoopProjectFile.stratigraphicLayerType)
-    print('  Importing from', str(importPath)+'stratigraphicObs.csv', 'into project file')
+    print('  Importing from', str(importPath)+'stratigraphicObs.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'stratigraphicObs.csv', 'stratigraphicObservations', LoopProjectFile.stratigraphicObservationType)
 
-    print('  Importing from', str(importPath)+'eventRel.csv', 'into project file')
+    print('  Importing from', str(importPath)+'eventRel.csv', 'into project file',file=sys.stderr)
     ElementFromCsv(loopFilename, importPath+'eventRel.csv', 'eventRelationships', LoopProjectFile.eventRelationshipType)
-
+    # except Exception as e:
+    #     print(f"Error in processing CSV files: {e}",file=sys.stderr)
+    #     return f"Error in processing CSV files: {e}"
+    return "All CSV files processed successfully"
 
 def ElementToDataframe(loopFilename, element, loopCompoundType):
     """
@@ -321,3 +338,50 @@ def ToCsv(loopFilename, outputPath):
 
     print('  Exporting event relationships into', str(outputPath)+'eventRel.csv')
     ElementToCsv(loopFilename, outputPath+'eventRel.csv', 'eventRelationships', LoopProjectFile.eventRelationshipType)
+
+from flask import jsonify
+
+def handleLoopProjectFile(file,shared_path='/shared'):
+    if file and file.filename.endswith('.loop3d'):
+        filepath = os.path.join(shared_path, file.filename)
+
+        if os.path.exists(filepath):
+            return jsonify({'status': 'error', 'message': f'File {file.filename} already exists'}), 409
+
+        file.save(filepath)
+        if not LoopProjectFile.CheckFileValid(filepath):
+            os.remove(filepath) 
+            return jsonify({'status': 'error', 'message': 'Invalid LoopProjectFile'}), 400
+        
+        return jsonify({'status': 'success','message': f'File {file.filename} saved successfully'}), 200
+    else:
+        return jsonify({'status': 'error','message': 'No file provided'}), 400
+    
+
+def handleCSVlist(files,loopFilename,shared_path='/shared'):
+    # print('files',files, file=sys.stderr)
+    # print('loopFilename',loopFilename, file=sys.stderr)
+    # print('files.getlist',files.getlist('file'), file=sys.stderr)
+    if not loopFilename:
+        return jsonify({'status': 'error','message': 'loopFilename is required'}), 400
+    
+    if not files:
+        return jsonify({'status': 'error','message': 'No CSV files provided' }), 400
+
+    loop_file_path = os.path.join(shared_path, loopFilename)
+    saved_files = []
+
+    for file_storage in files.getlist('file'):
+        if file_storage and file_storage.filename.endswith('.csv'):
+            # print('file_storage',file_storage)
+            filepath = os.path.join(shared_path, file_storage.filename)
+            file_storage.save(filepath)
+            saved_files.append(file_storage.filename)
+
+    try:
+        FromCsv(loop_file_path, shared_path)
+    except Exception as e:
+        print(f"Error processing CSV files: {e}")
+        return jsonify({'status': 'error','message': f"Error processing CSV files: {e}" }), 500
+
+    return jsonify({'status': 'success','message': f'{loopFilename} is created and saved successfully'}), 200
