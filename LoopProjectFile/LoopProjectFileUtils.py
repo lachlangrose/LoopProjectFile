@@ -212,6 +212,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         "foliationLog",
         LoopProjectFile.foliationEventType,
     )
+
     print("  Importing from", str(importPath) + "foliationObs.csv", "into project file",file=sys.stderr)
     ElementFromCsv(
         loopFilename,
@@ -220,22 +221,15 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         LoopProjectFile.foliationObservationType,
     )
 
-    print(
-        "  Importing from",
-        str(importPath) + "discontinuityLog.csv",
-        "into project file",
-    ,file=sys.stderr)
+    print("  Importing from",str(importPath) + "discontinuityLog.csv","into project file",file=sys.stderr)
     ElementFromCsv(
         loopFilename,
         importPath + "discontinuityLog.csv",
         "discontinuityLog",
         LoopProjectFile.discontinuityEventType,
     )
-    print(
-        "  Importing from",
-        str(importPath) + "discontinuityObs.csv",
-        "into project file",
-    ,file=sys.stderr)
+
+    print("  Importing from",str(importPath) + "discontinuityObs.csv","into project file",file=sys.stderr)
     ElementFromCsv(
         loopFilename,
         importPath + "discontinuityObs.csv",
@@ -243,22 +237,15 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         LoopProjectFile.discontinuityObservationType,
     )
 
-    print(
-        "  Importing from",
-        str(importPath) + "stratigraphicLog.csv",
-        "into project file",
-    ,file=sys.stderr)
+    print("  Importing from", str(importPath) + "stratigraphicLog.csv","into project file",file=sys.stderr)
     ElementFromCsv(
         loopFilename,
         importPath + "stratigraphicLog.csv",
         "stratigraphicLog",
         LoopProjectFile.stratigraphicLayerType,
     )
-    print(
-        "  Importing from",
-        str(importPath) + "stratigraphicObs.csv",
-        "into project file",
-    ,file=sys.stderr)
+
+    print("  Importing from",str(importPath) + "stratigraphicObs.csv","into project file",file=sys.stderr)
     ElementFromCsv(
         loopFilename,
         importPath + "stratigraphicObs.csv",
@@ -273,10 +260,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         "eventRelationships",
         LoopProjectFile.eventRelationshipType,
     )
-    return "All CSV files processed successfully"    # except Exception as e:
-    #     print(f"Error in processing CSV files: {e}",file=sys.stderr)
-    #     return f"Error in processing CSV files: {e}"
-    return "All CSV files processed successfully"
+    return "All CSV files processed successfully" 
 
 def ElementToDataframe(loopFilename, element, loopCompoundType):
     """
