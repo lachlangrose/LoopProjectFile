@@ -1,0 +1,4 @@
+layerId,easting,northing,altitude,type,dipDir,dip,dipPolarity,layer
+1,5000,6000,7000,0,338,28,1,s0
+2,6000,7000,8000,0,137,26,1,s0
+3,8000,9000,10000,0,171,60,1,s0
