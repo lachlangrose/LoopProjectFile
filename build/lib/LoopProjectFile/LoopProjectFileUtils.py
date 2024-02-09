@@ -541,7 +541,17 @@ def handleCSVlist(files, loopFilename, shared_path='/shared'):
             filepath = os.path.join(shared_path, file_storage.filename)
             file_storage.save(filepath)
             saved_files.append(filepath)
-  
+    
+    # FromCsv(loop_file_path, shared_path)
+
+    # for filepath in saved_files:
+    #     try:
+    #         os.remove(filepath)
+    #     except Exception as e:
+    #         raise Exception('Error deleting csv files')
+
+    # return 'success', f'{loopFilename} is created and saved successfully'
+            
     try:
         FromCsv(loop_file_path, shared_path)
     except Exception as conversion_error:
