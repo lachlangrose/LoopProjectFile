@@ -170,11 +170,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
 
     # Import from various csvs
     # try:
-    print(
-        "  Importing from", 
-        str(importPath) + "contacts.csv", 
-        "into project file"
-    )
+    print("  Importing from", str(importPath) + "contacts.csv", "into project file")
     ElementFromCsv(
         loopFilename,
         importPath + "contacts.csv",
@@ -182,10 +178,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         LoopProjectFile.contactObservationType,
     )
 
-    print(
-        "  Importing from", 
-        str(importPath) + "faultLog.csv", 
-        "into project file")
+    print("  Importing from", str(importPath) + "faultLog.csv", "into project file")
     ElementFromCsv(
         loopFilename,
         importPath + "faultLog.csv",
@@ -586,41 +579,41 @@ def handleCSVlist(files, loopFilename, shared_path="/shared"):
     return "success", f"{loopFilename} is created and saved successfully"
 
 
-def handleLoopProjectFile(file, shared_path='/shared'):
+def handleLoopProjectFile(file, shared_path="/shared"):
     if file:
         filename = file.filename
 
-        if not filename.endswith('.loop3d'):
-            filename += '.loop3d'
+        if not filename.endswith(".loop3d"):
+            filename += ".loop3d"
 
         filepath = os.path.join(shared_path, filename)
 
         if os.path.exists(filepath):
-            raise Exception(f'File {filename} already exists in the shared path.')
+            raise Exception(f"File {filename} already exists in the shared path.")
 
         file.save(filepath)
 
         if not LoopProjectFile.CheckFileValid(filepath):
             os.remove(filepath)
-            raise Exception('Uploaded file is not a valid LoopProjectFile.')
+            raise Exception("Uploaded file is not a valid LoopProjectFile.")
 
         return
 
     else:
-        raise Exception('No file was provided for upload.')
+        raise Exception("No file was provided for upload.")
 
 
-def handleCSVlist(files, loopFilename, shared_path='/shared'):
+def handleCSVlist(files, loopFilename, shared_path="/shared"):
     if not loopFilename:
-        raise Exception('loopFilename is required')
+        raise Exception("loopFilename is required")
     if not files:
-        raise Exception('No CSV files provided')
+        raise Exception("No CSV files provided")
 
     loop_file_path = os.path.join(shared_path, loopFilename)
     saved_files = []
 
-    for file_storage in files.getlist('file'):
-        if file_storage and file_storage.filename.endswith('.csv'):
+    for file_storage in files.getlist("file"):
+        if file_storage and file_storage.filename.endswith(".csv"):
             filepath = os.path.join(shared_path, file_storage.filename)
             file_storage.save(filepath)
             saved_files.append(filepath)
@@ -646,5 +639,4 @@ def handleCSVlist(files, loopFilename, shared_path='/shared'):
             except Exception as e:
                 print(f"Failed to delete CSV file {csv_file}: {e}")
 
-    return 'success', f'{loopFilename} is created and saved successfully'
-
+    return "success", f"{loopFilename} is created and saved successfully"
