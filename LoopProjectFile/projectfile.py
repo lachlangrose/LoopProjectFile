@@ -195,7 +195,11 @@ class ProjectFile:
                     "northing",
                     "altitude",
                     "type",
+                    "dipDir",
+                    "dip",
+                    "dipPolarity",
                     "val",
+                    "displacement",
                     "posOnly",
                 ]
             },
