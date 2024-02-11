@@ -3,8 +3,6 @@ import pandas
 import os
 import sys
 import LoopProjectFile
-from flask import jsonify
-import sys
 
 
 def GetGroup(node, groupName, verbose=False):
