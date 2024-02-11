@@ -157,7 +157,6 @@ def FromCsv(loopFilename, importPath, overwrite=False):
     if not os.path.isfile(importPath + "extents.csv"):
         print(str(importPath) + "extents.csv", "does not exist")
         raise Exception("extents.csv is required")
-        raise Exception("extents.csv is required")
     else:
         print(importPath + "extents.csv", file=sys.stderr)
         df = pandas.read_csv(str(importPath) + "extents.csv")
