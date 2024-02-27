@@ -1,0 +1,2 @@
+min_longitude,max_longitude,min_latitude,max_latitude,utm_zone,utm_north_south,min_easting,max_easting,min_northing,max_northing,bottom_depth,top_depth,spacing_x,spacing_y,spacing_z,working_format
+-180,-179,0,1,1,1,520000,550000,7490000,7510000,-3200,1200,1000,1000,500,1

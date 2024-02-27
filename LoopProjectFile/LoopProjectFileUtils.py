@@ -1,6 +1,7 @@
 # import netCDF4
 import pandas
 import os
+import sys
 import LoopProjectFile
 
 
@@ -30,6 +31,7 @@ def GetGroup(node, groupName, verbose=False):
 
 
 def ElementFromDataframe(loopFilename, df, element, loopCompoundType):
+    # print('Entered ElementFromDataframe')
     """
     **ElementFromCsv** - Imports one element of the loop project file
     from a csv file into the project file
@@ -51,10 +53,12 @@ def ElementFromDataframe(loopFilename, df, element, loopCompoundType):
     """
     if isinstance(df, pandas.DataFrame) is False:
         print("not a dataframedoes not exist")
-        return
+        raise Exception("not a dataframedoes not exist")
     if not os.path.isfile(loopFilename):
         print(loopFilename, "does not exist. Try LoopProjectFile.CreateBasic first")
-        return
+        raise Exception(
+            f"{loopFilename} does not exist. Try LoopProjectFile.CreateBasic first"
+        )
     if len(df.columns) != len(loopCompoundType):
         print("In dataframe columns do not match compound type")
         print(
@@ -63,11 +67,15 @@ def ElementFromDataframe(loopFilename, df, element, loopCompoundType):
             " does not match\n  Compound type:",
             loopCompoundType.names,
         )
-        return
-    struct = LoopProjectFile.ConvertDataFrame(df, loopCompoundType)
-    resp = LoopProjectFile.Set(loopFilename, element, data=struct)
-    if resp["errorFlag"]:
-        print(resp["errorString"])
+        raise Exception(f"In dataframe columns do not match compound type")
+    try:
+        struct = LoopProjectFile.ConvertDataFrame(df, loopCompoundType)
+        resp = LoopProjectFile.Set(loopFilename, element, data=struct)
+        if resp["errorFlag"]:
+            print(resp["errorString"])
+            raise Exception(resp["errorString"])
+    except Exception as e:
+        return f"Error in ElementFromDataframe for {element}: {e}"
 
 
 def ElementFromCsv(loopFilename, importFilename, element, loopCompoundType):
@@ -96,11 +104,15 @@ def ElementFromCsv(loopFilename, importFilename, element, loopCompoundType):
     if not os.path.isfile(loopFilename):
         print(loopFilename, "does not exist. Try LoopProjectFile.CreateBasic first")
         return
-    df = pandas.read_csv(importFilename)
-    ElementFromDataframe(loopFilename, df, element, loopCompoundType)
+    try:
+        df = pandas.read_csv(importFilename)
+        ElementFromDataframe(loopFilename, df, element, loopCompoundType)
+    except Exception as e:
+        raise Exception(f"Error processing {importFilename}: {e}")
 
 
 def FromCsv(loopFilename, importPath, overwrite=False):
+    # print('Entered Fromcsv','loopFilename',loopFilename,'importPath',importPath)
     """
     **FromCsv** - Imports all elements of the loop project file
     from csv files into the project file
@@ -124,16 +136,16 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         if overwrite:
             os.remove(loopFilename)
         else:
-            print(loopFilename, "already exists and overwrite not set")
-            return
+            print(loopFilename, "already exists and overwrite not set", file=sys.stderr)
+            raise Exception(f"already exists and overwrite not set")
 
     importPath = importPath.replace("\\", "/")
     if importPath[-1] != "/" and importPath[-1] != "\\":
         importPath += "/"
 
     if not os.path.isdir(importPath):
-        print("Import path", importPath, "does not exist")
-        return
+        print("Import path", importPath, "does not exist", file=sys.stderr)
+        raise Exception(f"Import path {importPath} does not exist")
 
     # Create the basic loop project file
     print("Creating", loopFilename)
@@ -142,7 +154,9 @@ def FromCsv(loopFilename, importPath, overwrite=False):
     print("  Importing from", str(importPath) + "extents.csv", "into project file")
     if not os.path.isfile(importPath + "extents.csv"):
         print(str(importPath) + "extents.csv", "does not exist")
+        raise Exception("extents.csv is required")
     else:
+        print(importPath + "extents.csv", file=sys.stderr)
         df = pandas.read_csv(str(importPath) + "extents.csv")
         extents = {}
         extents["geodesic"] = list(df.values[0][0:4])
@@ -152,6 +166,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         LoopProjectFile.Set(loopFilename, "extents", **extents)
 
     # Import from various csvs
+    # try:
     print("  Importing from", str(importPath) + "contacts.csv", "into project file")
     ElementFromCsv(
         loopFilename,
@@ -197,6 +212,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         "foliationLog",
         LoopProjectFile.foliationEventType,
     )
+
     print("  Importing from", str(importPath) + "foliationObs.csv", "into project file")
     ElementFromCsv(
         loopFilename,
@@ -216,6 +232,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         "discontinuityLog",
         LoopProjectFile.discontinuityEventType,
     )
+
     print(
         "  Importing from",
         str(importPath) + "discontinuityObs.csv",
@@ -239,6 +256,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         "stratigraphicLog",
         LoopProjectFile.stratigraphicLayerType,
     )
+
     print(
         "  Importing from",
         str(importPath) + "stratigraphicObs.csv",
@@ -258,6 +276,7 @@ def FromCsv(loopFilename, importPath, overwrite=False):
         "eventRelationships",
         LoopProjectFile.eventRelationshipType,
     )
+    return "All CSV files processed successfully"
 
 
 def ElementToDataframe(loopFilename, element, loopCompoundType):
@@ -499,3 +518,122 @@ def ToCsv(loopFilename, outputPath):
         "eventRelationships",
         LoopProjectFile.eventRelationshipType,
     )
+
+
+def handleLoopProjectFile(file, shared_path="/shared"):
+    if file:
+        filename = file.filename
+        if not filename.endswith(".loop3d"):
+            filename += ".loop3d"
+        filepath = os.path.join(shared_path, filename)
+        if os.path.exists(filepath):
+            raise Exception(f"File {filename} already exists in the shared path.")
+        file.save(filepath)
+        if not LoopProjectFile.CheckFileValid(filepath):
+            os.remove(filepath)
+            raise Exception("Uploaded file is not a valid LoopProjectFile.")
+        return
+    else:
+        raise Exception("No file was provided for upload.")
+
+
+def handleCSVlist(files, loopFilename, shared_path="/shared"):
+    if not loopFilename:
+        raise Exception("loopFilename is required")
+    if not files:
+        raise Exception("No CSV files provided")
+
+    loop_file_path = os.path.join(shared_path, loopFilename)
+    saved_files = []
+
+    for file_storage in files.getlist("file"):
+        if file_storage and file_storage.filename.endswith(".csv"):
+            filepath = os.path.join(shared_path, file_storage.filename)
+            file_storage.save(filepath)
+            saved_files.append(filepath)
+
+    try:
+        FromCsv(loop_file_path, shared_path)
+    except Exception as conversion_error:
+        for csv_file in saved_files:
+            try:
+                os.remove(os.path.join(shared_path, csv_file))
+            except Exception as e:
+                print(f"Failed to delete CSV file {csv_file}: {e}")
+        if os.path.exists(loop_file_path):
+            try:
+                os.remove(loop_file_path)
+            except Exception as e:
+                print(f"Failed to delete project file {loop_file_path}: {e}")
+        raise conversion_error
+    else:
+        for csv_file in saved_files:
+            try:
+                os.remove(os.path.join(shared_path, csv_file))
+            except Exception as e:
+                print(f"Failed to delete CSV file {csv_file}: {e}")
+
+    return "success", f"{loopFilename} is created and saved successfully"
+
+
+def handleLoopProjectFile(file, shared_path="/shared"):
+    if file:
+        filename = file.filename
+
+        if not filename.endswith(".loop3d"):
+            filename += ".loop3d"
+
+        filepath = os.path.join(shared_path, filename)
+
+        if os.path.exists(filepath):
+            raise Exception(f"File {filename} already exists in the shared path.")
+
+        file.save(filepath)
+
+        if not LoopProjectFile.CheckFileValid(filepath):
+            os.remove(filepath)
+            raise Exception("Uploaded file is not a valid LoopProjectFile.")
+
+        return
+
+    else:
+        raise Exception("No file was provided for upload.")
+
+
+def handleCSVlist(files, loopFilename, shared_path="/shared"):
+    if not loopFilename:
+        raise Exception("loopFilename is required")
+    if not files:
+        raise Exception("No CSV files provided")
+
+    loop_file_path = os.path.join(shared_path, loopFilename)
+    saved_files = []
+
+    for file_storage in files.getlist("file"):
+        if file_storage and file_storage.filename.endswith(".csv"):
+            filepath = os.path.join(shared_path, file_storage.filename)
+            file_storage.save(filepath)
+            saved_files.append(filepath)
+
+    try:
+        FromCsv(loop_file_path, shared_path)
+    except Exception as conversion_error:
+        for csv_file in saved_files:
+            try:
+                os.remove(os.path.join(shared_path, csv_file))
+            except Exception as e:
+                print(f"Failed to delete CSV file {csv_file}: {e}")
+        if os.path.exists(loop_file_path):
+            try:
+                os.remove(loop_file_path)
+            except Exception as e:
+                print(f"Failed to delete project file {loop_file_path}: {e}")
+        raise conversion_error
+    else:
+        for csv_file in saved_files:
+            try:
+                os.remove(os.path.join(shared_path, csv_file))
+            except Exception as e:
+                print(f"Failed to delete CSV file {csv_file}: {e}")
+
+    return "success", f"{loopFilename} is created and saved successfully"
