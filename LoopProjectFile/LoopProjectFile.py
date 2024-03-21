@@ -32,7 +32,7 @@ a failure or "value" in the case of a successful get call.
 import numpy
 import pandas
 
-# import sys
+import sys
 import os
 import enum
 
@@ -126,20 +126,29 @@ def OpenProjectFile(filename, readOnly=True, verbose=True):
 
     """
     if verbose:
-        print("Accessing file named: " + filename)
+        print(f"Accessing file named: {filename}", file=sys.stderr)
+
     if not os.path.isfile(filename):
-        errStr = "File " + filename + " does not exist"
-        print(errStr)
+        errStr = f"File {filename} does not exist"
+        print(errStr, file=sys.stderr)
         return {"errorFlag": True, "errorString": errStr}
+
+    try:
+        with open(filename, 'rb') as f:
+            print(f"File {filename} opened successfully.", file=sys.stderr)
+    except Exception as e:
+        return {"errorFlag": True, "errorString": str(e)}
+
     readFlag = "r" if readOnly else "a"
-    rootgrp = netCDF4.Dataset(filename, readFlag, format="NETCDF4")
-    if not rootgrp:
-        errStr = "(ERROR) File was not a Loop Project File"
-        print(errStr)
-        return {"errorFlag": True, "errorString": errStr}
-    if verbose:
-        print("NetCDF data model type: " + rootgrp.data_model)
-    return {"errorFlag": False, "root": rootgrp}
+    try:
+        rootgrp = netCDF4.Dataset(filename, readFlag, format="NETCDF4")
+        if rootgrp:
+            if verbose:
+                print(f"NetCDF data model type: {rootgrp.data_model}", file=sys.stderr)
+            return {"errorFlag": False, "root": rootgrp}
+    except Exception as e:
+        print(f"Error occurred while opening file {filename}: {e}", file=sys.stderr)
+        return {"errorFlag": True, "errorString": str(e)}
 
 
 # Accessor Function handling opening and closing of file and calling
@@ -370,57 +379,61 @@ def Get(filename, element, **kwargs):
         response = fileResp
     else:
         root = fileResp["root"]
-        if element == "version":
-            response = Version.GetVersion(root)
-        elif element == "extents":
-            response = Extents.GetExtents(root)
-        elif element == "strModel":
-            response = StructuralModels.GetStructuralModel(root, **kwargs)
-        elif element == "faultObservations":
-            response = DataCollection.GetFaultObservations(root, **kwargs)
-        elif element == "foldObservations":
-            response = DataCollection.GetFoldObservations(root, **kwargs)
-        elif element == "foliationObservations":
-            response = DataCollection.GetFoliationObservations(root, **kwargs)
-        elif element == "discontinuityObservations":
-            response = DataCollection.GetDiscontinuityObservations(root, **kwargs)
-        elif element == "stratigraphicObservations":
-            response = DataCollection.GetStratigraphicObservations(root, **kwargs)
-        elif element == "contacts":
-            response = DataCollection.GetContacts(root, **kwargs)
-        elif element == "drillholeObservations":
-            response = DataCollection.GetDrillholeObservations(root, **kwargs)
-        elif element == "drillholeSurveys":
-            response = DataCollection.GetDrillholeSurveys(root, **kwargs)
-        elif element == "drillholeProperties":
-            response = DataCollection.GetDrillholeProperties(root, **kwargs)
-        elif element == "stratigraphicLog":
-            response = ExtractedInformation.GetStratigraphicLog(root, **kwargs)
-        elif element == "faultLog":
-            response = ExtractedInformation.GetFaultLog(root, **kwargs)
-        elif element == "foldLog":
-            response = ExtractedInformation.GetFoldLog(root, **kwargs)
-        elif element == "foliationLog":
-            response = ExtractedInformation.GetFoliationLog(root, **kwargs)
-        elif element == "discontinuityLog":
-            response = ExtractedInformation.GetDiscontinuityLog(root, **kwargs)
-        elif element == "drillholeLog":
-            response = ExtractedInformation.GetDrillholeLog(root, **kwargs)
-        elif element == "dataCollectionConfig":
-            response = DataCollection.GetConfiguration(root, **kwargs)
-        elif element == "dataCollectionSources":
-            response = DataCollection.GetSources(root, **kwargs)
-        elif element == "dataCollectionRawSourceData":
-            response = DataCollection.GetRawSourceData(root, **kwargs)
-        elif element == "eventRelationships":
-            response = ExtractedInformation.GetEventRelationships(root, **kwargs)
-        elif element == "structuralModelsConfig":
-            response = StructuralModels.GetConfiguration(root, **kwargs)
-        else:
-            errStr = "(ERROR) Unknown element for Get function '" + element + "'"
-            print(errStr)
-            response = {"errorFlag": True, "errorString": errStr}
-        root.close()
+        try:
+            if element == "version":
+                response = Version.GetVersion(root)
+            elif element == "extents":
+                response = Extents.GetExtents(root)
+            elif element == "strModel":
+                response = StructuralModels.GetStructuralModel(root, **kwargs)
+            elif element == "faultObservations":
+                response = DataCollection.GetFaultObservations(root, **kwargs)
+            elif element == "foldObservations":
+                response = DataCollection.GetFoldObservations(root, **kwargs)
+            elif element == "foliationObservations":
+                response = DataCollection.GetFoliationObservations(root, **kwargs)
+            elif element == "discontinuityObservations":
+                response = DataCollection.GetDiscontinuityObservations(root, **kwargs)
+            elif element == "stratigraphicObservations":
+                response = DataCollection.GetStratigraphicObservations(root, **kwargs)
+            elif element == "contacts":
+                response = DataCollection.GetContacts(root, **kwargs)
+            elif element == "drillholeObservations":
+                response = DataCollection.GetDrillholeObservations(root, **kwargs)
+            elif element == "drillholeSurveys":
+                response = DataCollection.GetDrillholeSurveys(root, **kwargs)
+            elif element == "drillholeProperties":
+                response = DataCollection.GetDrillholeProperties(root, **kwargs)
+            elif element == "stratigraphicLog":
+                response = ExtractedInformation.GetStratigraphicLog(root, **kwargs)
+            elif element == "faultLog":
+                response = ExtractedInformation.GetFaultLog(root, **kwargs)
+            elif element == "foldLog":
+                response = ExtractedInformation.GetFoldLog(root, **kwargs)
+            elif element == "foliationLog":
+                response = ExtractedInformation.GetFoliationLog(root, **kwargs)
+            elif element == "discontinuityLog":
+                response = ExtractedInformation.GetDiscontinuityLog(root, **kwargs)
+            elif element == "drillholeLog":
+                response = ExtractedInformation.GetDrillholeLog(root, **kwargs)
+            elif element == "dataCollectionConfig":
+                response = DataCollection.GetConfiguration(root, **kwargs)
+            elif element == "dataCollectionSources":
+                response = DataCollection.GetSources(root, **kwargs)
+            elif element == "dataCollectionRawSourceData":
+                response = DataCollection.GetRawSourceData(root, **kwargs)
+            elif element == "eventRelationships":
+                response = ExtractedInformation.GetEventRelationships(root, **kwargs)
+            elif element == "structuralModelsConfig":
+                response = StructuralModels.GetConfiguration(root, **kwargs)
+            else:
+                errStr = "(ERROR) Unknown element for Get function '" + element + "'"
+                print(errStr)
+                response = {"errorFlag": True, "errorString": errStr}
+        finally:
+            print(f"Closing file: {filename}",file=sys.stderr)
+            root.close()
+            print(f"{filename} closed successfully",file=sys.stderr)
     return response
 
 
