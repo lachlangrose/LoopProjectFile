@@ -105,7 +105,7 @@ def CreateBasic(filename):
 
 
 # Open project file with error checking for file existing and of netCDF format
-def OpenProjectFile(filename, readOnly=True, verbose=True):
+def OpenProjectFile(filename, readOnly=True, verbose=False):
     """
     **OpenProjectFile** - Open a Loop Project File and checks it exists and is a
     netCDF formatted file
@@ -133,9 +133,11 @@ def OpenProjectFile(filename, readOnly=True, verbose=True):
         print(errStr, file=sys.stderr)
         return {"errorFlag": True, "errorString": errStr}
 
+    # Quick check to see if openable
     try:
         with open(filename, 'rb') as f:
-            print(f"File {filename} opened successfully.", file=sys.stderr)
+            if (verbose):
+                print(f"File {filename} opened successfully.", file=sys.stderr)
     except Exception as e:
         return {"errorFlag": True, "errorString": str(e)}
 
@@ -217,106 +219,117 @@ def Set(filename, element, **kwargs):
         True
 
     """
-    fileResp = OpenProjectFile(filename, readOnly=False, verbose=False)
+    if "verbose" in kwargs.keys():
+        verbose = kwargs["verbose"]
+    else:
+        verbose = False
+
+    fileResp = OpenProjectFile(filename, readOnly=False, verbose=verbose)
     if fileResp["errorFlag"]:
         response = fileResp
     else:
         root = fileResp["root"]
-        if element == "version":
-            response = Version.SetVersion(root, **kwargs)
-        elif element == "extents":
-            response = Extents.SetExtents(root, **kwargs)
-        elif element == "strModel":
-            response = StructuralModels.SetStructuralModel(root, **kwargs)
-        elif element == "faultObservations":
-            response = DataCollection.SetFaultObservations(root, **kwargs)
-        elif element == "faultObservationsAppend":
-            response = DataCollection.SetFaultObservations(root, append=True, **kwargs)
-        elif element == "foldObservations":
-            response = DataCollection.SetFoldObservations(root, **kwargs)
-        elif element == "foldObservationsAppend":
-            response = DataCollection.SetFoldObservations(root, append=True, **kwargs)
-        elif element == "foliationObservations":
-            response = DataCollection.SetFoliationObservations(root, **kwargs)
-        elif element == "foliationObservationsAppend":
-            response = DataCollection.SetFoliationObservations(
-                root, append=True, **kwargs
-            )
-        elif element == "discontinuityObservations":
-            response = DataCollection.SetDiscontinuityObservations(root, **kwargs)
-        elif element == "discontinuityObservationsAppend":
-            response = DataCollection.SetDiscontinuityObservations(
-                root, append=True, **kwargs
-            )
-        elif element == "stratigraphicObservations":
-            response = DataCollection.SetStratigraphicObservations(root, **kwargs)
-        elif element == "stratigraphicObservationsAppend":
-            response = DataCollection.SetStratigraphicObservations(
-                root, append=True, **kwargs
-            )
-        elif element == "contacts":
-            response = DataCollection.SetContacts(root, **kwargs)
-        elif element == "contactsAppend":
-            response = DataCollection.SetContacts(root, append=True, **kwargs)
-        elif element == "drillholeObservations":
-            response = DataCollection.SetDrillholeObservations(root, **kwargs)
-        elif element == "drillholeObservationsAppend":
-            response = DataCollection.SetDrillholeObservations(
-                root, append=True, **kwargs
-            )
-        elif element == "drillholeSurveys":
-            response = DataCollection.SetDrillholeSurveys(root, **kwargs)
-        elif element == "drillholeSurveysAppend":
-            response = DataCollection.SetDrillholeSurveys(root, append=True, **kwargs)
-        elif element == "drillholeProperties":
-            response = DataCollection.SetDrillholeProperties(root, **kwargs)
-        elif element == "drillholePropertiesAppend":
-            response = DataCollection.SetDrillholeProperties(
-                root, append=True, **kwargs
-            )
-        elif element == "stratigraphicLog":
-            response = ExtractedInformation.SetStratigraphicLog(root, **kwargs)
-        elif element == "stratigraphicLogAppend":
-            response = ExtractedInformation.SetStratigraphicLog(
-                root, append=True, **kwargs
-            )
-        elif element == "faultLog":
-            response = ExtractedInformation.SetFaultLog(root, **kwargs)
-        elif element == "faultLogAppend":
-            response = ExtractedInformation.SetFaultLog(root, append=True, **kwargs)
-        elif element == "foldLog":
-            response = ExtractedInformation.SetFoldLog(root, **kwargs)
-        elif element == "foldLogAppend":
-            response = ExtractedInformation.SetFoldLog(root, append=True, **kwargs)
-        elif element == "foliationLog":
-            response = ExtractedInformation.SetFoliationLog(root, **kwargs)
-        elif element == "foliationLogAppend":
-            response = ExtractedInformation.SetFoliationLog(root, append=True, **kwargs)
-        elif element == "discontinuityLog":
-            response = ExtractedInformation.SetDiscontinuityLog(root, **kwargs)
-        elif element == "discontinuityLogAppend":
-            response = ExtractedInformation.SetDiscontinuityLog(
-                root, append=True, **kwargs
-            )
-        elif element == "drillholeLog":
-            response = ExtractedInformation.SetDrillholeLog(root, **kwargs)
-        elif element == "drillholeLogAppend":
-            response = ExtractedInformation.SetDrillholeLog(root, append=True, **kwargs)
-        elif element == "dataCollectionConfig":
-            response = DataCollection.SetConfiguration(root, **kwargs)
-        elif element == "dataCollectionSources":
-            response = DataCollection.SetSources(root, **kwargs)
-        elif element == "dataCollectionRawSourceData":
-            response = DataCollection.SetRawSourceData(root, **kwargs)
-        elif element == "eventRelationships":
-            response = ExtractedInformation.SetEventRelationships(root, **kwargs)
-        elif element == "structuralModelsConfig":
-            response = StructuralModels.SetConfiguration(root, **kwargs)
-        else:
-            errStr = "(ERROR) Unknown element for Set function '" + element + "'"
-            print(errStr)
-            response = {"errorFlag": True, "errorString": errStr}
-        root.close()
+        try:
+            if element == "version":
+                response = Version.SetVersion(root, **kwargs)
+            elif element == "extents":
+                response = Extents.SetExtents(root, **kwargs)
+            elif element == "strModel":
+                response = StructuralModels.SetStructuralModel(root, **kwargs)
+            elif element == "faultObservations":
+                response = DataCollection.SetFaultObservations(root, **kwargs)
+            elif element == "faultObservationsAppend":
+                response = DataCollection.SetFaultObservations(root, append=True, **kwargs)
+            elif element == "foldObservations":
+                response = DataCollection.SetFoldObservations(root, **kwargs)
+            elif element == "foldObservationsAppend":
+                response = DataCollection.SetFoldObservations(root, append=True, **kwargs)
+            elif element == "foliationObservations":
+                response = DataCollection.SetFoliationObservations(root, **kwargs)
+            elif element == "foliationObservationsAppend":
+                response = DataCollection.SetFoliationObservations(
+                    root, append=True, **kwargs
+                )
+            elif element == "discontinuityObservations":
+                response = DataCollection.SetDiscontinuityObservations(root, **kwargs)
+            elif element == "discontinuityObservationsAppend":
+                response = DataCollection.SetDiscontinuityObservations(
+                    root, append=True, **kwargs
+                )
+            elif element == "stratigraphicObservations":
+                response = DataCollection.SetStratigraphicObservations(root, **kwargs)
+            elif element == "stratigraphicObservationsAppend":
+                response = DataCollection.SetStratigraphicObservations(
+                    root, append=True, **kwargs
+                )
+            elif element == "contacts":
+                response = DataCollection.SetContacts(root, **kwargs)
+            elif element == "contactsAppend":
+                response = DataCollection.SetContacts(root, append=True, **kwargs)
+            elif element == "drillholeObservations":
+                response = DataCollection.SetDrillholeObservations(root, **kwargs)
+            elif element == "drillholeObservationsAppend":
+                response = DataCollection.SetDrillholeObservations(
+                    root, append=True, **kwargs
+                )
+            elif element == "drillholeSurveys":
+                response = DataCollection.SetDrillholeSurveys(root, **kwargs)
+            elif element == "drillholeSurveysAppend":
+                response = DataCollection.SetDrillholeSurveys(root, append=True, **kwargs)
+            elif element == "drillholeProperties":
+                response = DataCollection.SetDrillholeProperties(root, **kwargs)
+            elif element == "drillholePropertiesAppend":
+                response = DataCollection.SetDrillholeProperties(
+                    root, append=True, **kwargs
+                )
+            elif element == "stratigraphicLog":
+                response = ExtractedInformation.SetStratigraphicLog(root, **kwargs)
+            elif element == "stratigraphicLogAppend":
+                response = ExtractedInformation.SetStratigraphicLog(
+                    root, append=True, **kwargs
+                )
+            elif element == "faultLog":
+                response = ExtractedInformation.SetFaultLog(root, **kwargs)
+            elif element == "faultLogAppend":
+                response = ExtractedInformation.SetFaultLog(root, append=True, **kwargs)
+            elif element == "foldLog":
+                response = ExtractedInformation.SetFoldLog(root, **kwargs)
+            elif element == "foldLogAppend":
+                response = ExtractedInformation.SetFoldLog(root, append=True, **kwargs)
+            elif element == "foliationLog":
+                response = ExtractedInformation.SetFoliationLog(root, **kwargs)
+            elif element == "foliationLogAppend":
+                response = ExtractedInformation.SetFoliationLog(root, append=True, **kwargs)
+            elif element == "discontinuityLog":
+                response = ExtractedInformation.SetDiscontinuityLog(root, **kwargs)
+            elif element == "discontinuityLogAppend":
+                response = ExtractedInformation.SetDiscontinuityLog(
+                    root, append=True, **kwargs
+                )
+            elif element == "drillholeLog":
+                response = ExtractedInformation.SetDrillholeLog(root, **kwargs)
+            elif element == "drillholeLogAppend":
+                response = ExtractedInformation.SetDrillholeLog(root, append=True, **kwargs)
+            elif element == "dataCollectionConfig":
+                response = DataCollection.SetConfiguration(root, **kwargs)
+            elif element == "dataCollectionSources":
+                response = DataCollection.SetSources(root, **kwargs)
+            elif element == "dataCollectionRawSourceData":
+                response = DataCollection.SetRawSourceData(root, **kwargs)
+            elif element == "eventRelationships":
+                response = ExtractedInformation.SetEventRelationships(root, **kwargs)
+            elif element == "structuralModelsConfig":
+                response = StructuralModels.SetConfiguration(root, **kwargs)
+            else:
+                errStr = "(ERROR) Unknown element for Set function '" + element + "'"
+                print(errStr)
+                response = {"errorFlag": True, "errorString": errStr}
+        finally:
+            if (verbose):
+                print(f"Closing file: {filename}",file=sys.stderr)
+            root.close()
+            if (verbose):
+                print(f"{filename} closed successfully",file=sys.stderr)
     return response
 
 
@@ -373,8 +386,12 @@ def Get(filename, element, **kwargs):
         True otherwise the extracted value is in the "value" keyword
 
     """
+    if "verbose" in kwargs.keys():
+        verbose = kwargs["verbose"]
+    else:
+        verbose = False
 
-    fileResp = OpenProjectFile(filename, readOnly=True, verbose=False)
+    fileResp = OpenProjectFile(filename, readOnly=True, verbose=verbose)
     if fileResp["errorFlag"]:
         response = fileResp
     else:
@@ -431,9 +448,11 @@ def Get(filename, element, **kwargs):
                 print(errStr)
                 response = {"errorFlag": True, "errorString": errStr}
         finally:
-            print(f"Closing file: {filename}",file=sys.stderr)
+            if (verbose):
+                print(f"Closing file: {filename}",file=sys.stderr)
             root.close()
-            print(f"{filename} closed successfully",file=sys.stderr)
+            if (verbose):
+                print(f"{filename} closed successfully",file=sys.stderr)
     return response
 
 
@@ -557,7 +576,7 @@ faultObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("type", "<i4"),
+        ("segNum", "<u4"),
         ("dipDir", "<f8"),
         ("dip", "<f8"),
         ("dipPolarity", "<f8"),
@@ -573,7 +592,7 @@ foldObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("type", "<i4"),
+        ("segNum", "<u4"),
         ("axisX", "<f8"),
         ("axisY", "<f8"),
         ("axisZ", "<f8"),
@@ -588,7 +607,7 @@ foliationObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("type", "<i4"),
+        ("segNum", "<u4"),
         ("dipDir", "<f8"),
         ("dip", "<f8"),
     ]
@@ -600,7 +619,7 @@ discontinuityObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("type", "<i4"),
+        ("segNum", "<u4"),
         ("dipDir", "<f8"),
         ("dip", "<f8"),
     ]
@@ -612,7 +631,7 @@ contactObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("type", "<i4"),
+        ("segNum", "<u4"),
     ]
 )
 
@@ -622,7 +641,6 @@ stratigraphicObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("type", "<i4"),
         ("dipDir", "<f8"),
         ("dip", "<f8"),
         ("dipPolarity", "<f8"),
@@ -639,8 +657,6 @@ faultEventType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("rank", "<u4"),
-        ("type", "<i4"),
         ("avgDisplacement", "<f8"),
         ("avgDownthrowDir", "<f8"),
         ("influenceDistance", "<f8"),
@@ -668,8 +684,6 @@ foldEventType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("rank", "<u4"),
-        ("type", "<i4"),
         ("periodic", "u1"),
         ("wavelength", "<f8"),
         ("amplitude", "<f8"),
@@ -689,8 +703,6 @@ foliationEventType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("rank", "<u4"),
-        ("type", "<i4"),
         ("lowerScalarValue", "<f8"),
         ("upperScalarValue", "<f8"),
     ]
@@ -705,8 +717,6 @@ discontinuityEventType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("rank", "<u4"),
-        ("type", "<i4"),
         ("scalarValue", "<f8"),
     ]
 )
@@ -720,8 +730,6 @@ stratigraphicLayerType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("rank", "<u4"),
-        ("type", "<i4"),
         ("thickness", "<f8"),
         ("colour1Red", "u1"),
         ("colour1Green", "u1"),
