@@ -1,6 +1,3 @@
 netCDF4>=1.5.4
 numpy
 pandas
-flask
-flask-cors
-LoopProjectFile
