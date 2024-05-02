@@ -13,12 +13,12 @@ jobs:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
         python-version: ["3.8","3.9","3.10","3.11", "3.12"]
     steps:
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Add msbuild to PATH
         if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1.0.2  
