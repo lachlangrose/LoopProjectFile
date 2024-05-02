@@ -579,7 +579,7 @@ faultObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("segNum", "<u4"),
+        ("featureId", "<u4"),
         ("dipDir", "<f8"),
         ("dip", "<f8"),
         ("dipPolarity", "<f8"),
@@ -595,7 +595,7 @@ foldObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("segNum", "<u4"),
+        ("featureId", "<u4"),
         ("axisX", "<f8"),
         ("axisY", "<f8"),
         ("axisZ", "<f8"),
@@ -610,7 +610,7 @@ foliationObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("segNum", "<u4"),
+        ("featureId", "<u4"),
         ("dipDir", "<f8"),
         ("dip", "<f8"),
     ]
@@ -622,7 +622,7 @@ discontinuityObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("segNum", "<u4"),
+        ("featureId", "<u4"),
         ("dipDir", "<f8"),
         ("dip", "<f8"),
     ]
@@ -634,7 +634,7 @@ contactObservationType = numpy.dtype(
         ("easting", "<f8"),
         ("northing", "<f8"),
         ("altitude", "<f8"),
-        ("segNum", "<u4"),
+        ("featureId", "<u4"),
     ]
 )
 
