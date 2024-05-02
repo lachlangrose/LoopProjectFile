@@ -165,6 +165,7 @@ def Set(filename, element, **kwargs):
                       "depth" = [topDepth, bottomDepth]
                       "spacing" = [E/WSpacing, N/SSpacing, DepthSpacing]
                       "preference" = "utm" or "geodesic" (optional)
+                      "epsg" = EPSG projection used
         strModel    : "data" = the 3D scalar field of structural data
                       "index" = the index of the dataset to save
                       "verbose" = optional extra console logging
@@ -195,7 +196,7 @@ def Set(filename, element, **kwargs):
     For saving extents (in the middle of the pacific ocean):
     >>> LoopProjectFile.Set("test.loop3d", "extents", geodesic=[0,1,-180,-179], \
         utm=[1,1,10000000,9889363.77,833966.132,722587.169], depth=[-1000,-2000] \
-        spacing=[1000,1000,10], preference="utm")
+        spacing=[1000,1000,10], preference="utm", epsg="EPSG:32753")
 
     For saving field observations:
     >>> data = ((easting, northing, altitude), dipdir, dip, polarity, formation, layer) * X rows
@@ -344,7 +345,8 @@ def Get(filename, element, **kwargs):
                       "utm" = [utmZone, utmNorthSouth, minNorthing, maxNorthing, minEasting, maxEasting]
                       "depth" = [topDepth, bottomDepth]
                       "spacing" = [N/SSpacing, E/WSpacing, DepthSpacing]
-                      "preference" = "utm" or "geodesic" (optional)}
+                      "preference" = "utm" or "geodesic" (optional),
+                      "epsg" = EPSG projection}
         strModel    : "value" = the 3D scalar field of structural data
 
     Examples
@@ -368,6 +370,7 @@ def Get(filename, element, **kwargs):
     >>>     utm = data["utm"]
     >>>     depth = data["depth"]
     >>>     spacing = data["spacing"]
+    >>>     epsg = data["epsg"]
 
     Parameters
     ----------
