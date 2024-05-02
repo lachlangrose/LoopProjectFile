@@ -24,6 +24,13 @@ def CheckExtentsValid(rootGroup, xyzGridSize, verbose=False):
 
     """
     valid = True
+    if ("epsg" in rootGroup.ncattrs()):
+        if verbose:
+            print("  ", rootGroup.epsg)
+    else:
+        print("(INVALID) No epsg format in project file")
+        valid = False
+
     # Check Projection Model
     if "workingFormat" in rootGroup.ncattrs():
         if verbose:
@@ -127,10 +134,13 @@ def GetExtents(rootGroup):
     Returns
     -------
     dict {"errorFlag", "errorString"/"value"}
-        value is a dict{"geodesic":[double, double, double, double],
-        "utm":[int, int, double, double, double, double], "depth":[double, double],
-        "spacing":[double, double, double]} containing the extents of this
-        project file
+        value is a dict{
+            "geodesic":[double, double, double, double],
+            "utm":[int, int, double, double, double, double],
+            "depth":[double, double],
+            "spacing":[double, double, double],
+            "epsg":str
+        } containing the extents of this project file
 
     """
     response = {"errorFlag": False}
@@ -150,6 +160,7 @@ def GetExtents(rootGroup):
         errStr = "(ERROR) No or incomplete geodesic boundary in loop project file"
         print(errStr)
         response = {"errorFlag": True, "errorString": errStr}
+
     if (
         "utmZone" in rootGroup.ncattrs()
         and "utmNorthSouth" in rootGroup.ncattrs()
@@ -170,12 +181,14 @@ def GetExtents(rootGroup):
         errStr = "(ERROR) No or incomplete UTM boundary in loop project file"
         print(errStr)
         response = {"errorFlag": True, "errorString": errStr}
+
     if "topDepth" in rootGroup.ncattrs() and "bottomDepth" in rootGroup.ncattrs():
         depth = [rootGroup.bottomDepth, rootGroup.topDepth]
     else:
         errStr = "(ERROR) No or incomplete depth boundary in loop project file"
         print(errStr)
         response = {"errorFlag": True, "errorString": errStr}
+
     if (
         "spacingX" in rootGroup.ncattrs()
         and "spacingY" in rootGroup.ncattrs()
@@ -186,18 +199,27 @@ def GetExtents(rootGroup):
         errStr = "(ERROR) No or incomplete spacing data in loop project file"
         print(errStr)
         response = {"errorFlag": True, "errorString": errStr}
+
+    if ("epsg" in rootGroup.ncattrs()):
+        epsg = rootGroup.epsg
+    else:
+        errStr = "(ERROR) No or incomplete epsg data in loop project file"
+        print(errStr)
+        response = {"errorFlag": True, "errorString": errStr}
+
     if response["errorFlag"] is False:
         response["value"] = {
             "geodesic": geodesic,
             "utm": utm,
             "depth": depth,
             "spacing": spacing,
+            "epsg": epsg
         }
     return response
 
 
 # Set extents of region of interest on root group
-def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
+def SetExtents(rootGroup, geodesic, utm, depth, spacing, epsg, preference="utm"):
     """
     **SetExtents** - Saves the extents of the region of interest as specified into
     the netCDF Loop Project File
@@ -220,6 +242,9 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
     preference: string (optional)
         A string ("utm" or "geodesic") which specifies which format the Loop GUI
         region of interest should be displayed
+    epsg: string
+        A string of the EPSG projection used in the Loop Project in the
+        format "EPSG:<value>"
 
     Returns
     -------
@@ -273,6 +298,7 @@ def SetExtents(rootGroup, geodesic, utm, depth, spacing, preference="utm"):
         rootGroup.spacingY = spacing[1]
         rootGroup.spacingZ = spacing[2]
     rootGroup.workingFormat = 1 if preference == "utm" else 0
+    rootGroup.epsg = epsg
 
     # Do a quick sanity check and swap min and max values if wrong
     if rootGroup.minLatitude > rootGroup.maxLatitude:
