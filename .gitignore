@@ -2,3 +2,4 @@ __pycache__
 *.swp
 *.swo
 LoopProjectFile.egg-info/*
+build/lib/LoopProjectFile/*
