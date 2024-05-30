@@ -2,6 +2,7 @@
 import pandas
 import os
 import sys
+import numpy
 import LoopProjectFile
 
 
@@ -305,7 +306,8 @@ def ElementToDataframe(loopFilename, element, loopCompoundType):
         columns = list(loopCompoundType.names)
         df = pandas.DataFrame.from_records(resp["value"], columns=columns)
         for name in columns:
-            df[name] = df[name].astype(loopCompoundType[name])
+            if type(loopCompoundType[name]) != numpy.dtypes.VoidDType:
+                df[name] = df[name].astype(loopCompoundType[name])
         df = df.map(lambda x: x.decode() if isinstance(x, bytes) else x)
         # df.set_index(columns[0], inplace=True)
         return df  # .to_csv(outputFilename)

@@ -63,6 +63,12 @@ class EventRelationshipType(enum.IntEnum):
     FAULT_FAULT_ABUT = 3
     FAULT_FAULT_OVERPRINT = 4
 
+class ThickenessCalculatorType(enum.IntEnum):
+    ALPHA = 0
+    INTERPOLATED_STRUCTURE = 1
+    STRUCTURAL_POINT = 2
+    PLACEHOLDER_1 = 3
+    PLACEHOLDER_2 = 4
 
 # ###  External Accessors ### #
 
@@ -733,9 +739,9 @@ stratigraphicLayerType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("ThicknessMean", "<f8"),
-        ("ThicknessMedian", "<f8"),
-        ("ThicknessStdDev", "<f8"),
+        ("ThicknessMean", "<f8", len(ThickenessCalculatorType)),
+        ("ThicknessMedian", "<f8", len(ThickenessCalculatorType)),
+        ("ThicknessStdDev", "<f8", len(ThickenessCalculatorType)),
         ("colour1Red", "u1"),
         ("colour1Green", "u1"),
         ("colour1Blue", "u1"),
