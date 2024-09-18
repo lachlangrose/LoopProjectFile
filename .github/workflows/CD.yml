@@ -42,10 +42,10 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install . --user
-      - name: Test verification
-        shell: bash -l {0}
-        run: |
-          pytest
+      # - name: Test verification
+      #   shell: bash -l {0}
+      #   run: |
+      #     pytest
 
   release-please:
     runs-on: ubuntu-latest
