@@ -15,7 +15,7 @@ jobs:
           black .
       - name: Lint with ruff
         run: |
-          ruff check LoopPojectFile --fix
+          ruff check LoopProjectFile --fix
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: style fixes by ruff and autoformatting by black"
@@ -55,8 +55,8 @@ jobs:
         id: release
         with:
           release-type: python
-          package-name: LoopPojectFile
-          version-file: LoopPojectFile/version.py
+          package-name: LoopProjectFile
+          version-file: LoopProjectFile/version.py
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
   # if a release is created then run the deploy scripts for github.io, conda, pypi and docker
