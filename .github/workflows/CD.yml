@@ -37,7 +37,7 @@ jobs:
       - name: Installing dependencies
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge -c loop3d --file dependencies.txt -y
+          conda install -c conda-forge -c loop3d --file requirements.txt -y
       - name: Building and install
         shell: bash -l {0}
         run: |
@@ -120,7 +120,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
       - uses: actions/download-artifact@v4
