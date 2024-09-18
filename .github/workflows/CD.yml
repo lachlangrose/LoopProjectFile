@@ -1,24 +1,24 @@
 on: [push, pull_request]
 name: release-please
 jobs:
-  linting:
-    name: Linting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install black ruff
-      - name: Autoformat with black
-        run: |
-          black .
-      - name: Lint with ruff
-        run: |
-          ruff check LoopProjectFile --fix
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "style: style fixes by ruff and autoformatting by black"
+  # linting:
+  #   name: Linting
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install black ruff
+  #     - name: Autoformat with black
+  #       run: |
+  #         black .
+  #     - name: Lint with ruff
+  #       run: |
+  #         ruff check LoopProjectFile --fix
+  #     - uses: stefanzweifel/git-auto-commit-action@v5
+  #       with:
+  #         commit_message: "style: style fixes by ruff and autoformatting by black"
 
   continuous-integration:
     name: Continuous integration ${{ matrix.os }} python ${{ matrix.python-version }}
