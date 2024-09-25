@@ -26,8 +26,20 @@ from .LoopProjectFile import (
     EventRelationshipType, # noqa: F401
     CheckFileIsLoopProjectFile, # noqa: F401
 )  
-from .Permutations import (Event, perm, ApproxPerm,  CalcPermutation,  checkBrokenRules,  checkBrokenEventRules,) # noqa: F401  
-from .LoopProjectFileUtils import (ToCsv, FromCsv, ElementToCsv, ElementFromCsv, ElementToDataframe, ElementFromDataframe,)  # noqa: F401
+from .Permutations import (
+    Event, # noqa: F401
+    perm, # noqa: F401
+    ApproxPerm,  # noqa: F401
+    CalcPermutation,  # noqa: F401
+    checkBrokenRules,  # noqa: F401
+    checkBrokenEventRules,)   # noqa: F401
+from .LoopProjectFileUtils import (
+    ToCsv, # noqa: F401
+    FromCsv, # noqa: F401
+    ElementToCsv, # noqa: F401
+    ElementFromCsv, # noqa: F401
+    ElementToDataframe, # noqa: F401
+    ElementFromDataframe,)  # noqa: F401
 
 from .Version import LoopVersion  # noqa: F401
 from .Version import __version__ # noqa: F401
