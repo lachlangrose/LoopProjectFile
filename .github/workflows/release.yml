@@ -164,7 +164,7 @@ jobs:
         shell: bash
         run: |
           uv pip install --no-cache wheelhouse/*.tar.gz
-          uv pip install -r requirements.txt
+          uv pip install netCDF4>=1.5.4 numpy pandas pytest
           uv pip list
     
   build-wheels:
