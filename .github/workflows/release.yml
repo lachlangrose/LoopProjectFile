@@ -26,7 +26,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "macos-12", "macos-13","macos-13-arm64", "macos-14", "macos-14-arm64", "macos-15","macos-15-arm64","windows-latest", "windows-2019"]
+        os:   
+        - ubuntu-latest
+        - macos-latest
+        - macos-12
+        - macos-13
+        - macos-14
+        - macos-15
+        - windows-latest
+        - windows-2019
         python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
     steps:
       - uses: actions/checkout@v4
