@@ -196,6 +196,84 @@ jobs:
           name: loopprojectfile-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
           compression-level: 0
+  test-wheels:
+    name: Test wheels on ${{ matrix.os }} (Python ${{ matrix.python-version }})
+    needs: build-wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - macos-12
+          - macos-13
+          - macos-14
+          - macos-15
+          - windows-latest
+          - windows-2019
+        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
+        include:
+          - os: "ubuntu-latest"
+            artifact: loopprojectfile-wheels-ubuntu-latest
+          - os: "macos-latest"
+            artifact: loopprojectfile-wheels-macos-latest
+          - os: "macos-12"
+            artifact: loopprojectfile-wheels-macos-12
+          - os: "macos-13"
+            artifact: loopprojectfile-wheels-macos-13
+          - os: "macos-14"
+            artifact: loopprojectfile-wheels-macos-14
+          - os: "macos-15"
+            artifact: loopprojectfile-wheels-macos-15
+          - os: "windows-2019"
+            artifact: loopprojectfile-wheels-windows-2019
+          - os: "windows-latest"
+            artifact: loopprojectfile-wheels-windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Create virtual environment (Linux / MacOS)
+        # install uv and use it to create a virtual environment, then add it to
+        # environment variables so that it is automatically activated and can be
+        # used for tests below
+        if: ${{ runner.os != 'Windows' }}
+        shell: bash
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          . $HOME/.cargo/env
+          uv venv .venv
+          echo "VIRTUAL_ENV=.venv" >> $GITHUB_ENV
+          echo "$PWD/.venv/bin" >> $GITHUB_PATH
+
+      - name: Create virtual environment (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          irm https://astral.sh/uv/install.ps1 | iex
+          uv venv .venv
+          "VIRTUAL_ENV=.venv" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "$PWD/.venv/Scripts" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Download wheels from artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: wheelhouse
+
+      - name: Install dependencies and LoopProjectFile wheel
+        shell: bash
+        run: |
+          uv pip install --no-cache --pre --no-index --find-links wheelhouse pyogrio
+          uv pip list
+
 
   upload_to_conda:
     needs: ["release-please", "conda-deploy"]
