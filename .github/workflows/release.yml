@@ -114,7 +114,7 @@ jobs:
         run: |
           conda install --solver=classic -c conda-forge conda-build anaconda-client conda-libmamba-solver -y
           conda install anaconda-client -y
-          
+
       - name: Conda build for Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
@@ -187,7 +187,7 @@ jobs:
       - name: Build LPF from sdist and install test dependencies
         shell: bash
         run: |
-          uv pip install --no-cache wheelhouse/*.tar.gz
+          uv pip install --no-cache dist/*.tar.gz
           uv pip install netCDF4>=1.5.4 numpy pandas pytest
           uv pip list
     
