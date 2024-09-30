@@ -275,26 +275,22 @@ jobs:
       - name: Conda build for Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform win-64 --python ${{ matrix.python-version }} 
-          conda convert -p all conda/win-64/*.tar.bz2 -f -o conda
+          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --python ${{ matrix.python-version }} 
+          conda convert --platform win-64 conda/linux-64/*.tar.bz2 -f -o conda
 
       - name: Conda build for Linux
         if: ${{ runner.os == 'Linux' }}
         shell: bash -l {0}
         run: |
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform linux-64 --python ${{ matrix.python-version }} 
-          conda convert -p all conda/linux-64/*.tar.bz2 -f -o conda
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform linux-aarch64 --python ${{ matrix.python-version }} 
-          conda convert -p all conda/linux-aarch64/*.tar.bz2 -f -o conda
+          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --python ${{ matrix.python-version }} 
+          conda convert --platform linux-64 conda/linux-64/*.tar.bz2 -f -o conda
           
       - name: Conda build for MacOS
         if: ${{ runner.os == 'macos' }}
         shell: bash -l {0}
         run: |
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform osx-64 --python ${{ matrix.python-version }} 
-          conda convert -p all conda/osx-64/*.tar.bz2 -f -o conda
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform osx-arm64 --python ${{ matrix.python-version }} 
-          conda convert -p all conda/osx-arm64/*.tar.bz2 -f -o conda
+          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --python ${{ matrix.python-version }} 
+          conda convert --platform osx-64 conda/linux-64/*.tar.bz2 -f -o conda
           
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -321,9 +317,13 @@ jobs:
         shell: bash -l {0}
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN  }}
+          with: 
+          skip-existing: true
+          verbose: true
         run: |
           conda install -c anaconda anaconda-client -y
           anaconda upload --label main conda/*/*.tar.bz2
+        
 
   # upload_to_pypi:
   #     runs-on: "ubuntu-latest"
