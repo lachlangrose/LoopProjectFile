@@ -96,6 +96,7 @@ jobs:
           - macos-15
           - windows-latest
           - windows-2019
+        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
     steps:
       - uses: conda-incubator/setup-miniconda@v3
         with:
@@ -110,7 +111,7 @@ jobs:
           path: ~/.conda/envs
           key: conda-${{ matrix.os }}-${{ matrix.python-version }}-env
           restore-keys: |
-            conda-${{ matrix.os }}-${{ matrix.python-version }}-
+            conda-${{ matrix.os }}-${{ matrix.python-version }}-env
 
       - uses: actions/checkout@v4
       - name: update submodules
