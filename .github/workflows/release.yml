@@ -290,12 +290,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: wheelhouse
+          path: dist
 
       - name: Install dependencies and LoopProjectFile wheel
         shell: bash
         run: |
-          uv pip install --no-cache --pre --no-index --find-links "file:///${{ github.workspace }}/dist" loopprojectfile
+          uv pip install --no-cache --pre --no-index --find-links dist loopprojectfile
           uv pip list
 
 
@@ -333,7 +333,7 @@ jobs:
         - uses: actions/download-artifact@v4
           with:
             name: loopprojectfile-dist
-            path: dist/*.tar.gz
+            path: dist/
         - uses: pypa/gh-action-pypi-publish@release/v1
           with:
             skip-existing: true
