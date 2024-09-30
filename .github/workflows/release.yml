@@ -81,37 +81,24 @@ jobs:
   # if a release is created then run the deploy scripts for github.io, conda, pypi and docker
   
   conda-deploy:
-    name: Building conda package for python ${{ matrix.os }}) python ${{ matrix.python-version }}
+    name: Building conda package for ${{ matrix.os-conda }}) python ${{ matrix.python-version }}
     needs: "continuous-integration"
-    runs-on: ${{matrix.os}}
+    runs-on: ${{matrix.os-conda}}
     strategy:
       fail-fast: false
       matrix:
-        os: 
-          - ubuntu-latest
-          - macos-latest
-          - macos-12
-          - macos-13
-          - macos-14
-          - macos-15
-          - windows-latest
-          - windows-2019
+        os-conda:
+          - linux-64
+          - aaarch64
+          - osx-64
+          - osx-arm64
+          - win-64
         python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
     steps:
       - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-
-      # Restore Conda environment from cache if available
-      - name: Cache Conda environment
-        uses: actions/cache@v3
-        id: conda-cache
-        with:
-          path: ~/.conda/envs
-          key: conda-${{ matrix.os }}-${{ matrix.python-version }}-env
-          restore-keys: |
-            conda-${{ matrix.os }}-${{ matrix.python-version }}-env
 
       - uses: actions/checkout@v4
       - name: update submodules
@@ -124,13 +111,13 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install --solver=classic -c conda-forge conda-build anaconda-client conda-libmamba-solver -y
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform ${{ matrix.os }} --python ${{ matrix.python-version }} 
+          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform ${{ matrix.os-conda }} --python ${{ matrix.python-version }} 
           conda convert -p all conda/linux-64/*.tar.bz2 -f -o conda
           conda install anaconda-client -y
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: conda-${{ matrix.os }}-${{ matrix.python-version }}
+          name: conda-${{ matrix.os-conda }}-${{ matrix.python-version }}
           path: conda
 
   build-sdist:
