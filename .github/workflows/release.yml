@@ -20,7 +20,7 @@ jobs:
   #       with:
   #         commit_message: "style: style fixes by ruff and autoformatting by black"
 
-  continuous-integration:
+  conda-continuous-integration:
     name: Continuous integration ${{ matrix.os }} python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -81,18 +81,21 @@ jobs:
   # if a release is created then run the deploy scripts for github.io, conda, pypi and docker
   
   conda-deploy:
-    name: Building conda package for ${{ matrix.os-conda }}) python ${{ matrix.python-version }}
-    needs: "continuous-integration"
+    name: Building conda package for ${{ matrix.os }}) python ${{ matrix.python-version }}
+    needs: conda-continuous-integration
     runs-on: ${{matrix.os-conda}}
     strategy:
       fail-fast: false
       matrix:
-        os-conda:
-          - linux-64
-          - aaarch64
-          - osx-64
-          - osx-arm64
-          - win-64
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - macos-12
+          - macos-13
+          - macos-14
+          - macos-15
+          - windows-latest
+          - windows-2019
         python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
     steps:
       - uses: conda-incubator/setup-miniconda@v3
@@ -108,20 +111,41 @@ jobs:
       - name: Conda build
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN  }}
+          run: |
+            conda install --solver=classic -c conda-forge conda-build anaconda-client conda-libmamba-solver -y
+            conda install anaconda-client -y
+      - name: Conda build for Windows
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+            conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform win-64 --python ${{ matrix.python-version }} 
+            conda convert -p all conda/win-64/*.tar.bz2 -f -o conda
+      - name: Conda build for Linux
+        if: ${{ runner.os == 'Linux' }}
         shell: bash -l {0}
         run: |
-          conda install --solver=classic -c conda-forge conda-build anaconda-client conda-libmamba-solver -y
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform ${{ matrix.os-conda }} --python ${{ matrix.python-version }} 
-          conda convert -p all conda/linux-64/*.tar.bz2 -f -o conda
-          conda install anaconda-client -y
+            
+            conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform linux-64 --python ${{ matrix.python-version }} 
+            conda convert -p all conda/linux-64/*.tar.bz2 -f -o conda
+            conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform linux-aarch64 --python ${{ matrix.python-version }} 
+            conda convert -p all conda/linux-aarch64/*.tar.bz2 -f -o conda
+            
+
+          if: ${{ runner.os == 'macos' }}
+          shell: bash -l {0}
+          run: |
+            conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform osx-64 --python ${{ matrix.python-version }} 
+            conda convert -p all conda/osx-64/*.tar.bz2 -f -o conda
+            conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform osx-arm64 --python ${{ matrix.python-version }} 
+            conda convert -p all conda/osx-arm64/*.tar.bz2 -f -o conda
+            
+
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: conda-${{ matrix.os-conda }}-${{ matrix.python-version }}
+          name: conda-${{ matrix.os }}-${{ matrix.python-version }}
           path: conda
 
   build-sdist:
-    needs: "continuous-integration"
     name: Build SDist
     runs-on: ubuntu-latest
     steps:
@@ -158,7 +182,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: loopprojectfile-dist
-          path: wheelhouse
+          path: dist
 
       - name: Build LPF from sdist and install test dependencies
         shell: bash
@@ -194,7 +218,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: loopprojectfile-wheels-${{ matrix.os }}
-          path: ./wheelhouse/*.whl
+          path: dist/*.whl
           compression-level: 0
   test-wheels:
     name: Test wheels on ${{ matrix.os }} (Python ${{ matrix.python-version }})
