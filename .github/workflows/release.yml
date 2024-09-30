@@ -42,6 +42,14 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install . --user
+         # Cache conda environments
+      - name: Cache conda environment
+        uses: actions/cache@v4
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-conda-
       # - name: Test verification
       #   shell: bash -l {0}
       #   run: |
@@ -78,6 +86,16 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
+
+      # Restore Conda environment from cache if available
+      - name: Cache Conda environment
+        uses: actions/cache@v3
+        id: conda-cache
+        with:
+          path: ~/.conda/envs
+          key: conda-${{ matrix.os }}-${{ matrix.python-version }}-env
+          restore-keys: |
+            conda-${{ matrix.os }}-${{ matrix.python-version }}-
 
       - uses: actions/checkout@v4
       - name: update submodules
@@ -123,7 +141,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "macos-10", "windows-latest"]
+        os: ["ubuntu-latest", "macos-latest", "macos-12", "windows-latest", "windows-2019"]
     steps:
       - uses: actions/checkout@v4
 
