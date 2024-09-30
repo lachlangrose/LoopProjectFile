@@ -188,6 +188,8 @@ jobs:
       - name: Install dependencies and LoopProjectFile wheel
         shell: bash
         run: |
+          uv pip install netCDF4>=1.5.4 --only-binary :all:
+          uv pip install numpy pandas pytest
           uv pip install --no-cache --pre --no-index --find-links dist loopprojectfile
           uv pip list
 
