@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "macos-10", "windows-latest"]
+        os: ["ubuntu-latest", "macos-latest", "macos-12", "macos-13","macos-13-arm64", "macos-14", "macos-14-arm64", "macos-15","macos-15-arm64","windows-latest", "windows-2019"]
         python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
     steps:
       - uses: actions/checkout@v4
@@ -79,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "macos-10", "windows-latest"]
+        os: ["ubuntu-latest", "macos-latest", "macos-12", "macos-13","macos-13-arm64", "macos-14", "macos-14-arm64", "macos-15","macos-15-arm64","windows-latest", "windows-2019"]
         python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
     steps:
       - uses: conda-incubator/setup-miniconda@v3
@@ -141,7 +141,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "macos-12", "windows-latest", "windows-2019"]
+        os: ["ubuntu-latest", "macos-latest", "macos-12", "macos-13","macos-13-arm64", "macos-14", "macos-14-arm64", "macos-15","macos-15-arm64","windows-latest", "windows-2019"]
     steps:
       - uses: actions/checkout@v4
 
