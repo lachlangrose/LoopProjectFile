@@ -81,7 +81,7 @@ jobs:
   # if a release is created then run the deploy scripts for github.io, conda, pypi and docker
   
   conda-deploy:
-    name: Building conda package for python ${{ matrix.os }})
+    name: Building conda package for python ${{ matrix.os }}) python ${{ matrix.python-version }}
     needs: "continuous-integration"
     runs-on: ${{matrix.os}}
     strategy:
@@ -124,7 +124,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install --solver=classic -c conda-forge conda-build anaconda-client conda-libmamba-solver -y
-          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --python ${{ matrix.python-version }}
+          conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --platform ${{ matrix.os }} --python ${{ matrix.python-version }} 
           conda convert -p all conda/linux-64/*.tar.bz2 -f -o conda
           conda install anaconda-client -y
       - name: upload artifacts
@@ -149,9 +149,39 @@ jobs:
         with:
           name: loopprojectfile-dist
           path: dist/*.tar.gz
+          compression-level: 0
+  
+  test-sdist:
+    name: Test sdist
+    needs: build-sdist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create virtual environment
+        # install uv and use it to create a virtual environment, then add it to
+        # environment variables so that it is automatically activated and can be
+        # used for tests below
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          . $HOME/.cargo/env
+          uv venv .venv
+          echo "VIRTUAL_ENV=.venv" >> $GITHUB_ENV
+          echo "$PWD/.venv/bin" >> $GITHUB_PATH
+
+      - name: Download sdist from artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: loopprojectfile-dist
+          path: wheelhouse
+
+      - name: Build LPF from sdist and install test dependencies
+        shell: bash
+        run: |
+          uv pip install --no-cache wheelhouse/*.tar.gz
+          uv pip install -r requirements.txt
+          uv pip list
     
   build-wheels:
-    needs: build-sdist
+    needs: [build-sdist, test-sdist]
     name: Build Wheels
     runs-on: ${{ matrix.os }}
     strategy:
@@ -176,7 +206,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: loopprojectfile-wheels
+          name: loopprojectfile-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
           compression-level: 0
 
