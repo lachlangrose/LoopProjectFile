@@ -295,12 +295,12 @@ jobs:
       - name: Install dependencies and LoopProjectFile wheel
         shell: bash
         run: |
-          uv pip install --no-cache --pre --no-index --find-links wheelhouse loopprojectfile
+          uv pip install --no-cache --pre --no-index --find-links dist loopprojectfile
           uv pip list
 
 
   upload_to_conda:
-    needs: ["release-please", "conda-deploy"]
+    needs: [release-please, conda-deploy]
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
@@ -324,7 +324,7 @@ jobs:
 
   upload_to_pypi:
       runs-on: "ubuntu-latest"
-      needs: ["release-please", build-sdist]
+      needs: [release-please, test-wheels] 
       if: ${{ needs.release-please.outputs.release_created }}
       permissions:
         # IMPORTANT: this permission is mandatory for trusted publishing
