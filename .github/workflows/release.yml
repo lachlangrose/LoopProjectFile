@@ -271,7 +271,7 @@ jobs:
       - name: Install dependencies and LoopProjectFile wheel
         shell: bash
         run: |
-          uv pip install --no-cache --pre --no-index --find-links wheelhouse pyogrio
+          uv pip install --no-cache --pre --no-index --find-links wheelhouse loopprojectfile
           uv pip list
 
 
