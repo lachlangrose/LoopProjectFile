@@ -37,165 +37,165 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
   # if a release is created then run the deploy scripts for github.io, conda, pypi and docker
 
-  # build-sdist:
-  #   name: Build SDist
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  build-sdist:
+    name: Build SDist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Build SDist
-  #       run: |
-  #         pip install build
-  #         python -m build
+      - name: Build SDist
+        run: |
+          pip install build
+          python -m build
 
-  #     - uses: actions/upload-artifact@v4
-  #       with:
-  #         name: loopprojectfile-dist
-  #         path: dist/*.tar.gz
-  #         compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loopprojectfile-dist
+          path: dist/*.tar.gz
+          compression-level: 0
   
-  # test-sdist:
-  #   name: Test sdist
-  #   needs: build-sdist
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Create virtual environment
-  #       # install uv and use it to create a virtual environment, then add it to
-  #       # environment variables so that it is automatically activated and can be
-  #       # used for tests below
-  #       run: |
-  #         curl -LsSf https://astral.sh/uv/install.sh | sh
-  #         . $HOME/.cargo/env
-  #         uv venv .venv
-  #         echo "VIRTUAL_ENV=.venv" >> $GITHUB_ENV
-  #         echo "$PWD/.venv/bin" >> $GITHUB_PATH
+  test-sdist:
+    name: Test sdist
+    needs: build-sdist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create virtual environment
+        # install uv and use it to create a virtual environment, then add it to
+        # environment variables so that it is automatically activated and can be
+        # used for tests below
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          . $HOME/.cargo/env
+          uv venv .venv
+          echo "VIRTUAL_ENV=.venv" >> $GITHUB_ENV
+          echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-  #     - name: Download sdist from artifacts
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: loopprojectfile-dist
-  #         path: dist
+      - name: Download sdist from artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: loopprojectfile-dist
+          path: dist
 
-  #     - name: Build LPF from sdist and install test dependencies
-  #       shell: bash
-  #       run: |
-  #         uv pip install --no-cache dist/*.tar.gz
-  #         uv pip install netCDF4>=1.5.4 numpy pandas pytest
-  #         uv pip list
+      - name: Build LPF from sdist and install test dependencies
+        shell: bash
+        run: |
+          uv pip install --no-cache dist/*.tar.gz
+          uv pip install netCDF4>=1.5.4 numpy pandas pytest
+          uv pip list
     
-  # build-wheels:
-  #   needs: [build-sdist, test-sdist]
-  #   name: Build Wheels
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: 
-  #         - ubuntu-latest
-  #         - macos-latest
-  #         - macos-12
-  #         - macos-13
-  #         - macos-14
-  #         - macos-15
-  #         - windows-latest
-  #         - windows-2019
-  #   steps:
-  #     - uses: actions/checkout@v4
+  build-wheels:
+    needs: [build-sdist, test-sdist]
+    name: Build Wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: 
+          - ubuntu-latest
+          - macos-latest
+          - macos-12
+          - macos-13
+          - macos-14
+          - macos-15
+          - windows-latest
+          - windows-2019
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Build Wheels
-  #       run: |
-  #         pip install netCDF4>=1.5.4 --only-binary :all:
-  #         pip install build numpy pandas pytest
-  #         python -m build --wheel
+      - name: Build Wheels
+        run: |
+          pip install netCDF4>=1.5.4 --only-binary :all:
+          pip install build numpy pandas pytest
+          python -m build --wheel
 
-  #     - uses: actions/upload-artifact@v4
-  #       with:
-  #         name: loopprojectfile-wheels-${{ matrix.os }}
-  #         path: dist/*.whl
-  #         compression-level: 0
-  # test-wheels:
-  #   name: Test wheels on ${{ matrix.os }} (Python ${{ matrix.python-version }})
-  #   needs: build-wheels
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os:
-  #         - ubuntu-latest
-  #         - macos-latest
-  #         - macos-12
-  #         - macos-13
-  #         - macos-14
-  #         - macos-15
-  #         - windows-latest
-  #         - windows-2019
-  #       python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
-  #       include:
-  #         - os: "ubuntu-latest"
-  #           artifact: loopprojectfile-wheels-ubuntu-latest
-  #         - os: "macos-latest"
-  #           artifact: loopprojectfile-wheels-macos-latest
-  #         - os: "macos-12"
-  #           artifact: loopprojectfile-wheels-macos-12
-  #         - os: "macos-13"
-  #           artifact: loopprojectfile-wheels-macos-13
-  #         - os: "macos-14"
-  #           artifact: loopprojectfile-wheels-macos-14
-  #         - os: "macos-15"
-  #           artifact: loopprojectfile-wheels-macos-15
-  #         - os: "windows-2019"
-  #           artifact: loopprojectfile-wheels-windows-2019
-  #         - os: "windows-latest"
-  #           artifact: loopprojectfile-wheels-windows-latest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loopprojectfile-wheels-${{ matrix.os }}
+          path: dist/*.whl
+          compression-level: 0
+  test-wheels:
+    name: Test wheels on ${{ matrix.os }} (Python ${{ matrix.python-version }})
+    needs: build-wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - macos-12
+          - macos-13
+          - macos-14
+          - macos-15
+          - windows-latest
+          - windows-2019
+        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS)}}
+        include:
+          - os: "ubuntu-latest"
+            artifact: loopprojectfile-wheels-ubuntu-latest
+          - os: "macos-latest"
+            artifact: loopprojectfile-wheels-macos-latest
+          - os: "macos-12"
+            artifact: loopprojectfile-wheels-macos-12
+          - os: "macos-13"
+            artifact: loopprojectfile-wheels-macos-13
+          - os: "macos-14"
+            artifact: loopprojectfile-wheels-macos-14
+          - os: "macos-15"
+            artifact: loopprojectfile-wheels-macos-15
+          - os: "windows-2019"
+            artifact: loopprojectfile-wheels-windows-2019
+          - os: "windows-latest"
+            artifact: loopprojectfile-wheels-windows-latest
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #         allow-prereleases: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
-  #     - name: Create virtual environment (Linux / MacOS)
-  #       # install uv and use it to create a virtual environment, then add it to
-  #       # environment variables so that it is automatically activated and can be
-  #       # used for tests below
-  #       if: ${{ runner.os != 'Windows' }}
-  #       shell: bash
-  #       run: |
-  #         curl -LsSf https://astral.sh/uv/install.sh | sh
-  #         . $HOME/.cargo/env
-  #         uv venv .venv
-  #         echo "VIRTUAL_ENV=.venv" >> $GITHUB_ENV
-  #         echo "$PWD/.venv/bin" >> $GITHUB_PATH
+      - name: Create virtual environment (Linux / MacOS)
+        # install uv and use it to create a virtual environment, then add it to
+        # environment variables so that it is automatically activated and can be
+        # used for tests below
+        if: ${{ runner.os != 'Windows' }}
+        shell: bash
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          . $HOME/.cargo/env
+          uv venv .venv
+          echo "VIRTUAL_ENV=.venv" >> $GITHUB_ENV
+          echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-  #     - name: Create virtual environment (Windows)
-  #       if: ${{ runner.os == 'Windows' }}
-  #       run: |
-  #         irm https://astral.sh/uv/install.ps1 | iex
-  #         uv venv .venv
-  #         "VIRTUAL_ENV=.venv" | Out-File -FilePath $env:GITHUB_ENV -Append
-  #         "$PWD/.venv/Scripts" | Out-File -FilePath $env:GITHUB_PATH -Append
+      - name: Create virtual environment (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          irm https://astral.sh/uv/install.ps1 | iex
+          uv venv .venv
+          "VIRTUAL_ENV=.venv" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "$PWD/.venv/Scripts" | Out-File -FilePath $env:GITHUB_PATH -Append
 
-  #     - name: Download wheels from artifacts
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: ${{ matrix.artifact }}
-  #         path: dist
+      - name: Download wheels from artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist
 
-  #     - name: Install dependencies and LoopProjectFile wheel
-  #       shell: bash
-  #       run: |
-  #         uv pip install --upgrade pip
-  #         uv pip install netCDF4>=1.5.4 --only-binary :all:
-  #         uv pip install numpy pandas pytest
-  #         uv pip install --no-cache --pre --no-index --find-links dist loopprojectfile
-  #         uv pip list
+      - name: Install dependencies and LoopProjectFile wheel
+        shell: bash
+        run: |
+          uv pip install --upgrade pip
+          uv pip install netCDF4>=1.5.4 --only-binary :all:
+          uv pip install numpy pandas pytest
+          uv pip install --no-cache --pre --no-index --find-links dist loopprojectfile
+          uv pip list
 
   conda-continuous-integration:
-    name: Continuous integration ${{ matrix.os }} python ${{ matrix.python-version }}
+    name: Continuous integration ${{ matrix.os }} - Python Version":" ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -219,6 +219,7 @@ jobs:
       - name: Installing dependencies
         shell: bash -l {0}
         run: |
+          conda install --solver=classic -c conda-forge conda-build anaconda-client conda-libmamba-solver -y
           conda install -c conda-forge -c loop3d --file requirements.txt -y
       - name: Building and install
         shell: bash -l {0}
@@ -266,6 +267,24 @@ jobs:
         #       shell: bash -l {0}
         run: |
           git submodule update --init --recursive
+    # Restore the cached Conda environment and package cache to speed up the build
+      - name: Restore Conda environment cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./conda-env
+            ~/conda_pkgs_dir  # Restore Conda package cache
+          key: ${{ runner.os }}-conda-env-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-env-${{ matrix.python-version }}-
+            ${{ runner.os }}-conda-env-
+
+      # Activate the cached environment
+      - name: Activate Conda environment
+        shell: bash -l {0}
+        run: |
+          conda activate ./conda-env
+
       - name: Conda build
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN  }}
@@ -273,7 +292,6 @@ jobs:
         run: |
           conda install --solver=classic -c conda-forge conda-build anaconda-client conda-libmamba-solver -y
           conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --python ${{ matrix.python-version }} 
-          # conda convert --platform all conda/linux-64/*.tar.bz2 -f -o conda
           conda install anaconda-client -y
           
       - name: upload artifacts
@@ -308,20 +326,19 @@ jobs:
           conda install -c anaconda anaconda-client -y
           anaconda upload --label main conda/*/*.tar.bz2
         
-
-  # upload_to_pypi:
-  #     runs-on: "ubuntu-latest"
-  #     needs: [release-please, test-wheels] 
-  #     if: ${{ needs.release-please.outputs.release_created }}
-  #     permissions:
-  #       # IMPORTANT: this permission is mandatory for trusted publishing
-  #       id-token: write
-  #     steps:
-  #       - uses: actions/download-artifact@v4
-  #         with:
-  #           name: loopprojectfile-dist
-  #           path: dist/
-  #       - uses: pypa/gh-action-pypi-publish@release/v1
-  #         with:
-  #           skip-existing: true
-  #           verbose: true
+  upload_to_pypi:
+      runs-on: "ubuntu-latest"
+      needs: [release-please, test-wheels] 
+      if: ${{ needs.release-please.outputs.release_created }}
+      permissions:
+        # IMPORTANT: this permission is mandatory for trusted publishing
+        id-token: write
+      steps:
+        - uses: actions/download-artifact@v4
+          with:
+            name: loopprojectfile-dist
+            path: dist/
+        - uses: pypa/gh-action-pypi-publish@release/v1
+          with:
+            skip-existing: true
+            verbose: true
