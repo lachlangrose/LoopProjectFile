@@ -220,6 +220,20 @@ jobs:
 
         with:
           python-version: ${{ matrix.python-version }}
+          
+      - name: Install Cygwin    
+        if: ${{runner.os == 'Windows'}}
+        shell: pwsh
+        run: |
+          # Download Cygwin installer
+          curl -L -o cygwin-installer.exe https://cygwin.com/setup-x86_64.exe
+          
+          # Install Cygwin with the default base packages (including cygpath)
+          .\cygwin-installer.exe -q -n -N -d -R C:\cygwin64
+          echo "C:\cygwin64\bin" | Out-File -Append -Encoding ASCII $env:GITHUB_PATH
+          # Verify that cygpath is available
+          cygpath --help
+
       - name: Installing dependencies
         shell: bash -l {0}
         run: |
@@ -276,18 +290,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ./conda-env
             ~/conda_pkgs_dir  # Restore Conda package cache
-          key: ${{ runner.os }}-conda-env-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-conda-env-${{ matrix.python-version }}-
-            ${{ runner.os }}-conda-env-
+            ${{ runner.os }}-conda-${{ matrix.python-version }}-
+            ${{ runner.os }}-conda-
 
       # Activate the cached environment
       - name: Activate Conda environment
         shell: bash -l {0}
         run: |
-          conda activate ./${{ runner.os }}-conda-${{ matrix.python-version }}
+          conda activate ./conda-env/${{ runner.os }}-conda-${{ matrix.python-version }}
 
       - name: Conda build
         env:
