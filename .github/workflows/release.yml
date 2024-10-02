@@ -243,8 +243,7 @@ jobs:
 
       - name: Update environment
         run: |
-          mamba env update -n anaconda-client-env -f
-          conda/environment.yml
+          mamba env update -n anaconda-client-env -f conda/environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Caching/Restoring conda environment dependencies
