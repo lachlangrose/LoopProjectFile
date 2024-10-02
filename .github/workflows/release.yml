@@ -220,7 +220,33 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Cache conda environments
+      - name: Setup Miniforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: anaconda-client-env
+      - name: Get Date
+        id: get-date
+        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+        shell: bash
+      
+      - name: Cache Conda env
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CONDA }}/envs
+          key:
+            conda-${{ matrix.os }}--${{ runner.arch }}-python-${{ matrix.python-version }}-${{steps.get-date.outputs.today }}-${{hashFiles('**/conda/environment.yml') }}-${{ env.CACHE_NUMBER}}
+        env:
+          # Increase this value to reset cache if conda/environment.yml has not changed
+          CACHE_NUMBER: 0
+        id: cache
+
+      - name: Update environment
+        run:
+          mamba env update -n anaconda-client-env -f
+          conda/environment.yml
+        if: steps.cache.outputs.cache-hit != 'true'
+
       - name: Caching/Restoring conda environment dependencies
         id: cache-conda
         uses: actions/cache@v4
@@ -295,19 +321,42 @@ jobs:
           - macos-15
           - windows-latest
           - windows-2019
-
         python-version: ["3.9", "3.10", "3.11", "3.12"]
-    steps:
-      - uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
 
+    steps:
       - uses: actions/checkout@v4
       - name: update submodules
         shell: bash
         run: |
           git submodule update --init --recursive
+
+      - name: Setup Miniforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: anaconda-client-env
+
+      - name: Get Date
+        id: get-date
+        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+        shell: bash
+      
+      - name: Cache Conda env
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CONDA }}/envs
+          key:
+            conda-${{ matrix.os }}--${{ runner.arch }}-python-${{ matrix.python-version }}-${{steps.get-date.outputs.today }}-${{hashFiles('**/conda/environment.yml') }}-${{ env.CACHE_NUMBER}}
+        env:
+          # Increase this value to reset cache if conda/environment.yml has not changed
+          CACHE_NUMBER: 0
+        id: cache
+
+      - name: Update environment
+        run:
+          mamba env update -n anaconda-client-env -f
+          conda/environment.yml
+        if: steps.cache.outputs.cache-hit != 'true'
 
     # Restore the cached Conda packages to speed up the build
       - name: Restore cached dependencies
