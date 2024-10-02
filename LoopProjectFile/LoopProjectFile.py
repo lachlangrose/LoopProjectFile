@@ -65,10 +65,6 @@ class EventRelationshipType(enum.IntEnum):
 
 class ThickenessCalculatorType(enum.IntEnum):
     PLACEHOLDER_1 = 0
-    PLACEHOLDER_2 = 1
-    PLACEHOLDER_3 = 3
-    PLACEHOLDER_4 = 4
-    PLACEHOLDER_5 = 5
 
 # ###  External Accessors ### #
 
