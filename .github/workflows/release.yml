@@ -288,7 +288,6 @@ jobs:
           cygpath --help
 
       - name: Installing Dependencies
-        if: ${{ runner.os != 'Windows' }}
         shell: bash -l {0}
         run: |
           conda install -c conda-forge conda-build anaconda-client -y
@@ -310,7 +309,6 @@ jobs:
           path: ~/conda_pkgs_dir
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge conda-build anaconda-client -y
           conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --python ${{ matrix.python-version }} 
           
       - name: upload artifacts
