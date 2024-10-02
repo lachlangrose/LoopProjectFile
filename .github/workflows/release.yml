@@ -244,14 +244,18 @@ jobs:
         run: |
           pip install . --user
          # Cache conda environments
-      - name: Cache conda environment
+      - name: Caching conda environment dependencies
+        id: cache-conda
         uses: actions/cache@v4
+        env:
+          cache-name: cache-conda-env
         with:
-          path: |
-            ~/conda_pkgs_dir  # Cache Conda package cache
-          key: ${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          path: ~/conda_pkgs_dir  # path for caching Conda packages
+          key: ${{ matrix.os }}-conda-${{ matrix.python-version }}-${{env.cache-name}}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-conda-
+            ${{ matrix.os }}-conda-${{ matrix.python-version }}-${{env.cache-name}}-
+            ${{ matrix.os }}-conda-${{ matrix.python-version }}-
+            ${{ matrix.os }}-conda-
       # - name: Test verification
       #   shell: bash -l {0}
       #   run: |
@@ -286,22 +290,20 @@ jobs:
         #       shell: bash -l {0}
         run: |
           git submodule update --init --recursive
-    # Restore the cached Conda environment and package cache to speed up the build
-      - name: Restore Conda environment cache
+          
+    # Restore the cached Conda packages to speed up the build
+      - name: Restore cached dependencies
         uses: actions/cache@v4
+        env:
+          cache-name: cache-conda-env
         with:
-          path: |
-            ~/conda_pkgs_dir  # Restore Conda package cache
-          key: ${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          path: ~/conda_pkgs_dir  # Restore Conda packages cache
+          key: ${{ matrix.os }}-conda-${{ matrix.python-version }}-${{env.cache-name}}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-conda-${{ matrix.python-version }}-
-            ${{ runner.os }}-conda-
-
-      # Activate the cached environment
-      - name: Activate Conda environment
-        shell: bash -l {0}
-        run: |
-          conda activate ./conda-env/${{ runner.os }}-conda-${{ matrix.python-version }}
+            ${{ matrix.os }}-conda-${{ matrix.python-version }}-${{env.cache-name}}-
+            ${{ matrix.os }}-conda-${{ matrix.python-version }}-
+            ${{ matrix.os }}-conda-
+          continue-on-error: true
 
       - name: Conda build
         env:
