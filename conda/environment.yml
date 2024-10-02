@@ -1,13 +1,14 @@
 name: lpf-env
-channels:  - conda-forge
+channels:  
+  - conda-forge
 dependencies:  
-- python>=3.8  
-- numpy  
-- pandas  
-- netcdf4  
-- pip  
-- setuptools
-- pytest
-- conda-build
-- conda-verify
-- anaconda-client
+  - python>=3.8  
+  - numpy  
+  - pandas  
+  - netcdf4  
+  - pip  
+  - setuptools
+  - pytest
+  - conda-build
+  - conda-verify
+  - anaconda-client
