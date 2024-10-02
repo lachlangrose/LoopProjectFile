@@ -250,7 +250,7 @@ jobs:
           path: |
             ~/conda_pkgs_dir  # Cache Conda package cache
             ./conda-env/${{ runner.os }}-conda-${{ matrix.python-version }}  # Cache Conda environment
-          key: ${{ runner.os }}-conda-${{ matrix.python-version }}--${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-conda-
       # - name: Test verification
