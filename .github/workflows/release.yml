@@ -261,12 +261,6 @@ jobs:
             conda-${{ matrix.os }}-python-${{ matrix.python-version }}-${{env.cache-name}}-
             conda-${{ matrix.os }}-python-${{ matrix.python-version }}-
             conda-${{ matrix.os }}-python-
-          
-
-      - uses: conda-incubator/setup-miniconda@v3
-        with:
-          activate-environment: anaconda-client-env
-          use-only-tar-bz2: true
       
 
       - name: Set Conda PKGS_DIRS environment variable
