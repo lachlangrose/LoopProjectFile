@@ -249,7 +249,6 @@ jobs:
         with:
           path: |
             ~/conda_pkgs_dir  # Cache Conda package cache
-            ./conda-env/${{ runner.os }}-conda-${{ matrix.python-version }}  # Cache Conda environment
           key: ${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-conda-
@@ -292,7 +291,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ./conda-env/${{ runner.os }}-conda-${{ matrix.python-version }}  # Restore Conda environment
             ~/conda_pkgs_dir  # Restore Conda package cache
           key: ${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
           restore-keys: |
