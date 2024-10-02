@@ -263,7 +263,7 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         shell: bash -l {0}
         run: |
-          conda install --solver=classic -c conda-forge conda-build anaconda-client -y
+          conda install -c conda-forge conda-build anaconda-client -y
           conda install -c conda-forge -c loop3d --file requirements.txt -y
 
       - name: Installing dependencies - Windows
@@ -271,7 +271,7 @@ jobs:
         shell: pwsh
         run: |
           
-          conda install --solver=classic -c conda-forge conda-build anaconda-client -y
+          conda install -c conda-forge conda-build anaconda-client -y
           conda install -c conda-forge -c loop3d --file requirements.txt -y
 
       - name: Building and install
@@ -340,7 +340,7 @@ jobs:
           path: ~/conda_pkgs_dir
         shell: bash -l {0}
         run: |
-          conda install --solver=classic -c conda-forge conda-build anaconda-client -y
+          conda install -c conda-forge conda-build anaconda-client -y
           conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda --python ${{ matrix.python-version }} 
           conda install anaconda-client -y
           
