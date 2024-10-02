@@ -221,7 +221,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       # Cache conda environments
-      - name: Caching conda environment dependencies
+      - name: Caching/Restoring conda environment dependencies
         id: cache-conda
         uses: actions/cache@v4
         env:
@@ -326,7 +326,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           auto-update-conda: true
           activate-environment: anaconda-client-env
-          channel-priority: strict
           use-only-tar-bz2: true
           
 
