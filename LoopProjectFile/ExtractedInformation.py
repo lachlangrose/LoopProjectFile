@@ -255,8 +255,9 @@ def GetDiscontinuityLog(root, indexList=[], indexRange=(0, 0), verbose=False):
     )
 
 
+
 # Set stratigraphic log
-def SetStratigraphicLog(root, data, append=False, verbose=False):
+def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False, verbose=False):
     """
     **SetStratigraphicLog** - Saves a list of strata in (formation,
     thickness) format into the netCDF Loop Project File
@@ -302,26 +303,56 @@ def SetStratigraphicLog(root, data, append=False, verbose=False):
             zlib=True,
             complevel=9,
         )
+        
+        # Define compound type for thickness calculator (list of length 5)
+        thicknessCalculatorType_t = siGroup.createCompoundType(
+            LoopProjectFile.thicknessCalculatorType, "ThicknessCalculator"
+        )
+        siGroup.createVariable(
+            "thicknessCalculator",
+            thicknessCalculatorType_t,
+            zlib=True,
+            complevel=9,
+        )
     else:
         siGroup = resp["value"]
 
     if siGroup:
         stratigraphicLayersLocation = siGroup.variables["stratigraphicLayers"]
+        thickness_calculator = siGroup.variables["thicknessCalculator"]
+        
         index = 0
         if append:
             index = siGroup.dimensions["index"].size
         for i in data:
             stratigraphicLayersLocation[index] = i
             index += 1
-        siGroup.setncattr("index_MaxValid", index)
+         # Write thickness calculator data (must match expected structure)
+        if thickness_calculator_data:
+            # Check that each entry is a tuple/list of length 5
+            for tc in thickness_calculator_data:
+                if len(tc) != 5:
+                    errStr = "(ERROR) Each entry of thickness calculator data must be of length 5; this one is of length " + str(len(tc))
+                    if verbose:
+                        print(errStr)
+                    return {"errorFlag": True, "errorString": errStr}
+            import numpy as np
+            # Convert the first (and only) tuple to a structured array
+            structured_data = np.array([thickness_calculator_data[0]], dtype=LoopProjectFile.thicknessCalculatorType)
+
+            # Assign only the first structured row
+            thickness_calculator[:] = structured_data[0]
+            
+            
     else:
         errStr = "(ERROR) Failed to create stratigraphic log group for strata setting"
         if verbose:
             print(errStr)
         response = {"errorFlag": True, "errorString": errStr}
+        
     return response
 
-
+    
 def GetStratigraphicLog(root, indexList=[], indexRange=(0, 0), verbose=False):
     response = {"errorFlag": False}
     resp = GetStratigraphicInformationGroup(root)

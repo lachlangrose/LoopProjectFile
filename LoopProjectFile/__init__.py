@@ -13,6 +13,7 @@ from .LoopProjectFile import (
     foliationObservationType,
     discontinuityObservationType,
     stratigraphicLayerType,
+    thicknessCalculatorType,
     stratigraphicObservationType,
     contactObservationType,
     eventRelationshipType,

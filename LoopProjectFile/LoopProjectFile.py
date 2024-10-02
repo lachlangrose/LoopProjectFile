@@ -64,11 +64,11 @@ class EventRelationshipType(enum.IntEnum):
     FAULT_FAULT_OVERPRINT = 4
 
 class ThickenessCalculatorType(enum.IntEnum):
-    ALPHA = 0
-    INTERPOLATED_STRUCTURE = 1
-    STRUCTURAL_POINT = 2
-    PLACEHOLDER_1 = 3
-    PLACEHOLDER_2 = 4
+    PLACEHOLDER_1 = 0
+    PLACEHOLDER_2 = 1
+    PLACEHOLDER_3 = 3
+    PLACEHOLDER_4 = 4
+    PLACEHOLDER_5 = 5
 
 # ###  External Accessors ### #
 
@@ -295,6 +295,15 @@ def Set(filename, element, **kwargs):
                 response = ExtractedInformation.SetStratigraphicLog(
                     root, append=True, **kwargs
                 )
+                
+                
+            ###################################
+            # ###################################
+            # elif element == "thicknessCalculator":
+            #     response = ExtractedInformation.SetThicknessCalculator(root, **kwargs)
+                
+                
+                
             elif element == "faultLog":
                 response = ExtractedInformation.SetFaultLog(root, **kwargs)
             elif element == "faultLogAppend":
@@ -739,9 +748,9 @@ stratigraphicLayerType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("ThicknessMean", "<f8", (len(ThickenessCalculatorType)), ),
-        ("ThicknessMedian", "<f8", (len(ThickenessCalculatorType)), ),
-        ("ThicknessStdDev", "<f8", (len(ThickenessCalculatorType)), ),
+        # ("ThicknessMean", "<f8", (len(ThickenessCalculatorType)), ),
+        # ("ThicknessMedian", "<f8", (len(ThickenessCalculatorType)), ),
+        # ("ThicknessStdDev", "<f8", (len(ThickenessCalculatorType)), ),
         ("colour1Red", "u1"),
         ("colour1Green", "u1"),
         ("colour1Blue", "u1"),
@@ -749,6 +758,11 @@ stratigraphicLayerType = numpy.dtype(
         ("colour2Green", "u1"),
         ("colour2Blue", "u1"),
     ]
+)
+
+thicknessCalculatorType = numpy.dtype(
+    numpy.dtype([("name1", "S120"), ("name2", "S120"), ("name3", "S120"), ("name4", "S120"), ("name5", "S120")]),
+    "ThicknessCalculator"
 )
 
 eventRelationshipType = numpy.dtype(
