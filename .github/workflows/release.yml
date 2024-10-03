@@ -35,8 +35,8 @@ jobs:
           release-type: python
           package-name: LoopProjectFile
           version-file: LoopProjectFile/version.py
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
+    # outputs:
+    #   release_created: ${{ steps.release.outputs.release_created }}
   # if a release is created then run the deploy scripts for github.io, conda, pypi and docker
 
   pip-build-sdist:
