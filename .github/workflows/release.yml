@@ -1,5 +1,4 @@
-on:
-  workflow_dispatch:
+on: [release]
 
 name: release-please
 jobs:
