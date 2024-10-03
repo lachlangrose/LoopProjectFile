@@ -272,7 +272,7 @@ jobs:
           path: conda
 
   conda-upload:
-    needs: [release-please, conda-build-deploy]
+    needs: [release-please, conda-build]
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
