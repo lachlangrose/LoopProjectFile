@@ -201,12 +201,15 @@ jobs:
           miniforge-version: latest
           activate-environment: anaconda-client-env
           use-only-tar-bz2: true
-
-      - name: Cache/Restore Cygwin
-        uses: actions/cache@v3
+      
+      - name: Cache/Restore Cygwin - Windows Only
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
         with:
           path: C:/cygwin64
           key: cygwin-${{ runner.os }}-${{ matrix.python-version }}
+          restore-keys: |
+            cygwin-${{ runner.os }}-
 
       - name: Install Cygwin    
         if: ${{runner.os == 'Windows'}}
