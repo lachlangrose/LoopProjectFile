@@ -94,6 +94,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -222,13 +223,14 @@ jobs:
           .\cygwin-installer.exe -q -n -N -d -R C:\cygwin64
           echo "C:\cygwin64\bin" | Out-File -Append -Encoding ASCII $env:GITHUB_PATH
           echo "MSYSTEM=CYGWIN" >> $GITHUB_ENV
-          # Verify that cygpath is available
-          cygpath --help
+          # Check if the setup.rc file exists
+          if (Test-Path -Path "C:\cygwin64\etc\setup\setup.rc") { Write-Output "setup.rc file exists." } 
+          else { Write-Error "setup.rc file is missing." }
 
       - name: Installing Dependencies
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge conda-build anaconda-client -y
+          conda install -c conda-forge conda-build anaconda-client conda-verify -y
           conda install -c conda-forge -c loop3d --file requirements.txt -y
 
       - name: Building and install
