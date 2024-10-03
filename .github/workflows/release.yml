@@ -199,7 +199,7 @@ jobs:
           uv pip install --no-cache --pre --no-index --find-links dist loopprojectfile
           uv pip list
 
-  conda-build-deploy:
+  conda-build:
     name: Conda Build-Deploy ${{ matrix.os }} - Python Version-${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -208,18 +208,11 @@ jobs:
         os:   
         - ubuntu-latest
         - macos-latest
-        - macos-12
-        - macos-13
-        - macos-14
-        - macos-15
         - windows-latest
-        - windows-2019
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+
     steps:
       - uses: actions/checkout@v4
-
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Setup Miniforge
         uses: conda-incubator/setup-miniconda@v3
@@ -228,46 +221,11 @@ jobs:
           activate-environment: anaconda-client-env
           use-only-tar-bz2: true
 
-      # # get the date of today to update cached conda environment
-      # - name: Get Date
-      #   id: get-date
-      #   run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
-      #   shell: bash
-      
-      # - name: Cache Conda env
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ${{ env.CONDA }}/envs
-      #     key:
-      #       conda-${{ matrix.os }}--${{ runner.arch }}-python-${{ matrix.python-version }}-${{steps.get-date.outputs.today }}-${{hashFiles('**/conda/environment.yml') }}-${{ env.CACHE_NUMBER}}
-      #   env:
-      #     # Increase this value to reset cache if conda/environment.yml has not changed
-      #     CACHE_NUMBER: 0
-      #   id: cache
-
-      # - name: Update environment
-      #   run: |
-      #     mamba env update -n anaconda-client-env -f conda/environment.yml
-      #   if: steps.cache.outputs.cache-hit != 'true'
-
-      # - name: Caching/Restoring conda environment dependencies
-      #   id: cache-conda
-      #   uses: actions/cache@v4
-      #   env:
-      #     cache-name: cache-conda-env
-      #     CACHE_NUMBER: 0
-      #   with:
-      #     path: ~/conda_pkgs_dir  # path for caching Conda packages
-      #     key: conda-${{ matrix.os }}-python-${{ matrix.python-version }}-${{env.cache-name}}-${{ hashFiles('**/requirements.txt') }}
-      #     restore-keys: |
-      #       conda-${{ matrix.os }}-python-${{ matrix.python-version }}-${{env.cache-name}}-
-      #       conda-${{ matrix.os }}-python-${{ matrix.python-version }}-
-      #       conda-${{ matrix.os }}-python-
-      
-
-      # - name: Set Conda PKGS_DIRS environment variable
-      #   run: |
-      #     echo "CONDA_PKGS_DIRS=~/conda_pkgs_dir" >> $GITHUB_ENV
+      - name: Cache/Restore Cygwin
+        uses: actions/cache@v3
+        with:
+          path: C:/cygwin64
+          key: cygwin-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Install Cygwin    
         if: ${{runner.os == 'Windows'}}
