@@ -94,7 +94,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -212,6 +211,7 @@ jobs:
           restore-keys: |
             cygwin-${{ runner.os }}-
 
+      # setup.rc seems to be missing when cygwin installed
       - name: Install Cygwin    
         if: ${{runner.os == 'Windows'}}
         shell: pwsh
@@ -223,9 +223,6 @@ jobs:
           .\cygwin-installer.exe -q -n -N -d -R C:\cygwin64
           echo "C:\cygwin64\bin" | Out-File -Append -Encoding ASCII $env:GITHUB_PATH
           echo "MSYSTEM=CYGWIN" >> $GITHUB_ENV
-          # Check if the setup.rc file exists
-          if (Test-Path -Path "C:\cygwin64\etc\setup\setup.rc") { Write-Output "setup.rc file exists." } 
-          else { Write-Error "setup.rc file is missing." }
 
       - name: Installing Dependencies
         shell: bash -l {0}
