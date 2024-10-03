@@ -22,19 +22,19 @@ jobs:
   #       with:
   #         commit_message: "style: style fixes by ruff and autoformatting by black"
           
-  release-please:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1  # Fetch all history for all tags and branches
-      - uses: GoogleCloudPlatform/release-please-action@v4
-        id: release
-        with:
-          release-type: python
-          package-name: LoopProjectFile
-          version-file: LoopProjectFile/version.py
+  # release-please:
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/master'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 1  # Fetch all history for all tags and branches
+  #     - uses: GoogleCloudPlatform/release-please-action@v4
+  #       id: release
+  #       with:
+  #         release-type: python
+  #         package-name: LoopProjectFile
+  #         version-file: LoopProjectFile/version.py
     # outputs:
     #   release_created: ${{ steps.release.outputs.release_created }}
   # if a release is created then run the deploy scripts for github.io, conda, pypi and docker
