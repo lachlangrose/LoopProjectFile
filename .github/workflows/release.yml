@@ -250,26 +250,21 @@ jobs:
           name: loopprojectfile-conda-${{ matrix.os }}-${{ matrix.python-version }}
           path: conda
 
-#   release-please:
-#     runs-on: ubuntu-latest
-#     if: github.ref == 'refs/heads/master'
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: GoogleCloudPlatform/release-please-action@v4
-#         id: release
-#         with:
-#           release-type: python
-#           commit-search-depth: 10  # Fetch history for commits
-#           release-search-depth: 1  # Fetch history for tags and branches
-#           package-name-file: './pyproject.toml'
-#           bump-minor-pre-major: true  # Enable bumping minor version for pre-major releases
-#           bump-patch-for-minor-pre-major: true  # Enable bumping patch version for minor pre-major releases
-#     # outputs:
-#     #   release_created: ${{ steps.release.outputs.release_created }}
-# #if a release is created then run the deploy scripts for github.io, conda, pypi and docker
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: 'release-please-config.json'
+    # outputs:
+    #   release_created: ${{ steps.release.outputs.release_created }}
+#if a release is created then run the deploy scripts for github.io, conda, pypi and docker
 
   conda-upload:
-    needs: [conda-build]
+    needs: [release-please, conda-build]
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
@@ -296,7 +291,7 @@ jobs:
         
   pypi-upload:
       runs-on: "ubuntu-latest"
-      needs: [pip-test-wheels] 
+      needs: [release-please, pip-test-wheels] 
       # if: ${{ needs.release-please.outputs.release_created }}
       permissions:
         # IMPORTANT: this permission is mandatory for trusted publishing
