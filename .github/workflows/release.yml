@@ -1,9 +1,13 @@
-on: 
-  release: 
-    types: [published, edited]
-
-
 name: release-please
+on: 
+  push:
+    branches: 
+      - master 
+    tags:
+      - "*.*.*"
+  pull_request:
+    branches:
+      - master
 jobs:
   # linting:
   #   name: Linting
@@ -30,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1  # Fetch all history for all tags and branches
+          fetch-depth: 1  # Fetch history for all tags and branches
       - uses: GoogleCloudPlatform/release-please-action@v4
         id: release
         with:
