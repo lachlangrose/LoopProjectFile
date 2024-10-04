@@ -6,9 +6,6 @@ on:
       - released
 
   push:
-    tags:
-      - "*.*.*"
-
   pull_request:
 
 permissions:
