@@ -254,17 +254,18 @@ jobs:
         with:
           name: loopprojectfile-conda-${{ matrix.os }}-${{ matrix.python-version }}
           path: conda
+
   release-please:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1  # Fetch history for all tags and branches
       - uses: GoogleCloudPlatform/release-please-action@v4
         id: release
         with:
           release-type: python
+          commit-search-depth: 10  # Fetch history for commits
+          release-search-depth: 1  # Fetch history for tags and branches
           package-name-file: './pyproject.toml'
           bump-minor-pre-major: true  # Enable bumping minor version for pre-major releases
           bump-patch-for-minor-pre-major: true  # Enable bumping patch version for minor pre-major releases
