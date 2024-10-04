@@ -1,17 +1,15 @@
 name: release-please
 on: 
   release:
-    types: [created]
+    types: 
+      - published
+      - released
 
   push:
-    branches: 
-      - master 
     tags:
       - "*.*.*"
 
   pull_request:
-    branches:
-      - master
 
 permissions:
   contents: write
@@ -285,7 +283,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: conda-${{ matrix.os }}-${{ matrix.python-version }}
+          name: loopprojectfile-conda-${{ matrix.os }}-${{ matrix.python-version }}
           path: conda
       - uses: conda-incubator/setup-miniconda@v3
       - name: upload all files to conda-forge
