@@ -7,7 +7,8 @@
         "bump-patch-for-minor-pre-major": true,
         "bump-patch-for-minor-pre-major-pattern": "fix",
         "release-search-depth": 1,
-        "commit-search-depth": 10
+        "commit-search-depth": 10,
+        "version": "0.1.4"
       }
     }
   }
