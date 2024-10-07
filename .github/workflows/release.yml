@@ -197,28 +197,16 @@ jobs:
           miniforge-version: latest
           activate-environment: anaconda-client-env
           use-only-tar-bz2: true
-      
-      - name: Cache/Restore Cygwin - Windows Only
-        if: runner.os == 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: C:/cygwin64
-          key: cygwin-${{ runner.os }}-${{ matrix.python-version }}
-          restore-keys: |
-            cygwin-${{ runner.os }}-
 
-      # setup.rc seems to be missing when cygwin installed
-      - name: Install Cygwin    
-        if: ${{runner.os == 'Windows'}}
-        shell: pwsh
-        run: |
-          # Download Cygwin installer
-          curl -L -o cygwin-installer.exe https://cygwin.com/setup-x86_64.exe
-          
-          # Install Cygwin with the default base packages (including cygpath)
-          .\cygwin-installer.exe -q -n -N -d -R C:\cygwin64
-          echo "C:\cygwin64\bin" | Out-File -Append -Encoding ASCII $env:GITHUB_PATH
-          echo "MSYSTEM=CYGWIN" >> $GITHUB_ENV
+      # Setup cygwin for windows
+      - name: Set up Cygwin
+        if: runner.os == 'Windows'
+        uses: egor-tensin/setup-cygwin@v4
+        with:
+          packages: cmake gcc-g++
+      - run: |
+          ls.exe -Al
+          pwd.exe
 
       - name: Installing Dependencies
         shell: bash -l {0}
