@@ -226,6 +226,7 @@ jobs:
           path: conda
 
   release-please:
+    needs: [pip-test-wheels, conda-build]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
