@@ -204,7 +204,10 @@ jobs:
         uses: egor-tensin/setup-cygwin@v4
         with:
           packages: cmake gcc-g++
-      - run: |
+          
+      - name: List and print working directory (Windows)
+        if: runner.os == 'Windows'
+        run: |
           ls.exe -Al
           pwd.exe
 
