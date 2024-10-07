@@ -1,12 +1,7 @@
 name: release-please
 on: 
-  release:
-    types: 
-      - published
-      - released
-
-  push:
-  pull_request:
+  - push
+  - pull_request
 
 permissions:
   contents: write
