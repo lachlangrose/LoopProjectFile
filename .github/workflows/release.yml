@@ -1,7 +1,5 @@
 name: release-please
-on: 
-  - push
-  - pull_request
+on: [push, pull_request]
 
 permissions:
   contents: write
