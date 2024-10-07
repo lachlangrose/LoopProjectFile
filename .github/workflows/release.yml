@@ -75,7 +75,7 @@ jobs:
           uv pip list
     
   pip-build-wheels:
-    needs: [pip-build-sdist, pip-test-sdist]
+    needs: pip-test-sdist
     name: Build Wheels
     runs-on: ${{ matrix.os }}
     strategy:
