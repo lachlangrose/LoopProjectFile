@@ -63,11 +63,6 @@ class EventRelationshipType(enum.IntEnum):
     FAULT_FAULT_ABUT = 3
     FAULT_FAULT_OVERPRINT = 4
 
-class ThickenessCalculatorType(enum.IntEnum):
-    PLACEHOLDER_1 = 0
-
-# ###  External Accessors ### #
-
 
 # Create a basic loop project file if no file already exists
 def CreateBasic(filename):
@@ -291,12 +286,6 @@ def Set(filename, element, **kwargs):
                 response = ExtractedInformation.SetStratigraphicLog(
                     root, append=True, **kwargs
                 )
-                
-                
-            ###################################
-            # ###################################
-            # elif element == "thicknessCalculator":
-            #     response = ExtractedInformation.SetThicknessCalculator(root, **kwargs)
                 
                 
                 
@@ -744,9 +733,9 @@ stratigraphicLayerType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        # ("ThicknessMean", "<f8", (len(ThickenessCalculatorType)), ),
-        # ("ThicknessMedian", "<f8", (len(ThickenessCalculatorType)), ),
-        # ("ThicknessStdDev", "<f8", (len(ThickenessCalculatorType)), ),
+        ("ThicknessMean", "<f8", (5,)),
+        ("ThicknessMedian", "<f8", (5,)),
+        ("ThicknessStdDev", "<f8", (5,)),
         ("colour1Red", "u1"),
         ("colour1Green", "u1"),
         ("colour1Blue", "u1"),
@@ -756,10 +745,13 @@ stratigraphicLayerType = numpy.dtype(
     ]
 )
 
-thicknessCalculatorType = numpy.dtype(
-    numpy.dtype([("name1", "S120"), ("name2", "S120"), ("name3", "S120"), ("name4", "S120"), ("name5", "S120")]),
-    "ThicknessCalculator"
-)
+thicknessCalculatorType = numpy.dtype([
+    ("name1", "S120"),
+    ("name2", "S120"),
+    ("name3", "S120"),
+    ("name4", "S120"),
+    ("name5", "S120")
+])
 
 eventRelationshipType = numpy.dtype(
     [
