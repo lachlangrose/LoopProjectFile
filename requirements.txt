@@ -2,3 +2,5 @@ netCDF4>=1.5.4
 numpy
 pandas
 pytest
+conda-build 
+anaconda-client

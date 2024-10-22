@@ -1,0 +1,13 @@
+{
+    "packages": {
+      "LoopProjectFile": {
+        "release-type": "python",
+        "bump-minor-pre-major": true,
+        "bump-minor-pre-major-pattern": "feat",
+        "bump-patch-for-minor-pre-major": true,
+        "bump-patch-for-minor-pre-major-pattern": "fix",
+        "release-search-depth": 0,
+        "commit-search-depth": 0
+      }
+    }
+  }
