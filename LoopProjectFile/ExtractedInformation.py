@@ -2,7 +2,7 @@
 import LoopProjectFile
 import LoopProjectFile.LoopProjectFileUtils as LoopProjectFileUtils
 
-# import numpy
+import numpy
 
 
 # Check Extracted Information valid if present
@@ -336,9 +336,8 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
                     if verbose:
                         print(errStr)
                     return {"errorFlag": True, "errorString": errStr}
-            import numpy as np
             # Convert the first (and only) tuple to a structured array
-            structured_data = np.array([thickness_calculator_data[0]], dtype=LoopProjectFile.thicknessCalculatorType)
+            structured_data = numpy.array([thickness_calculator_data[0]], dtype=LoopProjectFile.thicknessCalculatorType)
 
             # Assign only the first structured row
             thickness_calculator[:] = structured_data[0]
