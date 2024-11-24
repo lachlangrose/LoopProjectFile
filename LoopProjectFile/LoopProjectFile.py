@@ -132,7 +132,7 @@ def OpenProjectFile(filename, readOnly=True, verbose=False):
 
     # Quick check to see if openable
     try:
-        with open(filename, 'rb') as f:
+        with open(filename, 'rb'):
             if (verbose):
                 print(f"File {filename} opened successfully.", file=sys.stderr)
     except Exception as e:
@@ -811,7 +811,7 @@ def ConvertDataFrame(df, dtype):
     if isinstance(df, pandas.DataFrame):
         return numpy.array(df.to_records(index=False).tolist(), dtype=dtype)
     else:
-        raise NotADataFrame
+        raise TypeError("Input is not a DataFrame")
 
 
 def CheckFileIsLoopProjectFile(filename, verbose=False):
