@@ -9,6 +9,7 @@ from .LoopProjectFile import (
     discontinuityEventType, # noqa: F401
     foliationEventType, # noqa: F401
     faultObservationType, # noqa: F401
+    thicknessCalculatorType, # noqa: F401
     foldObservationType, # noqa: F401
     foliationObservationType, # noqa: F401
     discontinuityObservationType, # noqa: F401
