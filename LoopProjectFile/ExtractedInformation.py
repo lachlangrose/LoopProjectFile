@@ -327,6 +327,8 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
         for i in data:
             stratigraphicLayersLocation[index] = i
             index += 1
+        siGroup.setncattr("index_MaxValid", index)
+
          # Write thickness calculator data (must match expected structure)
         if thickness_calculator_data:
             # Check that each entry is a tuple/list of length 5
@@ -338,7 +340,6 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
                     return {"errorFlag": True, "errorString": errStr}
             # Convert the first (and only) tuple to a structured array
             structured_data = numpy.array([thickness_calculator_data[0]], dtype=LoopProjectFile.thicknessCalculatorType)
-
             # Assign only the first structured row
             thickness_calculator[:] = structured_data[0]
             
