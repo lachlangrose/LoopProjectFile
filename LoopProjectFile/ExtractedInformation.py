@@ -388,63 +388,73 @@ def GetStratigraphicLog(
 ):
     response = {"errorFlag": False}
     resp = GetStratigraphicInformationGroup(root)
+
     if resp["errorFlag"]:
-        response = resp
-    else:
-        siGroup = resp["value"]
-        data = []
+        return resp
+    siGroup = resp["value"]
+    data = []
+
+    try:
+        # Get max valid index
         maxValidIndex = min(
             siGroup.dimensions["index"].size, siGroup.getncattr("index_MaxValid")
         )
-        thickness_calculator_data = []
-        thickness_calculator_active_flags = []
-        
-        # Select all option
-        if (
-            indexList == []
-            and len(indexRange) == 2
-            and indexRange[0] == 0
-            and indexRange[1] == 0
-        ):
-            # Select all
-            for i in range(0, maxValidIndex):
-                data.append((siGroup.variables.get("stratigraphicLayers")[i]))
-                thickness_calculator_data.append(siGroup.variables.get("thicknessCalculator")[:])
-                thickness_calculator_active_flags.append(siGroup.variables.get("thicknessCalculatorActiveFlags")[:])
-                
-        # Select based on list of indices option
-        elif indexList != []:
-            for i in indexList:
-                if int(i) >= 0 and int(i) < maxValidIndex:
-                    data.append((siGroup.variables.get("stratigraphicLayers")[i]))
-                    thickness_calculator_data.append(siGroup.variables.get("thicknessCalculator")[:])
-                    thickness_calculator_active_flags.append(siGroup.variables.get("thicknessCalculatorActiveFlags")[:])
-                    
-        # Select based on indices range option
-        elif (
-            len(indexRange) == 2
-            and indexRange[0] >= 0
-            and indexRange[1] >= indexRange[0]
-        ):
-            for i in range(indexRange[0], indexRange[1]):
-                if int(i) >= 0 and int(i) < maxValidIndex:
-                    data.append((siGroup.variables.get("stratigraphicLayers")[i]))
-                    thickness_calculator_data.append(siGroup.variables.get("thicknessCalculator")[:])
-                    thickness_calculator_active_flags.append(siGroup.variables.get("thicknessCalculatorActiveFlags")[:])
-                    
-        else:
-            errStr = "Non-implemented filter option"
+
+        # Check if variables exist in the group
+        if "thicknessCalculator" not in siGroup.variables or "thicknessCalculatorActiveFlags" not in siGroup.variables:
+            errStr = "Missing 'thicknessCalculator' or 'thicknessCalculatorActiveFlags' in the NetCDF file."
             if verbose:
                 print(errStr)
-            response = {"errorFlag": True, "errorString": errStr}
-            return response
+            return {"errorFlag": True, "errorString": errStr}
 
+        # Fetch thickness calculator and active flags
+        thickness_calculator_data = siGroup.variables["thicknessCalculator"][:]
+        thickness_calculator_active_flags = siGroup.variables["thicknessCalculatorActiveFlags"][:]
+
+        # Select all layers
+        if (
+            not indexList
+            and len(indexRange) == 2
+            and indexRange == (0, 0)
+        ):
+            for i in range(maxValidIndex):
+                data.append(siGroup.variables["stratigraphicLayers"][i])
+
+        # Select based on list of indices
+        elif indexList:
+            for i in indexList:
+                if 0 <= int(i) < maxValidIndex:
+                    data.append(siGroup.variables["stratigraphicLayers"][i])
+
+        # Select based on index range
+        elif (
+            len(indexRange) == 2
+            and 0 <= indexRange[0] < indexRange[1] <= maxValidIndex
+        ):
+            for i in range(indexRange[0], indexRange[1]):
+                data.append(siGroup.variables["stratigraphicLayers"][i])
+
+        else:
+            errStr = "Invalid filter option for stratigraphic log retrieval."
+            if verbose:
+                print(errStr)
+            return {"errorFlag": True, "errorString": errStr}
+
+        # Construct response
         response["value"] = {
             "stratigraphicLayers": data,
-            "thicknessCalculatorData": thickness_calculator_data,
-            "thicknessCalculatorActiveFlags": thickness_calculator_active_flags,
+            "thicknessCalculatorData": thickness_calculator_data.tolist(), 
+            "thicknessCalculatorActiveFlags": thickness_calculator_active_flags.tolist(),  
         }
+
+    except Exception as e:
+        errStr = f"(ERROR) Exception during stratigraphic log retrieval: {str(e)}"
+        if verbose:
+            print(errStr)
+        return {"errorFlag": True, "errorString": errStr}
+
     return response
+
 
 
 
