@@ -256,8 +256,14 @@ def GetDiscontinuityLog(root, indexList=[], indexRange=(0, 0), verbose=False):
 
 
 
-# Set stratigraphic log
-def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False, verbose=False):
+def SetStratigraphicLog(
+    root, 
+    data, 
+    thickness_calculator_data=None, 
+    thickness_calculator_active_flags=None, 
+    append=False, 
+    verbose=False
+):
     """
     **SetStratigraphicLog** - Saves a list of strata in (formation,
     thickness) format into the netCDF Loop Project File
@@ -268,6 +274,10 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
         The root group node of a Loop Project File
     data: list of (formation, thickness)
         The data to save
+    thickness_calculator_data: list of tuples
+        Labels for thickness calculators (e.g., [('Label1', 'Label2', ...)])
+    thickness_calculator_active_flags: list of tuples
+        Flags for active thickness calculators (e.g., [('None', 'Active', ...)])
     append: bool
         Flag of whether to append new data to existing log
     verbose: bool
@@ -275,8 +285,8 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
 
     Returns
     -------
-       dict {"errorFlag", "errorString"}
-        errorString exist and contains error message only when errorFlag is
+    dict {"errorFlag", "errorString"}
+        errorString exists and contains error message only when errorFlag is
         True
 
     """
@@ -304,7 +314,7 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
             complevel=9,
         )
         
-        # Define compound type for thickness calculator (list of length 5)
+        # Define compound types for thickness calculator and active flags (list of length 5)
         thicknessCalculatorType_t = siGroup.createCompoundType(
             LoopProjectFile.thicknessCalculatorType, "ThicknessCalculator"
         )
@@ -314,12 +324,23 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
             zlib=True,
             complevel=9,
         )
+
+        thicknessCalculatorActiveFlagsType_t = siGroup.createCompoundType(
+            LoopProjectFile.thicknessCalculatorType, "ThicknessCalculatorActiveFlags"
+        )
+        siGroup.createVariable(
+            "thicknessCalculatorActiveFlags",
+            thicknessCalculatorActiveFlagsType_t,
+            zlib=True,
+            complevel=9,
+        )
     else:
         siGroup = resp["value"]
 
     if siGroup:
         stratigraphicLayersLocation = siGroup.variables["stratigraphicLayers"]
         thickness_calculator = siGroup.variables["thicknessCalculator"]
+        thickness_calculator_active_flags_var = siGroup.variables["thicknessCalculatorActiveFlags"]
         
         index = 0
         if append:
@@ -329,20 +350,27 @@ def SetStratigraphicLog(root, data, thickness_calculator_data=None, append=False
             index += 1
         siGroup.setncattr("index_MaxValid", index)
 
-         # Write thickness calculator data (must match expected structure)
+        # Write thickness calculator data (must match expected structure)
         if thickness_calculator_data:
-            # Check that each entry is a tuple/list of length 5
             for tc in thickness_calculator_data:
                 if len(tc) != 5:
                     errStr = "(ERROR) Each entry of thickness calculator data must be of length 5; this one is of length " + str(len(tc))
                     if verbose:
                         print(errStr)
                     return {"errorFlag": True, "errorString": errStr}
-            # Convert the first (and only) tuple to a structured array
             structured_data = numpy.array([thickness_calculator_data[0]], dtype=LoopProjectFile.thicknessCalculatorType)
-            # Assign only the first structured row
             thickness_calculator[:] = structured_data[0]
-            
+
+        # Write thickness calculator active flags (must match expected structure)
+        if thickness_calculator_active_flags:
+            for tcf in thickness_calculator_active_flags:
+                if len(tcf) != 5:
+                    errStr = "(ERROR) Each entry of thickness calculator active flags must be of length 5; this one is of length " + str(len(tcf))
+                    if verbose:
+                        print(errStr)
+                    return {"errorFlag": True, "errorString": errStr}
+            structured_active_flags = numpy.array([thickness_calculator_active_flags[0]], dtype=LoopProjectFile.thicknessCalculatorType)
+            thickness_calculator_active_flags_var[:] = structured_active_flags[0]
             
     else:
         errStr = "(ERROR) Failed to create stratigraphic log group for strata setting"
