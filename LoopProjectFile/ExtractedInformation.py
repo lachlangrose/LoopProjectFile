@@ -380,8 +380,12 @@ def SetStratigraphicLog(
         
     return response
 
-    
-def GetStratigraphicLog(root, indexList=[], indexRange=(0, 0), verbose=False):
+def GetStratigraphicLog(
+    root, 
+    indexList=[], 
+    indexRange=(0, 0), 
+    verbose=False
+):
     response = {"errorFlag": False}
     resp = GetStratigraphicInformationGroup(root)
     if resp["errorFlag"]:
@@ -392,6 +396,9 @@ def GetStratigraphicLog(root, indexList=[], indexRange=(0, 0), verbose=False):
         maxValidIndex = min(
             siGroup.dimensions["index"].size, siGroup.getncattr("index_MaxValid")
         )
+        thickness_calculator_data = []
+        thickness_calculator_active_flags = []
+        
         # Select all option
         if (
             indexList == []
@@ -402,13 +409,17 @@ def GetStratigraphicLog(root, indexList=[], indexRange=(0, 0), verbose=False):
             # Select all
             for i in range(0, maxValidIndex):
                 data.append((siGroup.variables.get("stratigraphicLayers")[i]))
-            response["value"] = data
+                thickness_calculator_data.append(siGroup.variables.get("thicknessCalculator")[:])
+                thickness_calculator_active_flags.append(siGroup.variables.get("thicknessCalculatorActiveFlags")[:])
+                
         # Select based on list of indices option
         elif indexList != []:
             for i in indexList:
                 if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((siGroup.variables.get("stratigraphicLayers")[i]))
-            response["value"] = data
+                    thickness_calculator_data.append(siGroup.variables.get("thicknessCalculator")[:])
+                    thickness_calculator_active_flags.append(siGroup.variables.get("thicknessCalculatorActiveFlags")[:])
+                    
         # Select based on indices range option
         elif (
             len(indexRange) == 2
@@ -418,13 +429,23 @@ def GetStratigraphicLog(root, indexList=[], indexRange=(0, 0), verbose=False):
             for i in range(indexRange[0], indexRange[1]):
                 if int(i) >= 0 and int(i) < maxValidIndex:
                     data.append((siGroup.variables.get("stratigraphicLayers")[i]))
-            response["value"] = data
+                    thickness_calculator_data.append(siGroup.variables.get("thicknessCalculator")[:])
+                    thickness_calculator_active_flags.append(siGroup.variables.get("thicknessCalculatorActiveFlags")[:])
+                    
         else:
             errStr = "Non-implemented filter option"
             if verbose:
                 print(errStr)
             response = {"errorFlag": True, "errorString": errStr}
+            return response
+
+        response["value"] = {
+            "stratigraphicLayers": data,
+            "thicknessCalculatorData": thickness_calculator_data,
+            "thicknessCalculatorActiveFlags": thickness_calculator_active_flags,
+        }
     return response
+
 
 
 # Set drillhole log
