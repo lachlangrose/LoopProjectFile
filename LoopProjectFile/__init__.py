@@ -14,6 +14,7 @@ from .LoopProjectFile import (
     foliationObservationType, # noqa: F401
     discontinuityObservationType, # noqa: F401
     stratigraphicLayerType, # noqa: F401
+    stratigraphicThicknessType, # noqa: F401
     stratigraphicObservationType, # noqa: F401
     contactObservationType, # noqa: F401
     eventRelationshipType, # noqa: F401

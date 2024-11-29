@@ -286,7 +286,10 @@ def Set(filename, element, **kwargs):
                 response = ExtractedInformation.SetStratigraphicLog(
                     root, append=True, **kwargs
                 )
-                
+            elif element == "stratigraphicThicknesses":
+                response = ExtractedInformation.SetStratigraphicThicknesses(root, **kwargs)
+            elif element == "stratigraphicThicknessCalculatorLabels":
+                response = ExtractedInformation.SetStratigraphicThicknessCalculatorLabels(root, **kwargs)
                 
                 
             elif element == "faultLog":
@@ -426,6 +429,10 @@ def Get(filename, element, **kwargs):
                 response = DataCollection.GetDrillholeProperties(root, **kwargs)
             elif element == "stratigraphicLog":
                 response = ExtractedInformation.GetStratigraphicLog(root, **kwargs)
+            elif element == "stratigraphicThicknesses":
+                response = ExtractedInformation.GetStratigraphicThicknesses(root, **kwargs)
+            elif element == "stratigraphicThicknessCalculatorLabels":
+                response = ExtractedInformation.GetStratigraphicThicknessCalculatorLabels(root, **kwargs)
             elif element == "faultLog":
                 response = ExtractedInformation.GetFaultLog(root, **kwargs)
             elif element == "foldLog":
@@ -733,9 +740,9 @@ stratigraphicLayerType = numpy.dtype(
         ("group", "S120"),
         ("supergroup", "S120"),
         ("enabled", "u1"),
-        ("ThicknessMean", "<f8", (5,)),
-        ("ThicknessMedian", "<f8", (5,)),
-        ("ThicknessStdDev", "<f8", (5,)),
+        ("ThicknessMean", "<f8"),
+        ("ThicknessMedian", "<f8"),
+        ("ThicknessStdDev", "<f8"),
         ("colour1Red", "u1"),
         ("colour1Green", "u1"),
         ("colour1Blue", "u1"),
@@ -744,7 +751,26 @@ stratigraphicLayerType = numpy.dtype(
         ("colour2Blue", "u1"),
     ]
 )
-
+stratigraphicThicknessType = numpy.dtype(
+    [
+        ('name', 'S120'),
+        ('thickness1_mean', '<f8'),
+        ('thickness1_median', '<f8'),
+        ('thickness1_stddev', '<f8'),
+        ('thickness2_mean', '<f8'),
+        ('thickness2_median', '<f8'),
+        ('thickness2_stddev', '<f8'),
+        ('thickness3_mean', '<f8'),
+        ('thickness3_median', '<f8'),
+        ('thickness3_stddev', '<f8'),
+        ('thickness4_mean', '<f8'),
+        ('thickness4_median', '<f8'),
+        ('thickness4_stddev', '<f8'),
+        ('thickness5_mean', '<f8'),
+        ('thickness5_median', '<f8'),
+        ('thickness5_stddev', '<f8'),
+    ]
+)
 thicknessCalculatorType = numpy.dtype([
     ("name1", "S120"),
     ("name2", "S120"),
