@@ -304,11 +304,21 @@ def ElementToDataframe(loopFilename, element, loopCompoundType):
         return None
     else:
         columns = list(loopCompoundType.names)
+        attr = resp.get("attributes",{})
+
         df = pandas.DataFrame.from_records(resp["value"], columns=columns)
+
         for name in columns:
             if type(loopCompoundType[name]) is not numpy.dtypes.VoidDType:
                 df[name] = df[name].astype(loopCompoundType[name])
         df = df.map(lambda x: x.decode() if isinstance(x, bytes) else x)
+        if "headers" in attr:
+            if len(attr["headers"]) != len(columns):
+                print("Number of headers does not match number of columns")
+            else:
+                df = df.rename(columns={c:c2 for c,c2 in zip(columns,attr["headers"])})
+        if "ncols" in attr:
+            df = df.iloc[:, : attr["ncols"]]
         # df.set_index(columns[0], inplace=True)
         return df  # .to_csv(outputFilename)
 
