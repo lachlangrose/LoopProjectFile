@@ -316,7 +316,7 @@ def ElementToDataframe(loopFilename, element, loopCompoundType):
             if len(attr["headers"]) != len(columns):
                 print("Number of headers does not match number of columns")
             else:
-                df = df.rename(columns={c:c2 for c,c2 in zip(columns,attr["headers"])})
+                df = df.rename(columns=dict(zip(columns,attr["headers"])))
         if "ncols" in attr:
             df = df.iloc[:, : attr["ncols"]]
         # df.set_index(columns[0], inplace=True)

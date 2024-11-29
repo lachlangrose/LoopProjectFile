@@ -2,7 +2,6 @@
 import LoopProjectFile
 import LoopProjectFile.LoopProjectFileUtils as LoopProjectFileUtils
 
-import numpy
 
 
 # Check Extracted Information valid if present
