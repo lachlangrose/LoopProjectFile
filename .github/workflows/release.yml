@@ -8,7 +8,7 @@ permissions:
 jobs:
   linting:
     name: Linting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -35,7 +35,7 @@ jobs:
 
   pip-build-sdist:
     name: Build SDist
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -53,7 +53,7 @@ jobs:
   pip-test-sdist:
     name: Test sdist
     needs: pip-build-sdist
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Download sdist from artifacts
         uses: actions/download-artifact@v4
@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         os: 
-          - ubuntu-latest
+          - ubuntu-24.04
           - macos-latest
           - windows-latest
 
@@ -105,13 +105,13 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-24.04
           - macos-latest
           - windows-latest
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
-          - os: "ubuntu-latest"
-            artifact: loopprojectfile-wheels-ubuntu-latest
+          - os: "ubuntu-24.04"
+            artifact: loopprojectfile-wheels-ubuntu-24.04
           - os: "macos-latest"
             artifact: loopprojectfile-wheels-macos-latest
           - os: "windows-latest"
@@ -153,7 +153,7 @@ jobs:
       fail-fast: false
       matrix:
         os:   
-        - ubuntu-latest
+        - ubuntu-24.04
         - macos-latest
         - windows-latest
         python-version: ["3.9", "3.10", "3.11", "3.12"]
@@ -202,7 +202,7 @@ jobs:
 
   release-please:
     needs: [pip-test-wheels, conda-build]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
@@ -222,7 +222,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-        - ubuntu-latest
+        - ubuntu-24.04
         - macos-latest
         - windows-latest
         python-version: ["3.9", "3.10", "3.11", "3.12"]
@@ -247,7 +247,7 @@ jobs:
   pypi-upload:
     needs: [release-please, pip-test-wheels] 
     runs-on:
-      - ubuntu-latest
+      - ubuntu-24.04
       - macos-latest
       - windows-latest
     
