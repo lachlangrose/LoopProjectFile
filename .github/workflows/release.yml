@@ -110,8 +110,8 @@ jobs:
           - windows-latest
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
-          - os: "ubuntu-latest"
-            artifact: loopprojectfile-wheels-ubuntu-latest
+          - os: "ubuntu-24.04"
+            artifact: loopprojectfile-wheels-ubuntu-24.04
           - os: "macos-latest"
             artifact: loopprojectfile-wheels-macos-latest
           - os: "windows-latest"
