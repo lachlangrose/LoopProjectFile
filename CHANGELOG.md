@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.1](https://github.com/lachlangrose/LoopProjectFile/compare/v1.0.0...v1.0.1) (2024-12-13)
+
+
+### Bug Fixes
+
+* config ([eb56626](https://github.com/lachlangrose/LoopProjectFile/commit/eb5662646aa0a72a71ef9968a70c46f71bcc8721))
+* fuissy ([46ff655](https://github.com/lachlangrose/LoopProjectFile/commit/46ff655d3a9fbf2ed3fb7470f1cd965e157d632b))
+* try ([78cf318](https://github.com/lachlangrose/LoopProjectFile/commit/78cf318203cb524da80536427b45bb578f552d82))
+* Version to version ([d2275ca](https://github.com/lachlangrose/LoopProjectFile/commit/d2275cab96b6676b59774431c8c5adcc2631cc9f))
+
 ## [1.0.0](https://github.com/lachlangrose/LoopProjectFile/compare/v0.2.0...v1.0.0) (2024-12-13)
 
 
