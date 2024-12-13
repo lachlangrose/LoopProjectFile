@@ -17,8 +17,6 @@ jobs:
         id: release
         with:
           release-type: python
-          package-name: LoopProjectFile
-          version-file: LoopProjectFile/Version.py
           token:  ${{ secrets.RELEASE_PLEASE }}
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
