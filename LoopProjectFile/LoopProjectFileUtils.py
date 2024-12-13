@@ -3,7 +3,7 @@ import pandas
 import os
 import sys
 import numpy
-import LoopProjectFile
+import LoopProjectFile 
 
 
 def GetGroup(node, groupName, verbose=False):
