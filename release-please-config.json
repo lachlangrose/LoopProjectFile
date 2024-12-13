@@ -2,7 +2,7 @@
     "packages": {
       "LoopProjectFile": {
         "release-type": "python",
-          "version-file":'LoopProjectFile/Version.py'
+          "version-file":"LoopProjectFile/Version.py"
       
       }
     }
